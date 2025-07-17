@@ -1,0 +1,103 @@
+.main-login {
+  flex-grow: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+.login-container {
+  display: flex; /* Usa flexbox para alinear contenido */
+  justify-content: center; /* Centra horizontalmente */
+  align-items: center; /* Centra verticalmente */
+  height: 100%;  /* ocupa el tamaño restante de la pagina */
+  padding: 10px; /* Espaciado interior */
+  background-color: white; /* Fondo blanco para mantener limpieza visual */
+}
+
+.login-box {
+  background-color: #efefef;
+  padding: 50px 60px;
+  box-shadow: 0 4px 12px rgb(103, 125, 255);
+  text-align: center;
+  width: 100%;
+  max-width: 380px;
+  border-radius: 6px;
+  margin-bottom: 30px;
+}
+
+.login-box h2 {
+  margin: 0;
+  font-weight: bold;
+  font-size: 22px;
+}
+
+.login-box h3 {
+  margin: 10px 0 20px 0;
+  font-weight: normal;
+  font-size: 18px;
+  padding-bottom: 5px;
+  border-bottom: 2px solid rgb(0, 0, 0);
+  display: block;
+  width: 80%;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.login-box input {
+  display: block;
+  width: 100%;
+  padding: 10px;
+  margin: 10px 0;
+  border: 2px solid #b4b2b0;
+  border-radius: 3px;
+  box-sizing: border-box;
+}
+
+.login-box a {
+  font-size: 12px;
+  color: #09328b;
+  text-decoration: none;
+  display: block;
+  margin-bottom: 10px;
+  text-align: left;
+}
+
+.login-box a:hover {
+  color: #1e97dd;
+}
+
+.login-box button {
+  background-color: #628ecb;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  width: 50%;
+}
+
+.login-box button:hover {
+  background-color: #0043a0;
+  transform: scale(1.10); /* Aumenta el tamaño en un 5% */
+}
+
+.secondary-button {
+  background-color: transparent;
+  color: #7b1f26;
+  border: 2px solid #7b1f26;
+  padding: 10px 20px;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: background-color 0.3s, color 0.3s;
+  width: 80%;
+  margin: 10px auto 0 auto;
+  display: block;
+}
+
+.secondary-button:hover {
+  background-color: #7b1f26;
+  color: white;
+}

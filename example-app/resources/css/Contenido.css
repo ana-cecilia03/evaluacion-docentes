@@ -1,0 +1,210 @@
+/* Tabla de periodos */
+.tabla-periodos {
+  width: 90%;  /* Hace que la tabla ocupe el 100% del ancho disponible */
+  max-width: none;  /* Elimina el límite de ancho de 700px */
+  margin: 20px auto; /* Espacio en los laterales, centrado */
+  border-collapse: collapse;
+  text-align: center;
+  font-family: Arial, sans-serif;
+  padding: 0 20px; /* Agrega espacio en los laterales */
+  box-sizing: border-box; /* Incluye el padding en el ancho total */
+}
+
+.table-wrapper {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.tabla-periodos th {
+  background-color: #efefef;
+  padding: 10px;
+  font-weight: bold;
+}
+
+.tabla-periodos td {
+  padding: 10px;
+  border-bottom: 1px solid #ddd;
+}
+
+.titulo {
+  margin-top: 0; /* Asegúrate de que el título no tenga margen superior adicional */
+}
+
+.titulo {
+  font-size: 2rem;
+  font-weight: bold;
+  margin-bottom: 1rem;
+}
+
+/* Estilo de formulario de configuración */
+.config-box {
+  background-color: #f5f5f5;
+   box-shadow: 0 4px 12px rgb(103, 125, 255); /* Sombra suave para resaltar el contenedor */
+  border-radius: 10px;
+  padding: 2rem;
+  width: 100%;
+  max-width: 400px;
+  margin: 0 auto;
+  text-align: left;
+}
+
+.config-box .user-icon {
+  display: flex;
+  justify-content: center;
+  font-size: 3rem;
+  margin-bottom: 1rem;
+}
+
+.config-box label {
+  display: block;
+  font-weight: bold;
+  margin-bottom: 0.3rem;
+}
+
+.config-box input {
+  width: 100%;
+  padding: 0.5rem;
+  margin-bottom: 1rem;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+  box-sizing: border-box;
+}
+
+.boton-actualizar {
+  background-color: #130968;
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  display: block; 
+  margin: 0 auto; 
+}
+
+.boton-actualizar:hover {
+  background-color: #4d86d1;
+  transform: scale(1.10); /* Aumenta el tamaño en un 5% */
+}
+
+
+/* Responsive */
+@media (max-width: 600px) {
+  .config-box {
+    padding: 1rem;
+  }
+
+  .titulo {
+    font-size: 1.5rem;
+  }
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+  .tabla-periodos {
+    font-size: 14px;
+  }
+
+  .tabla-periodos th, .tabla-periodos td {
+    padding: 8px;
+  }
+}
+
+
+.modal-cuadro {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 9999;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.modal-password {
+  background: white;
+  border-radius: 12px;
+  padding: 2rem;
+  width: 380px;
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
+  text-align: left;
+  font-family: Arial, sans-serif;
+}
+
+.modal-password h2 {
+  text-align: center;
+  margin-bottom: 1rem;
+}
+
+.modal-password label {
+  font-weight: bold;
+  display: block;
+  margin-top: 1rem;
+  margin-bottom: 0.3rem;
+}
+
+.password-input {
+  display: flex;
+  align-items: center;
+  background: #f5f5f5;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.password-input input {
+  flex: 1;
+  padding: 0.5rem;
+  border: none;
+  background: transparent;
+}
+
+.password-input span {
+  padding: 0.5rem;
+  cursor: pointer;
+}
+
+
+.boton-group {
+  display: flex;
+  justify-content: space-between;
+  flex-direction: row; /* Asegura que los botones estén en fila */
+  gap: 4rem;
+  margin-top: 1rem; /* o la cantidad que desees */
+}
+
+.sesion {
+  background-color: #628ecb;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.sesion:hover {
+  color: rgb(104, 104, 104);
+  font-weight: bold;
+  transform: scale(1.20); /* Aumenta el tamaño en un 5% */
+}
+
+.contenedor {
+  display: flex;
+  justify-content: flex-end;
+  top: -20px;
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+  .contenedor {
+  display: flex;
+  justify-content: flex-end;
+  position: relative;
+  }
+  .sesion {
+    
+    top: -20px;
+  }
+}

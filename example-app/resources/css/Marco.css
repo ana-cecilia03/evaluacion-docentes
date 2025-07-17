@@ -1,0 +1,70 @@
+/* Reset básico */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+/* Cuerpo y fondo */
+html, body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  font-family: Arial, sans-serif;
+  background-color: white;
+  overflow-x: hidden; /* No permite scroll horizontal */
+  overflow-y: auto;
+  box-sizing: border-box; /* Asegura que los paddings y borders no sumen más al tamaño de los elementos */
+}
+
+/* Contenedor principal */
+.page-admin {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.contenido-principal {
+  flex: 1;
+  position: relative;
+  padding: 20px;
+  text-align: center;
+}
+
+/* Encabezado */
+.header-admin {
+  background-color: #628ecb;
+  padding: 10px;
+  text-align: left;
+  margin-top: 0; /* Elimina o ajusta cualquier margen extra */
+}
+
+/* Imagen dentro del encabezado */
+.header-admin img {
+  height: 70px;
+  width: auto;
+  max-width: 100%;
+}
+
+/* Pie de página (borde inferior) */
+.footer-admin {
+  background-color: #628ecb;
+  color: white;
+  text-align: center;
+  padding: 5px 10px;
+  font-size: 14px;
+  width: 100%;
+  margin-top: auto; /* Esto empuja el pie de página hacia el fondo */
+}
+
+/* Responsive extra: encabezado se adapta a pantallas pequeñas */
+@media (max-width: 600px) {
+  .header img {
+    height: 65px;
+  }
+
+  .footer-admin {
+    font-size: 12px;
+    padding: 10px;
+  }
+}

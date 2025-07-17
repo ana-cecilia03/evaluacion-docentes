@@ -1,0 +1,55 @@
+/* Botones */
+.boton-verde {
+  background-color: #156827;
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.boton-rojo {
+  background-color: #aa1a28;
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.boton-azul {
+  background-color: #130968;
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+/* Botones al pasar el cursor */
+.boton-verde:hover {
+  background-color: #3dbe59;
+}
+
+.boton-rojo:hover {
+  background-color: #e44c5b;
+}
+
+.boton-azul:hover {
+  background-color: #4d86d1;
+}
+
+
+/* Efecto de aumento al pasar el cursor */
+.boton-verde:hover,
+.boton-rojo:hover,
+.boton-azul:hover {
+  transform: scale(1.10); /* Aumenta el tamaño en un 5% */
+}
+
+@media (max-width: 600px) {
+    .boton-verde, .boton-rojo, .boton-azul {
+        padding: 5px 10px;
+        font-size: 13px;
+  }
+}

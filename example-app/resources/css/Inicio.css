@@ -1,0 +1,84 @@
+.seleccion-contenedor {
+  text-align: center;
+  padding: 20px 10px;
+  background-color: white;
+  display: flex;
+  flex-direction: column;
+  align-items: center; /* Centrar horizontalmente todo */
+  justify-content: flex-start;
+  min-height: 60vh; /* Para poder centrar verticalmente el formulario */
+}
+
+.seleccion-formulario {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 20px;
+  margin-top: 40px; /* Separación del h1 */
+}
+
+.campo {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.campo label {
+  margin-bottom: 6px;
+  font-size: 14px;
+  font-weight: bold;
+}
+
+select {
+  padding: 8px 12px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 14px;
+  min-width: 140px;
+}
+
+.boton-aceptar {
+  background-color: #1f8f2c;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  cursor: pointer;
+  width: 120px;
+  margin-top: 40px; /* Bajarlo un poco más */
+  margin-right: 30px; /* Separarlo del margen derecho */
+  align-self: flex-end;
+}
+
+.boton-aceptar:hover {
+  background-color: #166a20;
+}
+
+
+@media (max-width: 768px) {
+  .seleccion-formulario {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .campo {
+    width: 100%;
+    max-width: 300px;
+  }
+
+  select {
+    width: 100%;
+  }
+
+  .boton-aceptar {
+    align-self: center;
+    margin-right: 0;
+    margin-top: auto; /* Bajarlo un poco más */
+  }
+  .seleccion-contenedor {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 20px 16px;
+}
+}

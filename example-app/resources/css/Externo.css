@@ -1,0 +1,51 @@
+/* === Reset básico === */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* === Tipografía y fondo === */
+html, body {
+  height: 100%;
+  font-family: Arial, sans-serif;
+  background-color: #f3f3f3;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+/* === Estructura general de página === */
+.page {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+/* === Encabezado === */
+.header {
+  background-color: #628ecb;
+  padding: 10px;
+  text-align: left;
+}
+
+.header img {
+  height: 70px;
+}
+
+/* === Pie de página === */
+.footer {
+  background-color: #628ecb;
+  color: white;
+  text-align: center;
+  padding: 5px 10px;
+  font-size: 14px;
+  width: 100%;
+  margin-top: auto;
+}
+
+/* === Ajuste para pantallas pequeñas en altura === */
+@media (max-height: 600px) {
+  html, body {
+    overflow-y: auto;
+  }
+}
