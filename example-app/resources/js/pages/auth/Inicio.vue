@@ -2,7 +2,7 @@
   <div class="bienvenida-login-page">
     <Exterior />
 
-    <div class="dashboard-container">
+    <div class="inicio-container">
       <h1 class="titulo">Bienvenido al sistema de evaluación docentes</h1>
       <div class="imagen-wrapper">
         <img src="/img/carreras.png" />
@@ -16,3 +16,4 @@
 <script setup>
 import Exterior from '@/components/Exterior.vue'
 </script>
+<style src="@/../css/bienvenida.css"></style>

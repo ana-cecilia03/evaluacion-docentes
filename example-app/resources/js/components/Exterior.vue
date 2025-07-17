@@ -64,17 +64,33 @@ defineProps({
   font-size: 26px;
   color: white;
   cursor: pointer;
+   transition: transform 0.3s ease, color 0.3s ease;/* Añadir transición suave */
+}
+
+.menu-btn:hover {
+  transform: scale(1.1); /* Crece un 10% cuando se pasa el cursor */
+  color: #092fad; /* Cambia el color al pasar el cursor */
 }
 
 .nav {
   display: flex;
-  gap: 20px;
+  gap: 30px; /* Aumentamos el espacio entre los enlaces */
 }
 
 .nav a {
   color: white;
   font-weight: bold;
   text-decoration: none;
+  padding: 8px 10px; /* Espaciado dentro de cada enlace */
+  border: 1px solid transparent; /* Borde inicial transparente */
+  border-radius: 5px; /* Bordes redondeados */
+  transition: transform 0.2s ease, background-color 0.3s ease, border-color 0.3s ease;
+}
+
+.nav a:hover {
+  transform: scale(1.1); /* Hace crecer el enlace un 10% cuando pasas el cursor */
+  background-color: #0b55c5d3; /* Fondo al pasar el cursor */
+  border-color: #ffffffa4; /* Cambia el borde  al pasar el cursor */
 }
 
 .footer {
