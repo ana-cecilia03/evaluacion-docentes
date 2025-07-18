@@ -24,8 +24,7 @@ Route::get('/inicio', function () {
 
 #Login
 Route::get('/login/alumno', fn () => Inertia::render('Alumno/LoginAlumno'))->name('login.alumno');
-Route::get('/login/admin', fn () => Inertia::render('Admin/LoginAdmin'))->name('login.admin');
-
+Route::get('/admin-control', fn () => Inertia::render('Admin/LoginAdmin'))->name('login.admin');
 #inicioAlumno
 Route::get('/inicio/alumno', fn () => Inertia::render('Alumno/InicioAlumno'))->name('inicio.alumno');
 

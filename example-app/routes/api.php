@@ -3,6 +3,7 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\LoginAlumno;
+use App\Http\Controllers\Auth\LoginProfesor;
 
 /*
 |--------------------------------------------------------------------------
@@ -18,6 +19,5 @@ use App\Http\Controllers\Auth\LoginAlumno;
 // ✅ Ruta funcional para probar Login Alumno
 Route::post('/login/alumno', [LoginAlumno::class, 'login']);
 
-Route::get('/ping', function () {
-    return response()->json(['message' => 'pong']);
-});
+#Api Loginprofesores
+Route::post('/admin/login', [LoginProfesor::class, 'login']);

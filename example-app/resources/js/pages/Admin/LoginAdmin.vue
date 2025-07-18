@@ -10,17 +10,19 @@
       <div class="login-container">
         <div class="login-box">
           <h2>Inicio de sesión</h2>
-          <h3>Profesores</h3>
+          <h3>ADMINISTRADOR</h3>
 
           <input
-            type="text"
-            v-model="email"
+            type="email"
+            v-model="correo"
             placeholder="Correo institucional"
+            required
           />
           <input
             type="password"
             v-model="password"
             placeholder="Contraseña"
+            required
           />
 
           <a href="/recuperar">¿Has olvidado tu contraseña?</a>
@@ -28,6 +30,7 @@
           <button @click="login">Ingresar</button>
 
           <p v-if="error" class="mensaje-error">{{ error }}</p>
+          <p v-if="success" class="mensaje-exito">{{ success }}</p>
         </div>
       </div>
     </main>
@@ -43,16 +46,43 @@
 import { ref } from 'vue'
 import { router } from '@inertiajs/vue3'
 
-const email = ref('')
+const correo = ref('')
 const password = ref('')
 const error = ref('')
+const success = ref('')
 
-// Simulación de login para administrador
-function login() {
-  if (email.value === 'admin@uptex.edu.mx' && password.value === 'admin123') {
+async function login() {
+  error.value = ''
+  success.value = ''
+
+  try {
+    const response = await fetch('/api/admin/login', {
+      method: 'POST',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        correo: correo.value,
+        password: password.value
+      })
+    })
+
+    const data = await response.json()
+
+    if (!response.ok) {
+      error.value = data.message || 'Credenciales incorrectas'
+      return
+    }
+
+    success.value = data.message
+    localStorage.setItem('adminToken', data.token)
+
+    // Redirigir al panel de administración
     router.visit('/admin/dashboard')
-  } else {
-    error.value = 'Credenciales incorrectas'
+
+  } catch (err) {
+    error.value = 'Error al conectar con el servidor'
   }
 }
 </script>

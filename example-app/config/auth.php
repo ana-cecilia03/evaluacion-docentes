@@ -40,6 +40,12 @@ return [
             'driver' => 'session',
             'provider' => 'users',
         ],
+
+        // ✅ Nuevo guard para profesor
+        'profesor' => [
+            'driver' => 'session',
+            'provider' => 'profesores',
+        ],
     ],
 
     /*
@@ -65,10 +71,11 @@ return [
             'model' => env('AUTH_MODEL', App\Models\User::class),
         ],
 
-        // 'users' => [
-        //     'driver' => 'database',
-        //     'table' => 'users',
-        // ],
+        // ✅ Nuevo provider para profesor
+        'profesores' => [
+            'driver' => 'eloquent',
+            'model' => App\Models\Profesor::class,
+        ],
     ],
 
     /*
@@ -93,6 +100,14 @@ return [
     'passwords' => [
         'users' => [
             'provider' => 'users',
+            'table' => env('AUTH_PASSWORD_RESET_TOKEN_TABLE', 'password_reset_tokens'),
+            'expire' => 60,
+            'throttle' => 60,
+        ],
+
+        // ✅ Opcional: agregar soporte para reset de profesores
+        'profesores' => [
+            'provider' => 'profesores',
             'table' => env('AUTH_PASSWORD_RESET_TOKEN_TABLE', 'password_reset_tokens'),
             'expire' => 60,
             'throttle' => 60,
