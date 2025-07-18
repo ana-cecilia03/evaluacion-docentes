@@ -30,12 +30,16 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
+import axios from 'axios' // 📦 Cliente HTTP para consumir API
 import { router } from '@inertiajs/vue3'
 import Exterior from '@/components/Exterior.vue'
 
+// 📌 Datos del formulario
 const email = ref('')
 const password = ref('')
 const error = ref('')
+
+// 💬 Frases que se rotan en el lateral izquierdo
 const frases = [
   'Tu opinión es clave para mejorar la calidad educativa.',
   'Evaluar a los docentes es contribuir al crecimiento de la educación.',
@@ -45,9 +49,9 @@ const frases = [
   'La retroalimentación continua es el camino hacia la mejora constante en la enseñanza.',
   'Tu participación activa en la evaluación de docentes fortalece la educación de nuestra comunidad.',
 ]
-
 const fraseActual = ref(frases[0])
 
+// 🔁 Cambia la frase cada 5 segundos
 onMounted(() => {
   let index = 0
   setInterval(() => {
@@ -56,11 +60,22 @@ onMounted(() => {
   }, 5000)
 })
 
-function login() {
-  if (email.value === 'admin@uptex.edu.mx' && password.value === 'admin123') {
-    router.visit('/admin/dashboard')
-  } else {
-    error.value = 'Credenciales incorrectas'
+// 🟢 Función que hace login contra el backend Laravel
+async function login() {
+  try {
+    const response = await axios.post('/api/login/alumno', {
+      correo: email.value,
+      password: password.value
+    })
+
+    // ✅ Login exitoso: guarda el alumno en localStorage (opcional)
+    localStorage.setItem('alumno', JSON.stringify(response.data.alumno))
+
+    // Redirige a la vista protegida del alumno
+    router.visit('/alumno/materias')
+  } catch (err) {
+    // ❌ Si falla el login, muestra el mensaje de error
+    error.value = err.response?.data?.message || 'Error al iniciar sesión'
   }
 }
 </script>
