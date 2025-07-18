@@ -9,8 +9,8 @@
     <main class="main-login">
       <div class="login-container">
         <div class="login-box">
-          <h2>Inicio de sesión</h2>
-          <h3>estoy probando </h3>
+          <h2>Administrador</h2>
+          <h3> </h3>
 
           <input
             type="email"
