@@ -10,7 +10,7 @@
       <div class="login-container">
         <div class="login-box">
           <h2>Inicio de sesión</h2>
-          <h3>ADMINISTRADOR</h3>
+          <h3>estoy probando </h3>
 
           <input
             type="email"
