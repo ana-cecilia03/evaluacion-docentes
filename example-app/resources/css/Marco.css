@@ -1,70 +1,215 @@
-/* Reset básico */
+/* RESET */
 * {
+  margin: 0;
+  padding: 0;
   box-sizing: border-box;
-  margin: 0;
-  padding: 0;
 }
 
-/* Cuerpo y fondo */
-html, body {
-  height: 100%;
-  margin: 0;
-  padding: 0;
-  font-family: Arial, sans-serif;
-  background-color: white;
-  overflow-x: hidden; /* No permite scroll horizontal */
-  overflow-y: auto;
-  box-sizing: border-box; /* Asegura que los paddings y borders no sumen más al tamaño de los elementos */
-}
-
-/* Contenedor principal */
+/* CONTENEDOR GENERAL */
 .page-admin {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
+  font-family: Arial, sans-serif;
 }
 
-.contenido-principal {
-  flex: 1;
-  position: relative;
-  padding: 20px;
-  text-align: center;
-}
-
-/* Encabezado */
+/* ENCABEZADO AZUL */
 .header-admin {
-  background-color: #628ecb;
-  padding: 10px;
-  text-align: left;
-  margin-top: 0; /* Elimina o ajusta cualquier margen extra */
+  background-color: rgba(98, 142, 203, 0.8); /* Fondo azul semitransparente */
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 15px;
+  backdrop-filter: blur(10px); /* Desenfoque en el fondo del encabezado */
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); /* Sombra sutil para darle profundidad */
 }
 
-/* Imagen dentro del encabezado */
-.header-admin img {
+.logo {
   height: 70px;
-  width: auto;
-  max-width: 100%;
+  filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.2)); /* Sombra para darle un toque más moderno */
 }
 
-/* Pie de página (borde inferior) */
+/* PIE DE PÁGINA AZUL */
 .footer-admin {
   background-color: #628ecb;
   color: white;
   text-align: center;
-  padding: 5px 10px;
+  padding: 10px;
   font-size: 14px;
-  width: 100%;
-  margin-top: auto; /* Esto empuja el pie de página hacia el fondo */
+  margin-top: auto;
 }
 
-/* Responsive extra: encabezado se adapta a pantallas pequeñas */
-@media (max-width: 600px) {
-  .header img {
-    height: 65px;
+/* MENÚ LATERAL COMPLETO */
+.menu-lateral {
+  position: fixed;
+  top: 93px;
+  left: 0;
+  width: 240px;
+  height: calc(100vh - 95px); /* Ocupar todo el alto de la ventana */
+  background-color: rgba(176, 176, 176, 0.7); /* Fondo transparente */
+  backdrop-filter: blur(10px); /* Desenfoque suave */
+  padding-top: 0px; /* Espacio para que inicie debajo del encabezado */
+  padding-left: 10px;
+  padding-right: 10px;
+  overflow-y: auto;
+  transition: transform 0.3s ease-in-out, background-color 0.3s ease;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+.menu-lateral .panel ul {
+  list-style: none;
+  padding: 0;
+}
+
+.menu-lateral li {
+  margin: 8px 0;
+  font-size: 16px;
+  position: relative;
+  padding-left: 10px; /* Deja espacio para un ícono de animación */
+  transition: transform 0.3s ease-in-out;
+}
+
+.menu-lateral a {
+  text-decoration: none;
+  color: black;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px;
+  padding-left: 20px;
+  border-radius: 8px; /* Bordes redondeados */
+  transition: background-color 0.3s, box-shadow 0.3s ease-in-out;
+}
+
+.menu-lateral a:hover {
+  background-color: rgba(93, 153, 236, 0.452); /* Fondo suave al pasar el mouse */
+  box-shadow: 0 2px 15px rgba(0, 0, 0, 0.2); /* Sombra para crear profundidad */
+  color: #094dac; /* Color de texto al pasar el mouse */
+  transform: translateX(5px); /* Animación de desplazamiento */
+}
+
+.menu-lateral img {
+  height: 24px;
+  width: 24px;
+  transition: transform 0.3s ease;
+}
+
+.menu-lateral li:hover img {
+  transform: rotate(10deg); /* Rotación ligera de los íconos al pasar el mouse */
+}
+
+/* Contenedor de iconos lado derecho del encabezado */
+.acciones-header {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+/* Imagen salir (esquina superior derecha) */
+.salir-icono {
+  width: 35px;
+  height: 35px;
+  cursor: pointer;
+}
+
+/* Ocultar ícono de salir cuando se usa menú hamburguesa */
+@media (max-width: 768px) {
+  .salir-icono {
+    display: none;
+  }
+}
+
+/* RESPONSIVE - VERSIÓN HAMBURGUESA */
+@media (max-width: 768px) {
+  .menu-lateral {
+    top: 0; /* Ocupa desde arriba (encabezado) */
+    height: 100vh; /* Todo el alto visible */
+    transform: translateX(-100%);
+    z-index: 1000;
   }
 
-  .footer-admin {
-    font-size: 12px;
-    padding: 10px;
+  .menu-lateral.abierto {
+    transform: translateX(0%);
   }
+
+  .hamburger {
+    display: flex;
+    flex-direction: column;
+    cursor: pointer;
+    gap: 5px;
+    z-index: 1001; /* Asegura que esté sobre el contenido */
+    border: 1px solid #ffffff98; /* Borde blanco alrededor del conjunto */
+    padding: 8px; /* Espacio entre las barras y el borde */
+    border-radius: 1px; /* Bordes redondeados si lo deseas */
+    transition: background-color 0.3s ease; /* Transición suave para el cambio de fondo */
+  }
+
+  .hamburger:hover{
+    background-color: #9e9e9e8c;
+    border: 1px solid #44434398;
+    transform: scale(1);
+  }
+
+  .hamburger .bar {
+    width: 25px;
+    height: 3px;
+    background-color: #ffffff;
+    transition: transform 0.3s ease;
+  }
+
+  .hamburger:hover .bar {
+    transform: scale(1.3);
+    background-color: #ffffff;
+  }
+
+  .hamburger.abierto .bar:nth-child(1) {
+    transform: rotate(45deg) translate(5px, 5px);
+  }
+
+  .hamburger.abierto .bar:nth-child(2) {
+    opacity: 0; /* Hace desaparecer la barra del medio */
+  }
+
+  .hamburger.abierto .bar:nth-child(3) {
+    transform: rotate(-45deg) translate(5px, -5px);
+  }
+
+  .contenido-principal {
+    margin-left: 0;
+    margin-top: 100px;
+  }
+}
+
+/* CONTENIDO PRINCIPAL */
+.contenido-principal {
+  margin-left: 240px;
+  padding: 20px;
+  flex: 1;
+  transition: margin-left 0.3s ease-in-out; /* Animación suave */
+}
+
+/* Ajuste del contenido cuando es mobile */
+@media (max-width: 768px) {
+  .contenido-principal {
+    margin-left: 0;
+    padding-top: 50px; /* Asegura que no se superponga el encabezado */
+  }
+}
+
+/* SECCIONES */
+.seccion {
+  font-weight: bold;
+  color: darkblue;
+  margin-top: 10px;
+  font-size: 18px;
+}
+
+/* PIE DE PÁGINA AZUL */
+.footer-admin {
+  background-color: #628ecb;
+  color: white;
+  text-align: center;
+  padding: 10px;
+  font-size: 14px;
+  margin-top: auto;
 }

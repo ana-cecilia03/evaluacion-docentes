@@ -1,48 +1,121 @@
-.dashboard-container {
-  text-align: center;
-  padding: 0 1rem;
+.contenedor-cuadro {
+  border: 2px solid #add8e6;
+  padding: 15px;  /* Reducir padding */
+  border-radius: 10px;
+  background-color: #ffffff;
+  width: 100%;
+  max-width: 800px;
+  margin: 0 auto;
+  box-shadow: 0 10px 30px rgba(103, 125, 255, 0.5);
+}
+
+/* Estilo del contenedor principal */
+.contenido-periodo {
+  flex-grow: 1;
+  padding: 10px;  /* Reducir padding */
+  margin: 0;
+  background-color: #f5f5f5;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  min-height: 70vh;
 }
 
 .titulo {
-  font-size: 2.5rem;
-  font-weight: bold;
-  margin-bottom: 1.5rem;
+  text-align: center;
+  font-size: 1.8em;  /* Reducir tamaño de la fuente */
+  margin-bottom: 20px;  /* Reducir espacio debajo del título */
+  color: #333;
 }
 
-.imagen-wrapper {
-  overflow: hidden;
+.formulario-periodo {
   display: flex;
-  justify-content: center;
+  flex-direction: column;
+  gap: 10px;  /* Reducir gap entre los campos del formulario */
 }
 
-.imagen-carreras {
-  width: 100%;
-  max-width: 900px;
-  height: auto;
-  border-radius: 10px;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+.campo-formulario {
+  display: flex;
+  flex-direction: column;
 }
 
-/* Tablet */
-@media (max-width: 900px) {
-  .titulo {
-    font-size: 2rem;
-    margin-bottom: 2rem;
-  }
-
-  .imagen-carreras {
-    max-width: 100%;
-  }
+.campo-formulario label {
+  font-weight: bold;
+  margin-bottom: 5px;  /* Reducir el margen entre el label y el input */
+  color: #444;
 }
 
-/* Móvil */
-@media (max-width: 600px) {
-  .titulo {
-    font-size: 1.5rem;
-    margin-bottom: 1.5rem;
+.campo-formulario input {
+  padding: 8px;  /* Reducir padding */
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  font-size: 14px;  /* Reducir el tamaño de la fuente */
+}
+
+.botones-formulario {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 10px;  /* Reducir margen superior */
+  gap: 10px; /* Reducir el espacio entre los botones */
+}
+
+.btn-cancelar,
+.btn-crear {
+  padding: 10px 20px;  /* Reducir padding de los botones */
+  font-size: 14px;  /* Reducir tamaño de la fuente */
+  border-radius: 15px;  /* Ajuste visual */
+}
+
+.btn-cancelar {
+  background-color: #d32f2f;
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  font-size: 16px;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.btn-cancelar:hover {
+  background-color: #b71c1c;
+}
+
+.btn-crear {
+  background-color: #388e3c;
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  font-size: 16px;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.btn-crear:hover {
+  background-color: #2e7d32;
+}
+
+
+@media (max-width: 768px) {
+  .contenido-periodo {
+    margin: 0;
+    padding: 0;
   }
 
-  .imagen-carreras {
-    max-width: 100%;
+  .contenedor-cuadro {
+    margin: 0;
+    padding: 10px;  /* Reducir padding en dispositivos pequeños */
+  }
+
+  .botones-formulario {
+    flex-direction: column;
+    gap: 10px;  /* Reducir gap */
+  }
+
+  .btn-cancelar,
+  .btn-crear {
+    width: 100%;
+    text-align: center;
   }
 }

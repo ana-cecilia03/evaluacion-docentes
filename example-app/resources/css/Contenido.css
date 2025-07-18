@@ -8,6 +8,7 @@
   font-family: Arial, sans-serif;
   padding: 0 20px; /* Agrega espacio en los laterales */
   box-sizing: border-box; /* Incluye el padding en el ancho total */
+  box-shadow: 0 5px 20px rgba(94, 172, 245, 0.555);
 }
 
 .table-wrapper {
@@ -28,6 +29,7 @@
 
 .titulo {
   margin-top: 0; /* Asegúrate de que el título no tenga margen superior adicional */
+  text-align: center;
 }
 
 .titulo {

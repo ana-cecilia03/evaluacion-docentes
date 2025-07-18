@@ -1,90 +1,96 @@
 <template>
-  <div class="page-admin">
-    <!-- ===============================
-         ENCABEZADO SUPERIOR CON LOGO Y MENÚ HAMBURGUESA
-         - El logo redirige al dashboard del admin
-         - El menú hamburguesa será funcional en futuro para abrir el menú lateral
-       =============================== -->
-    <header class="header">
+  <div class="page-admin" @click="handleOutsideClick">
+    <!-- ENCABEZADO AZUL -->
+    <header class="header-admin">
       <a href="/admin/dashboard">
-        <img src="/img/logo.png" />
+        <img src="/img/logo.png" alt="Logo UPTex" class="logo">
       </a>
-      <div class="hamburger">
+      <!-- Menú hamburguesa solo en móviles -->
+      <div class="acciones-header">
+      <img src="/img/salir.png" class="salir-icono" alt="Salir" @click="cerrarSesion" />
+      <div class="hamburger" @click="toggleMenu">
         <div class="bar"></div>
         <div class="bar"></div>
         <div class="bar"></div>
       </div>
+    </div>
     </header>
+    
 
-    <!-- ===============================
-         ÁREA PRINCIPAL DINÁMICA
-         - Aquí se mostrará el contenido de cada vista dentro del layout
-         - Se inyecta usando el <slot></slot>
-       =============================== -->
+    <!-- PANEL DE CONTROL LATERAL (MENÚ) -->
+    <aside :class="['menu-lateral', { abierto: menuAbierto }]" ref="menuLateral">
+
+      <div class="panel">
+        <ul>
+          <li><a href="/admin/dashboard"><img src="/img/inicio.png" /> Dashboard</a></li>
+          <li><a href="/admin/periodo"><img src="/img/periodo.png" /> Periodo</a></li>
+          <li class="seccion">Registrar</li>
+          <li><a href="/registro/carreras"><img src="/img/registros.png" /> Carreras</a></li>
+          <li><a href="/registro/alumnos"><img src="/img/alumno.png" /> Alumnos</a></li>
+          <li><a href="/registro/profesores"><img src="/img/profesor.png" /> Profesores</a></li>
+          <li><a href="/registro/grupo"><img src="/img/grupos.png" /> Grupos</a></li>
+          <li><a href="/registro/asignaturas"><img src="/img/asignatura.png" /> Materias</a></li>
+
+          <li class="seccion">Reportes</li>
+          <li><a href="/reportes/alumnos"><img src="/img/repasig.png" /> Materias</a></li>
+          <li><a href="/reportes/profesores"><img src="/img/reprof.png" /> Profesores</a></li>
+          <li><a href="/reportes/grupos"><img src="/img/repgrup.png" /> Grupos</a></li>
+
+          <li class="seccion">Relación</li>
+          <li><a href="#"><img src="/img/Alum-Prof.png" /> Alumno-Prof</a></li>
+          <li><a href="#"><img src="/img/Mat-Per-Carr.png" /> Mat-Per-Carr</a></li>
+
+          <li class="seccion">Extras</li>
+          <li><a href="/estadisticas"><img src="/img/estadisticas.png" /> Estadísticas</a></li>
+          <li><a href="/admin/configuracion"><img src="/img/confi.png" /> Configuración</a></li>
+          <li><a href="/inicio"><img src="/img/salir.png" @click="cerrarSesion"/> Cerrar Sesion</a></li>
+        </ul>
+      </div>
+    </aside>
+
+    <!-- CONTENIDO PRINCIPAL -->
     <main class="contenido-principal">
-      <slot></slot>
+      <slot />
     </main>
 
-    <!-- ===============================
-         PIE DE PÁGINA FIJO
-         - Información institucional
-         - Se mantiene en todas las páginas
-       =============================== -->
+    <!-- PIE DE PÁGINA AZUL -->
     <footer class="footer-admin">
       Sistema de encuestas © UNIVERSIDAD POLITÉCNICA DE TEXCOCO
     </footer>
-
-    <!-- ===============================
-         MENÚ LATERAL (SIMULADO)
-         - Lista de opciones del panel de administración
-         - Cada ítem será luego reemplazado con <router-link> o <a>
-         - Puede controlarse con Vue (v-if, v-show, estados)
-       =============================== -->
-    <div class="menu">
-      <ul>
-        <!-- Enlaces directos -->
-        <li><a href="/admin/dashboard">Inicio</a></li>
-        <li><a href="/admin/periodo">Periodo</a></li>
-
-        <!-- Submenú de Registro -->
-        <li>Registros para la plataforma
-          <ul class="submenu">
-            <li><a href="/registro/alumnos">Alumno</a></li>
-            <li><a href="/registro/profesores">Profesores</a></li>
-            <li><a href="/registro/asignaturas">Asignaturas</a></li>
-            <li><a href="/registro/grupo">Grupos</a></li>
-          </ul>
-        </li>
-
-        <!-- Submenú de Reportes -->
-        <li>submenu de reportes
-          <ul class="submenu">
-            <li><a href="/admin/usuarios">Profesores</a></li> <!-- Vista Usuarios.vue -->
-            <li><a href="/admin/reportes/materias">Materias</a></li>
-            <li><a href="/admin/reportes/grupos">Grupos</a></li>
-          </ul>
-        </li>
-
-        <!-- Otras secciones -->
-        <li><a href="/admin/estadisticas">Estadísticas</a></li>
-        <li><a href="/admin/configuracion">configuración</a></li>
-        <li><a href="/bienvenida">Cerrar sesión</a></li>
-      </ul>
-    </div>
   </div>
 </template>
 
 <script setup>
-// Script vacío por ahora.
-// Aquí se podrá agregar:
-// - Manejo de estado para el menú (menuOpen, submenuOpen)
-// - Logout con backend
-// - Eventos de Vue para interacción dinámica
+import { ref, onMounted, onBeforeUnmount } from 'vue'
+
+const menuAbierto = ref(false)
+const menuLateral = ref(null)
+
+const toggleMenu = () => {
+  menuAbierto.value = !menuAbierto.value
+}
+
+// Cierra el menú si se hace clic fuera de él
+const handleOutsideClick = (event) => {
+  if (menuAbierto.value && menuLateral.value && !menuLateral.value.contains(event.target) && !event.target.closest('.hamburger')) {
+    menuAbierto.value = false
+  }
+}
+
+const cerrarSesion = () => {
+  window.location.href = '/bienvenida' // o la ruta que manejes para cerrar sesión
+}
+
+// Añadimos un listener para el clic fuera del menú cuando el componente se monta
+onMounted(() => {
+  document.addEventListener('click', handleOutsideClick)
+})
+
+// Removemos el listener cuando el componente se destruye
+onBeforeUnmount(() => {
+  document.removeEventListener('click', handleOutsideClick)
+})
+
 </script>
 
-<!-- ===============================
-     IMPORTACIÓN DE ESTILOS
-     - Asegúrate de que los archivos existan en /resources/css/
-   =============================== -->
-<style src="@/../css/Menu.css"></style>
 <style src="@/../css/Marco.css"></style>

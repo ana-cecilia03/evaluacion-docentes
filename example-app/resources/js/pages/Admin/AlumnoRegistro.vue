@@ -50,7 +50,6 @@
               <td>A</td>
               <td>
                 <button class="btn-edit">Editar</button>
-                <button class="btn-delete">Eliminar</button>
               </td>
             </tr>
             <tr>
@@ -60,7 +59,6 @@
               <td>B</td>
               <td>
                 <button class="btn-edit">Editar</button>
-                <button class="btn-delete">Eliminar</button>
               </td>
             </tr>
           </tbody>
@@ -72,14 +70,14 @@
 
 <script setup>
 // Importación de layout y componentes visuales (sin lógica por ahora)
-//import { ref } from 'vue'
+import { ref } from 'vue'
 import Menu from '@/layouts/Menu.vue'
-//import AlumnosManual from '@/components/AlumnosManual.vue'
-//import CsvAlumnos from '@/components/CsvAlumnos.vue'
+import AlumnosManual from '@/components/AlumnosManual.vue'
+import CsvAlumnos from '@/components/CsvAlumnos.vue'
 
 // Variables reactivas para mostrar modales (formulario o csv)
-//const mostrarFormulario = ref(false)
-//const mostrarCSV = ref(false)
+const mostrarFormulario = ref(false)
+const mostrarCSV = ref(false)
 </script>
 
 
