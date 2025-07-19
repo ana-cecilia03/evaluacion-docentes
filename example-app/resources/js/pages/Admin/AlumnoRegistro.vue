@@ -29,6 +29,14 @@
         </div>
       </div>
 
+      <!-- Modal para editar alumnos -->
+      <div v-if="editarDatos" class="modal-overlay">
+        <div class="modal-content">
+          <!-- Componente que abrirá un formulario más adelante -->
+          <EditarAlumno @cerrar="editarDatos = false" />
+        </div>
+      </div>   
+
       <!-- Tabla de alumnos estática, se conectará con backend después -->
       <div class="table-wrapper">
         <table>
@@ -51,7 +59,7 @@
               <td>A</td>
               <td>Activo</td>
               <td>
-                <button class="btn-edit">Editar</button>
+                <button class="btn-edit" @click="editarDatos = true ">Editar</button>
               </td>
             </tr>
           </tbody>
@@ -67,10 +75,12 @@ import { ref } from 'vue'
 import Menu from '@/layouts/Menu.vue'
 import AlumnosManual from '@/components/AlumnosManual.vue'
 import CsvAlumnos from '@/components/CsvAlumnos.vue'
+import EditarAlumno from '@/components/EditarAlumno.vue'
 
 // Variables reactivas para mostrar modales (formulario o csv)
 const mostrarFormulario = ref(false)
 const mostrarCSV = ref(false)
+const editarDatos = ref(false)
 </script>
 
 

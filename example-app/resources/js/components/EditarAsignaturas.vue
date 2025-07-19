@@ -3,7 +3,7 @@
   <div class="modal-overlay">
     <div class="modal-content">
       <div class="register-container">
-        <h1 class="titulo" >Registrar Materia Manualmente</h1>
+        <h1 class="titulo" >Actualizar</h1>
 
           <!-- Campo: clave -->
           <div class="form-group">
@@ -21,7 +21,7 @@
           <!-- Botones de acción -->
           <div class="button-group">
               <button type="button" class="register-rojo" @click="$emit('cerrar')">Cancelar</button>
-              <button type="submit" class="register-verde">Registrar Materia</button>
+              <button type="submit" class="register-verde">Actualizar</button>
           </div>
         </form>
       </div>
@@ -43,4 +43,4 @@ const materia = ref({
 </script>
 
 <!-- Estilos específicos del formulario de registro -->
-<style src="@/../css/RegistroManual.css"></style>
+<style src="@/../css/EditarDatos.css"></style>

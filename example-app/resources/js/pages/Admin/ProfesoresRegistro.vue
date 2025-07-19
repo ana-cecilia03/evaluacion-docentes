@@ -5,9 +5,9 @@
       <div class="actions">
         <input type="text" placeholder="Buscar por nombre o ID" />
         <select>
-          <option value="">Materia</option>
-          <option>Matemáticas</option>
-          <option>Física</option>
+          <option value="">Estado</option>
+          <option>Activo</option>
+          <option>Inactivo</option>
         </select>
         <button class="btn-register" @click="mostrarFormulario = true">Registrar Profesor Manual</button>
         <button class="btn-upload" @click="mostrarCSV = true">Cargar CSV</button>
@@ -27,34 +27,33 @@
         </div>
       </div>
 
+      <!-- Modal para actualizar -->
+      <div v-if="editarProfesores" class="modal-csv">
+        <div class="modal-content">
+          <EditarProfesores @cerrar="editarProfesores = false" />
+        </div>
+      </div>
+
       <!-- Tabla con profesores (datos simulados por ahora) -->
       <div class="table-wrapper">
         <table>
           <thead>
             <tr>
-              <th>ID</th>
+              <th>Matricula</th>
               <th>Nombre</th>
-              <th>Materia</th>
+              <th>Curp</th>
+              <th>Estado</th>
               <th>Acciones</th>
             </tr>
           </thead>
           <tbody>
             <tr>
-              <td>PR001</td>
-              <td>Laura Martínez</td>
-              <td>Matemáticas</td>
-              <td>
-                <button class="btn-edit">Editar</button>
-                <button class="btn-delete">Eliminar</button>
-              </td>
-            </tr>
-            <tr>
-              <td>PR002</td>
+              <td>13211689383</td>
               <td>José Hernández</td>
-              <td>Física</td>
+              <td>MDAU62YNA92GJAB5HQ</td>
+              <td>Inactivo</td>
               <td>
-                <button class="btn-edit">Editar</button>
-                <button class="btn-delete">Eliminar</button>
+                <button class="btn-edit" @click="editarProfesores = true">Editar</button>
               </td>
             </tr>
           </tbody>
@@ -66,13 +65,15 @@
 
 <script setup>
 // Script solo de frontend, sin conexión a backend por ahora
-//import { ref } from 'vue'
+import { ref } from 'vue'
 import Menu from '@/layouts/Menu.vue'
-//import ProfesoresManual from '@/components/ProfesoresManual.vue'
-//import CsvProfesores from '@/components/CsvProfesores.vue'
+import ProfesoresManual from '@/components/ProfesoresManual.vue'
+import CsvProfesores from '@/components/CsvProfesores.vue'
+import EditarProfesores from '@/components/EditarProfesores.vue'
 
-//const mostrarFormulario = ref(false)
-//const mostrarCSV = ref(false)
+const mostrarFormulario = ref(false)
+const mostrarCSV = ref(false)
+const editarProfesores = ref(false)
 </script>
 
 <!-- Estilos globales reutilizados para tablas y acciones -->

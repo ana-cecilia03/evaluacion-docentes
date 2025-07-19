@@ -20,6 +20,14 @@
         </div>
       </div>
 
+      <!-- Modal para ectualizar -->
+      <div v-if="editarCarreras" class="modal-overlay">
+        <div class="modal-content">
+          <!-- Componente que abrirá un formulario más adelante -->
+          <EditarCarreras @cerrar="editarCarreras = false" />
+        </div>
+      </div>
+
       <!-- Tabla de alumnos estática, se conectará con backend después -->
       <div class="table-wrapper">
         <table>
@@ -36,7 +44,7 @@
               <td>MSC1</td>
               <td>Ingenieria en Sistemas Computacionales</td>
               <td>
-                <button class="btn-edit">Editar</button>
+                <button class="btn-edit" @click="editarCarreras = true" >Editar</button>
               </td>
             </tr>
           </tbody>
@@ -51,9 +59,12 @@
 import { ref } from 'vue'
 import Menu from '@/layouts/Menu.vue'
 import CarrerasManual from '@/components/CarrerasManual.vue'
+import EditarCarreras from '@/components/EditarCarreras.vue'
+import { Ear } from 'lucide-vue-next'
 
 // Variables reactivas para mostrar modales (formulario o csv)
 const mostrarFormulario = ref(false)
+const editarCarreras = ref(false)
 </script>
 
 
