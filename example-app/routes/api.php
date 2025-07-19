@@ -25,3 +25,6 @@ Route::post('/admin/login', [LoginProfesor::class, 'login']);
 
 #Registar Peridos
 Route::post('/periodos', [PeriodoController::class, 'store']);
+
+#lista de peridos
+Route::get('/periodos', [PeriodoController::class, 'index']);

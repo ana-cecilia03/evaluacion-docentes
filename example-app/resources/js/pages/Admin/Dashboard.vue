@@ -1,7 +1,6 @@
 <template>
   <Menu>
     <div class="contenido-periodo">
-      <!-- Contenedor principal con contorno azul claro -->
       <div class="contenedor-cuadro">
         <h1 class="titulo">Crear periodo</h1>
         
@@ -30,6 +29,9 @@
             <button type="button" class="btn-cancelar" @click="cancelar">Cancelar</button>
             <button type="submit" class="btn-crear">Crear</button>
           </div>
+
+          <p v-if="mensaje" class="mensaje-exito">{{ mensaje }}</p>
+          <p v-if="error" class="mensaje-error">{{ error }}</p>
         </form>
       </div>
     </div>
@@ -37,25 +39,42 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
 import Menu from '@/layouts/Menu.vue'
+import { ref } from 'vue'
+import axios from 'axios'
 
-// Definir las propiedades reactivas con ref()
+// Datos del formulario
 const form = ref({
   numero: '',
   nombre: '',
   inicio: '',
   fin: ''
-});
+})
 
-// Funciones del componente
-function crearPeriodo() {
-  console.log("Periodo creado:", form.value);
-  // Aquí va el código para enviar al backend
+const mensaje = ref('')
+const error = ref('')
+
+// Enviar al backend
+const crearPeriodo = async () => {
+  try {
+    const response = await axios.post('/api/periodos', {
+      numero: form.value.numero,
+      nombre_periodo: form.value.nombre,
+      fecha_inicio: form.value.inicio,
+      fecha_fin: form.value.fin,
+    })
+    mensaje.value = response.data.message
+    error.value = ''
+    cancelar()
+  } catch (err) {
+    mensaje.value = ''
+    error.value = err.response?.data?.message || 'Error al guardar el período.'
+  }
 }
 
+// Cancelar formulario
 function cancelar() {
-  form.value = { numero: '', nombre: '', inicio: '', fin: '' };
+  form.value = { numero: '', nombre: '', inicio: '', fin: '' }
 }
 </script>
 

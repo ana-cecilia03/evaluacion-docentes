@@ -8,6 +8,19 @@ use App\Models\Periodo;
 
 class PeriodoController extends Controller
 {
+    /**
+     * Lista todos los periodos registrados.
+     */
+    public function index()
+    {
+        $periodos = Periodo::orderBy('id_periodo', 'desc')->get();
+
+        return response()->json($periodos);
+    }
+
+    /**
+     * Guarda un nuevo periodo en la base de datos.
+     */
     public function store(Request $request)
     {
         $request->validate([
