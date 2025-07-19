@@ -4,15 +4,18 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class Materia extends Model
+class Periodo extends Model
 {
-    protected $table = 'materias';
-    protected $primaryKey = 'id_materia';
+    protected $table = 'periodos';
+    protected $primaryKey = 'id_periodo';
     public $timestamps = true;
 
-    public function periodos()
-    {
-        return $this->hasMany(MatPerCarr::class, 'id_materia');
-    }
+    protected $fillable = [
+        'nombre_periodo',
+        'fecha_inicio',
+        'fecha_fin',
+        'created_by',
+        'modified_by',
+    ];
 }
 
