@@ -12,7 +12,19 @@
 
           <div class="campo-formulario">
             <label for="nombre">Nombre:</label>
-            <input type="text" id="nombre" v-model="form.nombre" required />
+            <select id="nombre" v-model="form.nombre" required>
+              <option value="">Selecciona un cuatrimestre</option>
+              <option>Primer Cuatrimestre</option>
+              <option>Segundo Cuatrimestre</option>
+              <option>Tercer Cuatrimestre</option>
+              <option>Cuarto Cuatrimestre</option>
+              <option>Quinto Cuatrimestre</option>
+              <option>Sexto Cuatrimestre</option>
+              <option>Septimo Cuatrimestre</option>
+              <option>Octavo Cuatrimestre</option>
+              <option>Noveno Cuatrimestre</option>
+              <option>Decimo Cuatrimestre</option>
+            </select>
           </div>
 
           <div class="campo-formulario">

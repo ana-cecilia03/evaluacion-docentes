@@ -53,6 +53,11 @@ Route::get('/admin/periodo', function () {
     return Inertia::render('Admin/Periodo');
 })->name('admin.periodo');
 
+#Vista de registros de carrera
+Route::get('/registro/carrera', function () {
+    return Inertia::render('Admin/Carreras');
+})->name('registro.carrera');
+
 #Vista de registros de alumnos
 Route::get('/registro/alumnos', function () {
     return Inertia::render('Admin/AlumnoRegistro');

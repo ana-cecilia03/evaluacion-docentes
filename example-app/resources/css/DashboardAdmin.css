@@ -45,6 +45,18 @@
   color: #444;
 }
 
+.campo-formulario select {
+  padding: 8px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  font-size: 14px;
+  background-color: white;
+  color: #333;
+  appearance: none; /* Oculta el estilo nativo del navegador */
+  -webkit-appearance: none;
+  -moz-appearance: none;
+}
+
 .campo-formulario input {
   padding: 8px;  /* Reducir padding */
   border-radius: 8px;

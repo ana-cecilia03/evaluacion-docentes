@@ -12,6 +12,10 @@
   padding: 1rem;
 }
 
+.titulo {
+  text-align: center;
+  color: #181717;
+}
 .modal-content {
   background-color: #fff;
   border-radius: 10px;

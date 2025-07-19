@@ -3,29 +3,20 @@
     <main class="contenido-principal">
       <!-- Barra de acciones: búsqueda, filtro y botones -->
       <div class="actions">
-        <input type="text" placeholder="Buscar alumno..." />
+        <input type="text" placeholder="Buscar carrera..." />
         <select>
-          <option value="">Filtrar por grupo</option>
-          <option>Grupo A</option>
-          <option>Grupo B</option>
+          <option value="">Filtrar por carrera</option>
+          <option>MSC1</option>
+          <option>MSC2</option>
         </select>
-        <button class="btn-register" @click="mostrarFormulario = true">Registrar Alumno Manual</button>
-        <button class="btn-upload" @click="mostrarCSV = true">Cargar CSV</button>
+        <button class="btn-register" @click="mostrarFormulario = true">Registrar Carrera</button>
       </div>
 
       <!-- Modal para registro manual de alumno -->
       <div v-if="mostrarFormulario" class="modal-overlay">
         <div class="modal-content">
           <!-- Componente que abrirá un formulario más adelante -->
-          <AlumnosManual @cerrar="mostrarFormulario = false" />
-        </div>
-      </div>
-
-      <!-- Modal para carga de alumnos por CSV -->
-      <div v-if="mostrarCSV" class="modal-csv">
-        <div class="modal-content">
-          <!-- Componente para subir CSV -->
-          <CsvAlumnos @cerrar="mostrarCSV = false" />
+          <CarrerasManual @cerrar="mostrarFormulario = false" />
         </div>
       </div>
 
@@ -34,22 +25,16 @@
         <table>
           <thead>
             <tr>
-              <th>Matrícula</th>
+              <th>Clave</th>
               <th>Nombre</th>
-              <th>Curp</th>
-              <th>Grupo</th>
-              <th>Estado</th>
-              <th>Acciones</th>
+              <th></th>
             </tr>
           </thead>
           <tbody>
             <!-- Estos datos están fijos para prueba visual -->
             <tr>
-              <td>20230101</td>
-              <td>Ana López</td>
-              <td>sdfgh5vde55g</td>
-              <td>A</td>
-              <td>Activo</td>
+              <td>MSC1</td>
+              <td>Ingenieria en Sistemas Computacionales</td>
               <td>
                 <button class="btn-edit">Editar</button>
               </td>
@@ -65,12 +50,10 @@
 // Importación de layout y componentes visuales (sin lógica por ahora)
 import { ref } from 'vue'
 import Menu from '@/layouts/Menu.vue'
-import AlumnosManual from '@/components/AlumnosManual.vue'
-import CsvAlumnos from '@/components/CsvAlumnos.vue'
+import CarrerasManual from '@/components/CarrerasManual.vue'
 
 // Variables reactivas para mostrar modales (formulario o csv)
 const mostrarFormulario = ref(false)
-const mostrarCSV = ref(false)
 </script>
 
 

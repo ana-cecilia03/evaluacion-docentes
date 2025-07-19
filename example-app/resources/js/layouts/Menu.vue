@@ -25,7 +25,7 @@
           <li><a href="/admin/dashboard"><img src="/img/inicio.png" /> Dashboard</a></li>
           <li><a href="/admin/periodo"><img src="/img/periodo.png" /> Periodo</a></li>
           <li class="seccion">Registrar</li>
-          <li><a href="/registro/carreras"><img src="/img/registros.png" /> Carreras</a></li>
+          <li><a href="/registro/carrera"><img src="/img/registros.png" /> Carreras</a></li>
           <li><a href="/registro/alumnos"><img src="/img/alumno.png" /> Alumnos</a></li>
           <li><a href="/registro/profesores"><img src="/img/profesor.png" /> Profesores</a></li>
           <li><a href="/registro/grupo"><img src="/img/grupos.png" /> Grupos</a></li>

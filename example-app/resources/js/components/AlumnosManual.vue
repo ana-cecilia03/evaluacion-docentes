@@ -3,7 +3,7 @@
   <div class="modal-overlay">
     <div class="modal-content">
       <div class="register-container">
-        <h1>Registrar Alumno Manualmente</h1>
+        <h1 class="titulo">Registrar Alumno Manualmente</h1>
 
         <form @submit.prevent="registrarAlumno" class="register-form">
           <!-- Campo: Nombre -->
@@ -18,21 +18,26 @@
             <input type="text" id="matricula" v-model="alumno.matricula" placeholder="Ej. 20230101" />
           </div>
 
+          <!-- Campo: CURP -->
+          <div class="form-group">
+            <label for="curp">Curp</label>
+            <input type="text" id="curp" v-model="alumno.curp" placeholder="VG6F6FGDX4YGMSC2" />
+          </div>
+
           <!-- Campo: Grupo -->
           <div class="form-group">
             <label for="grupo">Grupo</label>
-            <select id="grupo" v-model="alumno.grupo">
-              <option value="">Seleccione</option>
-              <option>Grupo A</option>
-              <option>Grupo B</option>
-              <option>Grupo C</option>
-            </select>
+            <input type="text" id="grupo" v-model="alumno.grupo" placeholder="Grupo A" />
           </div>
 
-          <!-- Campo: Carrera -->
+          <!-- Campo: Estado -->
           <div class="form-group">
-            <label for="carrera">Carrera</label>
-            <input type="text" id="carrera" v-model="alumno.carrera" placeholder="Ej. Ingeniería en Sistemas" />
+            <label for="estado">Estado</label>
+            <select id="estado" v-model="alumno.estado">
+              <option value="">Seleccione</option>
+              <option>Activo</option>
+              <option>Inactivo</option>
+            </select>
           </div>
 
           <!-- Botones -->
@@ -53,8 +58,9 @@ import { ref } from 'vue'
 const alumno = ref({
   nombre: '',
   matricula: '',
+  curp: '' ,
   grupo: '',
-  carrera: ''
+  estado: ''
 })
 
 // Función temporal de prueba (será reemplazada con llamada a backend)
