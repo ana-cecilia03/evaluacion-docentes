@@ -4,6 +4,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\LoginAlumno;
 use App\Http\Controllers\Auth\LoginProfesor;
+use App\Http\Controllers\Admin\PeriodoController;
 
 /*
 |--------------------------------------------------------------------------
@@ -21,3 +22,6 @@ Route::post('/login/alumno', [LoginAlumno::class, 'login']);
 
 #Api Loginprofesores
 Route::post('/admin/login', [LoginProfesor::class, 'login']);
+
+#Registar Peridos
+Route::post('/periodos', [PeriodoController::class, 'store']);
