@@ -92,6 +92,12 @@
   background-color: #e44c5b;
   transform: scale(1.05);
 }
+.mensaje-error {
+  color: red;
+  margin-top: 10px;
+  font-weight: bold;
+}
+
 /* Responsive */
 @media (max-width: 600px) {
   .modal-content {

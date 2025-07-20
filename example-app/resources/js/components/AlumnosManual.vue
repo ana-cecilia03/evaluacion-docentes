@@ -9,7 +9,7 @@
           <!-- Campo: Nombre -->
           <div class="form-group">
             <label for="nombre">Nombre completo</label>
-            <input type="text" id="nombre" v-model="alumno.nombre" placeholder="Ej. Ana López" />
+            <input type="text" id="nombre" v-model="alumno.nombre_completo" placeholder="Ej. Ana López" />
           </div>
 
           <!-- Campo: Matrícula -->
@@ -20,7 +20,7 @@
 
           <!-- Campo: CURP -->
           <div class="form-group">
-            <label for="curp">Curp</label>
+            <label for="curp">CURP</label>
             <input type="text" id="curp" v-model="alumno.curp" placeholder="VG6F6FGDX4YGMSC2" />
           </div>
 
@@ -30,13 +30,19 @@
             <input type="text" id="grupo" v-model="alumno.grupo" placeholder="Grupo A" />
           </div>
 
+          <!-- Campo: Correo -->
+          <div class="form-group">
+            <label for="correo">Correo electrónico</label>
+            <input type="email" id="correo" v-model="alumno.correo" placeholder="correo@ejemplo.com" />
+          </div>
+
           <!-- Campo: Estado -->
           <div class="form-group">
             <label for="estado">Estado</label>
-            <select id="estado" v-model="alumno.estado">
+            <select id="estado" v-model="alumno.status">
               <option value="">Seleccione</option>
-              <option>Activo</option>
-              <option>Inactivo</option>
+              <option value="activo">Activo</option>
+              <option value="inactivo">Inactivo</option>
             </select>
           </div>
 
@@ -46,6 +52,11 @@
             <button type="submit" class="register-verde">Registrar</button>
           </div>
         </form>
+
+        <!-- Error -->
+        <div v-if="error" class="error-message">
+          {{ error }}
+        </div>
       </div>
     </div>
   </div>
@@ -53,22 +64,44 @@
 
 <script setup>
 import { ref } from 'vue'
+import axios from 'axios'
+import { defineEmits } from 'vue'
 
-// Datos del alumno (se enviarán al backend más adelante)
+const emit = defineEmits(['cerrar', 'guardado'])
+
 const alumno = ref({
-  nombre: '',
+  nombre_completo: '',
   matricula: '',
-  curp: '' ,
+  curp: '',
   grupo: '',
-  estado: ''
+  correo: '', // nuevo campo
+  status: 'activo'
 })
 
-// Función temporal de prueba (será reemplazada con llamada a backend)
-const registrarAlumno = () => {
-  // Aquí se conectará con Laravel/Inertia vía POST
-  console.log('Alumno a registrar:', alumno.value)
+const error = ref(null)
+
+const registrarAlumno = async () => {
+  error.value = null
+  try {
+    await axios.post('/api/alumnos', {
+      ...alumno.value,
+      password: alumno.value.matricula,
+      rol: 'alumno',
+      created_by: 'frontend',
+      modified_by: 'frontend'
+    })
+
+    emit('guardado')
+    emit('cerrar')
+  } catch (err) {
+    if (err.response?.data?.message) {
+      error.value = err.response.data.message
+    } else {
+      error.value = 'Error al registrar alumno.'
+    }
+    console.error('Error al registrar alumno:', err)
+  }
 }
 </script>
 
 <style src="@/../css/RegistroManual.css"></style>
-

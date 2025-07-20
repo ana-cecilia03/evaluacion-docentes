@@ -10,9 +10,11 @@ class Carrera extends Model
     protected $primaryKey = 'id_carrera';
     public $timestamps = true;
 
-    public function materias()
-    {
-        return $this->hasMany(MatPerCarr::class, 'id_carrera');
-    }
+    protected $fillable = [
+        'clave',
+        'nombre_carrera',
+        'created_by',
+        'modified_by',
+    ];
 }
 

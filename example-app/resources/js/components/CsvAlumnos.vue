@@ -8,13 +8,18 @@
         <!-- Área de carga de archivo -->
         <div class="csv-upload">
           <input type="file" accept=".csv" @change="handleFileUpload" />
-          <p>Formato: <strong>matricula, nombre, carrera, grupo</strong></p>
+          <p>Formato esperado: <strong>matricula,nombre_completo,correo,curp,grupo,status</strong></p>
         </div>
 
         <!-- Botones para cancelar o confirmar carga -->
         <div class="csv-buttons">
           <button @click="$emit('cerrar')" class="cancel-button">Cancelar</button>
           <button @click="cargarCSV" class="cargar-button">Cargar CSV</button>
+        </div>
+
+        <!-- Mostrar errores si los hay -->
+        <div v-if="error" class="error-message">
+          {{ error }}
         </div>
       </div>
     </div>
@@ -23,27 +28,48 @@
 
 <script setup>
 import { ref } from 'vue'
+import axios from 'axios'
 
-// Variable para almacenar el archivo seleccionado
 const file = ref(null)
+const error = ref(null)
 
-// Captura el archivo cuando se selecciona
 const handleFileUpload = (event) => {
   file.value = event.target.files[0]
 }
 
-// Aquí se podrá agregar lógica para enviar el CSV al backend
-const cargarCSV = () => {
+const cargarCSV = async () => {
+  error.value = null
+
   if (!file.value) {
-    alert('Por favor, selecciona un archivo CSV.')
+    error.value = 'Por favor, selecciona un archivo CSV.'
     return
   }
 
-  // Aquí puedes usar FormData + fetch o axios para enviarlo al backend
-  console.log('Archivo seleccionado:', file.value)
-  alert('Archivo de alumnos cargado correctamente')
+  const formData = new FormData()
+  formData.append('archivo', file.value)
+
+  try {
+    await axios.post('/api/alumnos/csv', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      }
+    })
+
+    alert('Archivo de alumnos cargado correctamente')
+    file.value = null
+    // Aquí puedes emitir evento para actualizar tabla
+    // $emit('guardado') si lo deseas
+    // y cerrar modal
+    // $emit('cerrar')
+  } catch (err) {
+    if (err.response?.data?.message) {
+      error.value = err.response.data.message
+    } else {
+      error.value = 'Error al subir el archivo CSV.'
+    }
+    console.error('Error al subir archivo CSV:', err)
+  }
 }
 </script>
 
-<!-- Estilos específicos para carga de CSV -->
 <style src="@/../css/RegistroCSV.css"></style>

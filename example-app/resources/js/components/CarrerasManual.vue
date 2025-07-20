@@ -1,5 +1,5 @@
 <template>
-  <!-- Modal de registro manual de alumno -->
+  <!-- Modal de registro manual de carrera -->
   <div class="modal-overlay">
     <div class="modal-content">
       <div class="register-container">
@@ -9,13 +9,13 @@
           <!-- Campo: CLAVE -->
           <div class="form-group">
             <label for="clave">Clave</label>
-            <input type="text" id="clave" v-model="carrera.clave" placeholder="Ej. MSC4 "/>
+            <input type="text" id="clave" v-model="carrera.clave" placeholder="Ej. MSC4" />
           </div>
 
           <!-- Campo: nombre -->
           <div class="form-group">
-            <label for="matricula">Nombre</label>
-            <input type="text" id="nombre" v-model="carrera.nombre" placeholder="Ingenieria Robotica" />
+            <label for="nombre">Nombre</label>
+            <input type="text" id="nombre" v-model="carrera.nombre" placeholder="Ingeniería Robótica" />
           </div>
 
           <!-- Botones -->
@@ -23,6 +23,9 @@
             <button type="button" class="register-rojo" @click="$emit('cerrar')">Cancelar</button>
             <button type="submit" class="register-verde">Registrar</button>
           </div>
+
+          <!-- Mensaje de error -->
+          <p v-if="error" class="mensaje-error">{{ error }}</p>
         </form>
       </div>
     </div>
@@ -31,19 +34,31 @@
 
 <script setup>
 import { ref } from 'vue'
+import axios from 'axios'
 
-// Datos del alumno (se enviarán al backend más adelante)
+const emit = defineEmits(['cerrar', 'guardado'])
+
 const carrera = ref({
   clave: '',
   nombre: ''
 })
 
-// Función temporal de prueba (será reemplazada con llamada a backend)
-const registrarACarrera = () => {
-  // Aquí se conectará con Laravel/Inertia vía POST
-  console.log('Carrera a registrar:', carrera.value)
+const error = ref('')
+
+const registrarCarrera = async () => {
+  try {
+    await axios.post('/api/carreras', carrera.value)
+
+    // ✅ Notificar al componente padre que se guardó correctamente
+    emit('guardado')
+
+    // ✅ Cerrar el modal
+    emit('cerrar')
+  } catch (err) {
+    console.error('Error al registrar carrera:', err)
+    error.value = err.response?.data?.message || 'Error al registrar la carrera'
+  }
 }
 </script>
 
 <style src="@/../css/RegistroManual.css"></style>
-

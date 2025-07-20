@@ -2,30 +2,24 @@
 
 namespace App\Models;
 
-use Illuminate\Foundation\Auth\User as Authenticatable;
-use Laravel\Sanctum\HasApiTokens;
-use Illuminate\Notifications\Notifiable;
-use App\Models\Profesor;
+use Illuminate\Database\Eloquent\Model;
 
-class Alumno extends Authenticatable
+class Alumno extends Model
 {
-    use HasApiTokens, Notifiable;
-
-    protected $table = 'alumnos';
     protected $primaryKey = 'id_alumno';
-    public $timestamps = true;
 
-    // Oculta el password (y remember_token si lo usas) en las respuestas JSON
-    protected $hidden = [
+    protected $fillable = [
+        'matricula',
+        'nombre_completo',
+        'correo',
         'password',
-        'remember_token',
+        'rol',
+        'curp',
+        'grupo',
+        'status',
+        'created_by',
+        'modified_by',
     ];
-
-    // Relación con profesores (muchos a muchos)
-    public function profesores()
-    {
-        return $this->belongsToMany(Profesor::class, 'alum_prof', 'id_alumno', 'id_profesor');
-    }
 }
 
 

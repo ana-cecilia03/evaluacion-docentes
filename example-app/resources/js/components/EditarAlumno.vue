@@ -1,42 +1,42 @@
 <template>
-  <!-- Modal de registro manual de alumno -->
+  <!-- Modal de edición de alumno -->
   <div class="modal-overlay">
     <div class="modal-content">
       <div class="register-container">
-        <h1 class="titulo">Actualizar</h1>
+        <h1 class="titulo">Actualizar Alumno</h1>
 
-        <form @submit.prevent="registrarAlumno" class="register-form">
-          <!-- Campo: Nombre -->
+        <form @submit.prevent="actualizarAlumno" class="register-form">
+          <!-- Campo: Nombre completo -->
           <div class="form-group">
             <label for="nombre">Nombre completo</label>
-            <input type="text" id="nombre" v-model="alumno.nombre" placeholder="Ej. Ana López" />
+            <input type="text" id="nombre" v-model="alumnoLocal.nombre_completo" placeholder="Ej. Ana López" />
           </div>
 
           <!-- Campo: Matrícula -->
           <div class="form-group">
             <label for="matricula">Matrícula</label>
-            <input type="text" id="matricula" v-model="alumno.matricula" placeholder="Ej. 20230101" />
+            <input type="text" id="matricula" v-model="alumnoLocal.matricula" placeholder="Ej. 20230101" />
           </div>
 
           <!-- Campo: CURP -->
           <div class="form-group">
-            <label for="curp">Curp</label>
-            <input type="text" id="curp" v-model="alumno.curp" placeholder="VG6F6FGDX4YGMSC2" />
+            <label for="curp">CURP</label>
+            <input type="text" id="curp" v-model="alumnoLocal.curp" placeholder="VG6F6FGDX4YGMSC2" />
           </div>
 
           <!-- Campo: Grupo -->
           <div class="form-group">
             <label for="grupo">Grupo</label>
-            <input type="text" id="grupo" v-model="alumno.grupo" placeholder="Grupo A" />
+            <input type="text" id="grupo" v-model="alumnoLocal.grupo" placeholder="Grupo A" />
           </div>
 
           <!-- Campo: Estado -->
           <div class="form-group">
             <label for="estado">Estado</label>
-            <select id="estado" v-model="alumno.estado">
+            <select id="estado" v-model="alumnoLocal.status">
               <option value="">Seleccione</option>
-              <option>Activo</option>
-              <option>Inactivo</option>
+              <option value="activo">Activo</option>
+              <option value="inactivo">Inactivo</option>
             </select>
           </div>
 
@@ -46,29 +46,72 @@
             <button type="submit" class="register-verde">Actualizar</button>
           </div>
         </form>
+
+        <!-- Error -->
+        <div v-if="error" class="error-message">
+          {{ error }}
+        </div>
       </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, watch } from 'vue'
+import axios from 'axios'
+import { defineProps, defineEmits } from 'vue'
 
-// Datos del alumno (se enviarán al backend más adelante)
-const alumno = ref({
-  nombre: '',
-  matricula: '',
-  curp: '' ,
-  grupo: '',
-  estado: ''
+const emit = defineEmits(['cerrar', 'actualizado'])
+
+const props = defineProps({
+  alumno: {
+    type: Object,
+    required: true
+  }
 })
 
-// Función temporal de prueba (será reemplazada con llamada a backend)
-const registrarAlumno = () => {
-  // Aquí se conectará con Laravel/Inertia vía POST
-  console.log('Alumno a registrar:', alumno.value)
+// Crear una copia local para edición sin mutar la prop
+const alumnoLocal = ref({
+  id_alumno: null,
+  nombre_completo: '',
+  matricula: '',
+  curp: '',
+  grupo: '',
+  status: ''
+})
+
+// Copiar datos cuando se actualiza la prop
+watch(
+  () => props.alumno,
+  (nuevo) => {
+    if (nuevo) {
+      alumnoLocal.value = { ...nuevo }
+    }
+  },
+  { immediate: true }
+)
+
+const error = ref(null)
+
+// Función para enviar actualización al backend
+const actualizarAlumno = async () => {
+  error.value = null
+  try {
+    await axios.put(`/api/alumnos/${alumnoLocal.value.id_alumno}`, {
+      ...alumnoLocal.value,
+      modified_by: 'frontend'
+    })
+    emit('actualizado') // Recarga la tabla en la vista principal
+    emit('cerrar')      // Cierra el modal
+  } catch (err) {
+    if (err.response?.data?.message) {
+      error.value = err.response.data.message
+    } else {
+      error.value = 'Error al actualizar alumno.'
+    }
+    console.error('Error al actualizar alumno:', err)
+  }
 }
 </script>
 
 <style src="@/../css/EditarDatos.css"></style>
-
