@@ -41,3 +41,9 @@ Route::put('/alumnos/{id}', [AlumnoController::class, 'update']);
 Route::delete('/alumnos/{id}', [AlumnoController::class, 'destroy']);
 
 #REGISTROS vista de profesores
+use App\Http\Controllers\Admin\ProfesorController;
+
+Route::get('/profesores', [ProfesorController::class, 'index']);
+Route::post('/profesores', [ProfesorController::class, 'store']);
+Route::put('/profesores/{id}', [ProfesorController::class, 'update']);
+Route::post('/profesores/csv', [ProfesorController::class, 'importarDesdeCSV']);

@@ -2,24 +2,29 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
-use Laravel\Sanctum\HasApiTokens;
-use Illuminate\Notifications\Notifiable;  // <-- agregado
 
 class Profesor extends Authenticatable
 {
-    use HasApiTokens, Notifiable; // <-- agregado Notifiable
+    use HasFactory;
 
     protected $table = 'profesores';
     protected $primaryKey = 'id_profesor';
-    public $timestamps = true;
 
-    protected $fillable = ['correo', 'password', 'nombre_completo']; // Cambié 'nombre' por 'nombre_completo' para que coincida con la BD
+    protected $fillable = [
+        'matricula',
+        'nombre_completo',
+        'correo',
+        'password',
+        'rol',
+        'curp',
+        'status',
+        'created_by',
+        'modified_by',
+    ];
 
-    protected $hidden = ['password', 'remember_token'];
-
-    public function alumnos()
-    {
-        return $this->belongsToMany(Alumno::class, 'alum_prof', 'id_profesor', 'id_alumno');
-    }
+    protected $hidden = [
+        'password',
+    ];
 }

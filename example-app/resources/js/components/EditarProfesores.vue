@@ -1,75 +1,122 @@
 <template>
-  <!-- Modal para registrar un profesor manualmente -->
+  <!-- Modal para editar profesor -->
   <div class="modal-overlay">
     <div class="modal-content">
       <div class="register-container">
-        <h1 class="titulo">Actualizar</h1>
+        <h1 class="titulo">Actualizar Profesor</h1>
 
-        <!-- Formulario de registro -->
-        <form @submit.prevent="registrarProfesor" class="register-form">
-
+        <form @submit.prevent="actualizarProfesor" class="register-form">
+          <!-- Campo: Matrícula -->
           <div class="form-group">
-            <label for="matriculo"> Matricula</label>
-            <input type="text" id="matriculo" v-model="profesor.matricula" placeholder="Ej. 13122593103" />
+            <label for="matricula">Matrícula</label>
+            <input type="text" id="matricula" v-model="form.matricula" placeholder="Ej. 13122593103" />
           </div>
 
           <!-- Campo: Nombre completo -->
           <div class="form-group">
-            <label for="nombre">Nombre completo</label>
-            <input
-              type="text"
-              id="nombre"
-              v-model="profesor.nombre"
-              placeholder="Ej. Laura Martínez"
-            />
+            <label for="nombre_completo">Nombre completo</label>
+            <input type="text" id="nombre_completo" v-model="form.nombre_completo" placeholder="Ej. Laura Martínez" />
           </div>
 
-
-          <!-- Campo: Correo electrónico -->
+          <!-- Campo: Correo -->
           <div class="form-group">
-            <label for="curp">Curp</label>
-            <input type="curp" id="curp" v-model="profesor.curp" placeholder="MDFI32URAS9RMVS7" />
+            <label for="correo">Correo electrónico</label>
+            <input type="email" id="correo" v-model="form.correo" placeholder="Ej. profesor@ejemplo.com" />
           </div>
 
-          <!-- Campo: ESTADO -->
+          <!-- Campo: CURP -->
           <div class="form-group">
-            <label for="estado">Estado</label>
-            <select id="estado" v-model="profesor.estado">
+            <label for="curp">CURP</label>
+            <input type="text" id="curp" v-model="form.curp" placeholder="MDFI32URAS9RMVS7" />
+          </div>
+
+          <!-- Campo: Estado -->
+          <div class="form-group">
+            <label for="status">Estado</label>
+            <select id="status" v-model="form.status">
               <option value="">Seleccione</option>
-              <option>Activo</option>
-              <option>Inactivo</option>
+              <option value="activo">Activo</option>
+              <option value="inactivo">Inactivo</option>
             </select>
           </div>
 
-          <!-- Botones de acción -->
+          <!-- Botones -->
           <div class="button-group">
             <button type="button" class="register-rojo" @click="$emit('cerrar')">Cancelar</button>
             <button type="submit" class="register-verde">Actualizar</button>
           </div>
         </form>
+
+        <!-- Mensaje de error -->
+        <div v-if="error" class="error-message">
+          {{ error }}
+        </div>
       </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, watch, defineProps, defineEmits } from 'vue'
+import axios from 'axios'
 
-// Estado del formulario
-const profesor = ref({
-  matricula: '',
-  nombre: '',
-  curp: '',
-  estado: ''
+// Props
+const props = defineProps({
+  profesor: {
+    type: Object,
+    required: true
+  }
 })
 
-// Acción de registrar (temporal)
-const registrarProfesor = () => {
-  // Aquí se conectará al backend más adelante
-  console.log('Datos del profesor:', profesor.value)
-  alert('Profesor registrado correctamente')
+// Emits
+const emit = defineEmits(['cerrar', 'actualizado'])
+
+// Formulario editable
+const form = ref({
+  matricula: '',
+  nombre_completo: '',
+  correo: '',
+  curp: '',
+  status: ''
+})
+
+// Cargar datos iniciales cuando cambia la prop
+watch(() => props.profesor, (nuevo) => {
+  if (nuevo) {
+    form.value = { ...nuevo }
+  }
+}, { immediate: true })
+
+const error = ref(null)
+
+// Enviar actualización al backend
+const actualizarProfesor = async () => {
+  error.value = null
+
+  try {
+    await axios.put(`/api/profesores/${form.value.id_profesor}`, {
+      matricula: form.value.matricula,
+      nombre_completo: form.value.nombre_completo,
+      correo: form.value.correo,
+      curp: form.value.curp,
+      status: form.value.status,
+      modified_by: 'frontend'
+    })
+
+    emit('actualizado')
+    emit('cerrar')
+  } catch (err) {
+    console.error('Error al actualizar profesor:', err)
+    if (err.response?.data?.message) {
+      error.value = err.response.data.message
+    } else if (err.response?.data?.errors) {
+      const errores = Object.values(err.response.data.errors).flat()
+      error.value = errores.join(', ')
+    } else {
+      error.value = 'Error inesperado al actualizar profesor.'
+    }
+  }
 }
 </script>
 
-<!-- Estilos del formulario de registro -->
 <style src="@/../css/RegistroManual.css"></style>

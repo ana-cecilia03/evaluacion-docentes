@@ -8,7 +8,15 @@
         <!-- Área de carga del archivo -->
         <div class="csv-upload">
           <input type="file" accept=".csv" @change="handleFileUpload" />
-          <p>Formato: <strong>nombre, departamento, correo, telefono</strong></p>
+          <p>
+            Formato esperado:
+            <strong>matricula, nombre_completo, correo, password, curp, status</strong>
+          </p>
+        </div>
+
+        <!-- Mensaje de error -->
+        <div v-if="error" class="error-message">
+          <pre>{{ error }}</pre>
         </div>
 
         <!-- Botones para cerrar o cargar el archivo -->
@@ -23,27 +31,55 @@
 
 <script setup>
 import { ref } from 'vue'
+import axios from 'axios'
 
-// Referencia al archivo CSV seleccionado
+// Emitir eventos al componente padre
+const emit = defineEmits(['cerrar', 'guardado'])
+
+// Estado del archivo y errores
 const file = ref(null)
+const error = ref(null)
 
-// Captura el archivo cuando el usuario lo selecciona
+// Captura el archivo seleccionado
 const handleFileUpload = (event) => {
   file.value = event.target.files[0]
 }
 
-// Función que se ejecutará al presionar "Cargar CSV"
-const cargarCSV = () => {
+// Enviar el CSV al backend
+const cargarCSV = async () => {
+  error.value = null
+
   if (!file.value) {
     alert('Por favor, selecciona un archivo CSV.')
     return
   }
 
-  // Aquí se conectará con el backend cuando esté listo
-  console.log('Archivo seleccionado:', file.value)
-  alert('Archivo de profesores cargado correctamente')
+  const formData = new FormData()
+  formData.append('archivo', file.value)
+
+  try {
+    await axios.post('/api/profesores/csv', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
+    })
+
+    alert('Profesores cargados correctamente.')
+    emit('guardado')
+    emit('cerrar')
+  } catch (err) {
+    console.error('Error al cargar CSV:', err)
+    if (err.response?.data?.errores) {
+      error.value = err.response.data.errores
+        .map((e) => `Línea ${e.linea}: ${e.errores.join(', ')}`)
+        .join('\n')
+    } else if (err.response?.data?.message) {
+      error.value = err.response.data.message
+    } else {
+      error.value = 'Error desconocido al cargar el archivo.'
+    }
+  }
 }
 </script>
 
-<!-- Estilos para este componente -->
 <style src="@/../css/RegistroCSV.css"></style>
