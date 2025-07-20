@@ -7,6 +7,9 @@ use App\Http\Controllers\Auth\LoginProfesor;
 use App\Http\Controllers\Admin\PeriodoController;
 use App\Http\Controllers\Admin\CarreraController;
 use App\Http\Controllers\Admin\AlumnoController;
+use App\Http\Controllers\Admin\ProfesorController;
+use App\Http\Controllers\Admin\GrupoController;
+
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -41,9 +44,14 @@ Route::put('/alumnos/{id}', [AlumnoController::class, 'update']);
 Route::delete('/alumnos/{id}', [AlumnoController::class, 'destroy']);
 
 #REGISTROS vista de profesores
-use App\Http\Controllers\Admin\ProfesorController;
 
 Route::get('/profesores', [ProfesorController::class, 'index']);
 Route::post('/profesores', [ProfesorController::class, 'store']);
 Route::put('/profesores/{id}', [ProfesorController::class, 'update']);
 Route::post('/profesores/csv', [ProfesorController::class, 'importarDesdeCSV']);
+
+#REGISTROS vista Grupos
+Route::get('/grupos', [GrupoController::class, 'index']);
+Route::post('/grupos', [GrupoController::class, 'store']);
+Route::put('/grupos/{id}', [GrupoController::class, 'update']);
+Route::post('/grupos/csv', [GrupoController::class, 'importarDesdeCSV']);

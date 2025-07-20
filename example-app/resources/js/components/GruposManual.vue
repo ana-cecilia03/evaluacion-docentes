@@ -3,21 +3,20 @@
   <div class="modal-overlay">
     <div class="modal-content">
       <div class="register-container">
-        <h1 class="titulo" >Registrar Grupo Manualmente</h1>
+        <h1 class="titulo">Registrar Grupo Manualmente</h1>
 
         <!-- Formulario de registro -->
         <form @submit.prevent="registrarGrupo" class="register-form">
-
           <!-- Campo: clave -->
           <div class="form-group">
             <label for="clave">Clave</label>
-            <input type="text" id="clave" v-model="grupo.clave" placeholder="MSC8" />
+            <input type="text" id="clave" v-model="form.clave" placeholder="Ej. MSC8" />
           </div>
 
-          <!-- Campo: nombre del grupo -->
+          <!-- Campo: carrera -->
           <div class="form-group">
-            <label for="carrera">Carrear</label>
-            <input type="text" id="carrera" v-model="grupo.nombre" placeholder="Ingenieria en robotica" />
+            <label for="carrera">Carrera</label>
+            <input type="text" id="carrera" v-model="form.carrera" placeholder="Ej. Ingeniería en Robótica" />
           </div>
 
           <!-- Botones de acción -->
@@ -26,6 +25,11 @@
             <button type="submit" class="register-verde">Registrar Grupo</button>
           </div>
         </form>
+
+        <!-- Mensaje de error -->
+        <div v-if="error" class="error-message">
+          {{ error }}
+        </div>
       </div>
     </div>
   </div>
@@ -33,21 +37,37 @@
 
 <script setup>
 import { ref } from 'vue'
+import axios from 'axios'
 
-// Estado del grupo a registrar
-const grupo = ref({
-  nombre: '',
-  asignatura: '',
-  profesor: ''
+const emit = defineEmits(['cerrar', 'guardado'])
+
+const form = ref({
+  clave: '',
+  carrera: ''
 })
 
-// Acción al hacer clic en "Registrar Grupo"
-const registrarGrupo = () => {
-  // Aquí se conectará al backend cuando esté listo
-  console.log('Datos del grupo:', grupo.value)
-  alert('Grupo registrado correctamente')
+const error = ref(null)
+
+const registrarGrupo = async () => {
+  error.value = null
+  try {
+    await axios.post('/api/grupos', {
+      ...form.value,
+      created_by: 'frontend',
+      modified_by: 'frontend'
+    })
+    emit('guardado')
+    emit('cerrar')
+  } catch (err) {
+    console.error('Error al registrar grupo:', err)
+    if (err.response?.data?.errors) {
+      const errores = Object.values(err.response.data.errors).flat()
+      error.value = errores.join(', ')
+    } else {
+      error.value = 'Error al registrar grupo.'
+    }
+  }
 }
 </script>
 
-<!-- Estilos específicos para el formulario de registro manual -->
 <style src="@/../css/RegistroManual.css"></style>

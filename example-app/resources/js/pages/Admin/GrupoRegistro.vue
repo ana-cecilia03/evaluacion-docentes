@@ -11,25 +11,25 @@
       <!-- Modal para formulario manual -->
       <div v-if="mostrarFormulario" class="modal-overlay">
         <div class="modal-content">
-          <GruposManual @cerrar="mostrarFormulario = false" />
+          <GruposManual @cerrar="cerrarFormulario" @guardado="obtenerGrupos" />
         </div>
       </div>
 
       <!-- Modal para carga CSV -->
       <div v-if="mostrarCSV" class="modal-csv">
         <div class="modal-content">
-          <CsvGrupos @cerrar="mostrarCSV = false" />
+          <CsvGrupos @cerrar="cerrarCSV" @guardado="obtenerGrupos" />
         </div>
       </div>
 
-      <!-- Modal para actualizar -->
+      <!-- Modal para actualizar grupo -->
       <div v-if="editarGrupos" class="modal-overlay">
         <div class="modal-content">
-          <EditarGrupos @cerrar="editarGrupos = false" />
+          <EditarGrupos :grupo="grupoSeleccionado" @cerrar="cerrarEdicion" @actualizado="obtenerGrupos" />
         </div>
       </div>
 
-      <!-- Tabla con datos de ejemplo -->
+      <!-- Tabla con datos desde la base de datos -->
       <div class="table-wrapper">
         <table>
           <thead>
@@ -40,11 +40,11 @@
             </tr>
           </thead>
           <tbody>
-            <tr>
-              <td>MSC3</td>
-              <td>Ingenieria en Sistemas Computacionales</td>
+            <tr v-for="grupo in grupos" :key="grupo.id_grupo">
+              <td>{{ grupo.clave }}</td>
+              <td>{{ grupo.carrera }}</td>
               <td>
-                <button class="btn-edit" @click="editarGrupos = true">Editar</button>
+                <button class="btn-edit" @click="abrirModalEditar(grupo)">Editar</button>
               </td>
             </tr>
           </tbody>
@@ -55,17 +55,47 @@
 </template>
 
 <script setup>
-// Solo frontend: vista de registro de grupos
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
+import axios from 'axios'
+
+// Componentes
 import Menu from '@/layouts/Menu.vue'
 import GruposManual from '@/components/GruposManual.vue'
 import CsvGrupos from '@/components/CsvGrupos.vue'
 import EditarGrupos from '@/components/EditarGrupos.vue'
 
+// Estados de modales
 const mostrarFormulario = ref(false)
 const mostrarCSV = ref(false)
 const editarGrupos = ref(false)
+
+// Datos
+const grupos = ref([])
+const grupoSeleccionado = ref(null)
+
+// Función para obtener grupos desde la API
+const obtenerGrupos = async () => {
+  try {
+    const response = await axios.get('/api/grupos')
+    grupos.value = response.data
+  } catch (error) {
+    console.error('Error al obtener grupos:', error)
+  }
+}
+
+// Mostrar modal de edición
+const abrirModalEditar = (grupo) => {
+  grupoSeleccionado.value = grupo
+  editarGrupos.value = true
+}
+
+// Cerrar modales
+const cerrarFormulario = () => mostrarFormulario.value = false
+const cerrarCSV = () => mostrarCSV.value = false
+const cerrarEdicion = () => editarGrupos.value = false
+
+// Cargar grupos al montar
+onMounted(obtenerGrupos)
 </script>
 
-<!-- Estilos globales del módulo de registros -->
 <style src="@/../css/Registros.css"></style>

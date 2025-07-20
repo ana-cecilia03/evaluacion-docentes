@@ -8,7 +8,12 @@
         <!-- Área de carga de archivo -->
         <div class="csv-upload">
           <input type="file" accept=".csv" @change="handleFileUpload" />
-          <p>Formato: <strong>nombre_grupo, asignatura, profesor</strong></p>
+          <p>Formato: <strong>clave, carrera</strong></p>
+        </div>
+
+        <!-- Mensaje de error -->
+        <div v-if="error" class="error-message">
+          {{ error }}
         </div>
 
         <!-- Botones para cancelar o confirmar carga -->
@@ -23,27 +28,51 @@
 
 <script setup>
 import { ref } from 'vue'
+import axios from 'axios'
 
-// Referencia al archivo CSV
+const emit = defineEmits(['cerrar', 'guardado'])
+
 const file = ref(null)
+const error = ref(null)
 
-// Manejo del evento de carga de archivo
+// Captura el archivo seleccionado
 const handleFileUpload = (event) => {
   file.value = event.target.files[0]
 }
 
-// Acción al presionar el botón de carga
-const cargarCSV = () => {
+// Enviar archivo al backend
+const cargarCSV = async () => {
+  error.value = null
+
   if (!file.value) {
     alert('Por favor, selecciona un archivo CSV.')
     return
   }
 
-  // Aquí se conectará al backend más adelante
-  console.log('Archivo seleccionado:', file.value)
-  alert('Archivo cargado correctamente')
+  const formData = new FormData()
+  formData.append('archivo', file.value)
+
+  try {
+    await axios.post('/api/grupos/csv', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
+    })
+
+    alert('Grupos cargados correctamente.')
+    emit('guardado')
+    emit('cerrar')
+  } catch (err) {
+    console.error('Error al cargar CSV:', err)
+    if (err.response?.data?.errores) {
+      error.value = err.response.data.errores.map((e) =>
+        `Línea ${e.linea}: ${e.errores.join(', ')}`
+      ).join('\n')
+    } else {
+      error.value = 'Error al cargar archivo CSV.'
+    }
+  }
 }
 </script>
 
-<!-- Estilos para el modal y área de carga CSV -->
 <style src="@/../css/RegistroCSV.css"></style>
