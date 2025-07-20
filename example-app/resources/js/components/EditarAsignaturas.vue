@@ -1,28 +1,31 @@
 <template>
-  <!-- Modal para registrar asignatura manualmente -->
+  <!-- Modal para editar una materia -->
   <div class="modal-overlay">
     <div class="modal-content">
       <div class="register-container">
-        <h1 class="titulo" >Actualizar</h1>
+        <h1 class="titulo">Actualizar Materia</h1>
 
-          <!-- Campo: clave -->
+        <form @submit.prevent="actualizarMateria" class="register-form">
+          <!-- Campo: Nombre de la materia -->
           <div class="form-group">
-            <label for="clave">Clave</label>
-            <input type="text" id="clave" v-model.clave="materia.clave" placeholder="Ej. VSC1" />
-          </div>
-        
-        <form @submit.prevent="registrarAsignatura" class="register-form">
-          <!-- Campo: Nombre de la asignatura -->
-          <div class="form-group">
-            <label for="nombre">Nombre de la Materia</label>
-            <input type="text" id="materia" v-model="materia.nombre" placeholder="Ej. Álgebra Lineal" />
+            <label for="nombre_materia">Nombre de la Materia</label>
+            <input
+              type="text"
+              id="nombre_materia"
+              v-model="formulario.nombre_materia"
+              placeholder="Ej. Álgebra Lineal"
+              required
+            />
           </div>
 
           <!-- Botones de acción -->
           <div class="button-group">
-              <button type="button" class="register-rojo" @click="$emit('cerrar')">Cancelar</button>
-              <button type="submit" class="register-verde">Actualizar</button>
+            <button type="button" class="register-rojo" @click="$emit('cerrar')">Cancelar</button>
+            <button type="submit" class="register-verde">Actualizar</button>
           </div>
+
+          <!-- Mensaje de error -->
+          <div v-if="error" class="error-message">{{ error }}</div>
         </form>
       </div>
     </div>
@@ -30,17 +33,59 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
+import axios from 'axios'
 
-// Estado local del formulario de asignatura
-const materia = ref({
-  clave: '',
-  materia: ''
+// Props
+const props = defineProps({
+  materia: {
+    type: Object,
+    required: true
+  }
 })
 
-// Esta función será reemplazada luego por lógica de backend (API)
+const emit = defineEmits(['cerrar', 'guardado'])
 
+const formulario = ref({
+  nombre_materia: ''
+})
+
+const error = ref(null)
+
+// Inicializar datos al montar
+onMounted(() => {
+  if (!props.materia || !props.materia.id_materia) {
+    error.value = 'ID de materia no válido.'
+    return
+  }
+
+  formulario.value = {
+    nombre_materia: props.materia.nombre_materia
+  }
+})
+
+// Función para actualizar
+const actualizarMateria = async () => {
+  error.value = null
+
+  try {
+    await axios.put(`/api/materias/${props.materia.id_materia}`, {
+      ...formulario.value,
+      modified_by: 'frontend'
+    })
+
+    emit('guardado')
+    emit('cerrar')
+  } catch (err) {
+    console.error(err)
+    if (err.response?.data?.errors) {
+      const errores = Object.values(err.response.data.errors).flat()
+      error.value = errores.join(', ')
+    } else {
+      error.value = 'Error al actualizar la materia.'
+    }
+  }
+}
 </script>
 
-<!-- Estilos específicos del formulario de registro -->
 <style src="@/../css/EditarDatos.css"></style>

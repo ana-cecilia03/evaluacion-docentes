@@ -8,10 +8,12 @@ class Materia extends Model
 {
     protected $table = 'materias';
     protected $primaryKey = 'id_materia';
-    public $timestamps = true;
 
-    public function periodos()
-    {
-        return $this->hasMany(MatPerCarr::class, 'id_materia');
-    }
+    protected $fillable = [
+        'nombre_materia',
+        'created_by',
+        'modified_by',
+    ];
+
+    public $timestamps = true; 
 }

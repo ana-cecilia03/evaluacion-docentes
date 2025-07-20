@@ -9,6 +9,8 @@ use App\Http\Controllers\Admin\CarreraController;
 use App\Http\Controllers\Admin\AlumnoController;
 use App\Http\Controllers\Admin\ProfesorController;
 use App\Http\Controllers\Admin\GrupoController;
+use App\Http\Controllers\Admin\MateriaController;
+
 
 /*
 |--------------------------------------------------------------------------
@@ -55,3 +57,12 @@ Route::get('/grupos', [GrupoController::class, 'index']);
 Route::post('/grupos', [GrupoController::class, 'store']);
 Route::put('/grupos/{id}', [GrupoController::class, 'update']);
 Route::post('/grupos/csv', [GrupoController::class, 'importarDesdeCSV']);
+
+#REGISTROS de vista Materias
+
+Route::prefix('materias')->group(function () {
+    Route::get('/', [MateriaController::class, 'index']);
+    Route::post('/', [MateriaController::class, 'store']);
+    Route::put('/{id}', [MateriaController::class, 'update']);
+    Route::post('/csv', [MateriaController::class, 'importarDesdeCSV']);
+});

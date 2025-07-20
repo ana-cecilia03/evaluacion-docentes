@@ -3,12 +3,12 @@
   <div class="modal-csv">
     <div class="modal-content">
       <div class="csv-container">
-        <h1>Cargar Asignaturas por CSV</h1>
+        <h1>Cargar Materias por CSV</h1>
 
         <!-- Área de carga de archivo -->
         <div class="csv-upload">
           <input type="file" accept=".csv" @change="handleFileUpload" />
-          <p>Formato: <strong>nombre, departamento, semestre, duracion_semanas</strong></p>
+          <p>Formato: <strong>nombre_materia</strong></p>
         </div>
 
         <!-- Botones para cancelar o confirmar carga -->
@@ -23,25 +23,46 @@
 
 <script setup>
 import { ref } from 'vue'
+import axios from 'axios'
 
-// Archivo CSV seleccionado
+const emit = defineEmits(['cerrar', 'guardado'])
+
 const file = ref(null)
 
-// Captura el archivo cargado
+// Captura el archivo seleccionado
 const handleFileUpload = (event) => {
   file.value = event.target.files[0]
 }
 
-// Acción al presionar "Cargar CSV"
-const cargarCSV = () => {
+// Enviar archivo al backend
+const cargarCSV = async () => {
   if (!file.value) {
     alert('Por favor, selecciona un archivo CSV.')
     return
   }
 
-  // Aquí se integrará el envío al backend en el futuro
-  console.log('Archivo seleccionado:', file.value)
-  alert('Archivo de asignaturas cargado correctamente')
+  const formData = new FormData()
+  formData.append('archivo', file.value)
+
+  try {
+    const response = await axios.post('/api/materias/csv', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
+    })
+
+    alert(response.data.message || 'Materias cargadas correctamente.')
+    emit('guardado')
+    emit('cerrar')
+  } catch (error) {
+    console.error(error)
+    if (error.response?.data?.errores) {
+      const mensajes = error.response.data.errores.map(e => `Línea ${e.linea}: ${e.errores.join(', ')}`)
+      alert(mensajes.join('\n'))
+    } else {
+      alert('Error al cargar las materias.')
+    }
+  }
 }
 </script>
 
