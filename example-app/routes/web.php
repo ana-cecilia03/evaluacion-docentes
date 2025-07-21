@@ -77,3 +77,40 @@ Route::get('/registro/grupo', function () {
 Route::get('/registro/profesores', function () {
     return Inertia::render('Admin/ProfesoresRegistro');
 })->name('registro.profesores');
+
+
+###########################################
+#
+Route::get('/reportes/profesores', function () {
+    return Inertia::render('Admin/ReportesProfesores');
+})->name('reporte.profesores');
+
+#
+Route::get('/encuesta', function () {
+    return Inertia::render('Admin/Evaluacion');
+})->name('evaluacion.alumnos');
+
+#
+Route::get('/reportes/materias', function () {
+    return Inertia::render('Admin/ReportesMaterias');
+})->name('reporte.materias');
+
+#
+Route::get('/reporte/grupos', function () {
+    return Inertia::render('Admin/ReportesGrupos');
+})->name('reporte.grupos');
+
+#
+Route::get('/relacion/alumno-profesor', function () {
+    return Inertia::render('Admin/AlumnoProfesor');
+})->name('relacion.alumnoprofesor');
+
+#
+Route::get('/relacion/meteria-periodo-carrera', function () {
+    return Inertia::render('Admin/MateriaPeriodoCarrera');
+})->name('relacion.materia-periodo-carrera');
+
+#
+Route::get('/estadisticas', function () {
+    return Inertia::render('Admin/Estadisticas');
+})->name('admin.estadisticas');

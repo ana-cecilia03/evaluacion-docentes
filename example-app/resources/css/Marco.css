@@ -14,6 +14,7 @@
 }
 
 /* ENCABEZADO AZUL */
+/* Encabezado Azul - Fijo solo en pantallas grandes */
 .header-admin {
   background-color: rgba(98, 142, 203, 0.8); /* Fondo azul semitransparente */
   display: flex;
@@ -22,7 +23,28 @@
   padding: 10px 15px;
   backdrop-filter: blur(10px); /* Desenfoque en el fondo del encabezado */
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); /* Sombra sutil para darle profundidad */
+  
+  /* Aquí se agrega la posición fija para pantallas grandes */
+  position: sticky;  /* Cambié fixed por sticky */
+  top: 0; /* Fija el encabezado en la parte superior */
+  z-index: 100; /* Asegura que el encabezado esté por encima de otros elementos */
 }
+
+/* RESPONSIVE - Para pantallas más pequeñas */
+@media (max-width: 768px) {
+  .header-admin {
+    position: relative; /* El encabezado será relativo en pantallas pequeñas */
+    padding-top: 10px;
+    top: initial; /* Remueve el valor 'top' que se mantiene fijo en pantallas grandes */
+  }
+  .menu-lateral {
+    top: 0; /* Ocupa desde arriba (encabezado) */
+    height: 100vh; /* Todo el alto visible */
+    transform: translateX(-100%);
+    z-index: 1000;
+  }
+}
+
 
 .logo {
   height: 70px;

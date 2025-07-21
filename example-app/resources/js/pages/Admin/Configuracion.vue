@@ -1,14 +1,11 @@
 <template>
   <Menu>
-    <div class="contenido-principal">
+    <div class="contenido-periodo">
       <h1 class="titulo">Configuración</h1>
 
       <div class="config-box">
         <label>Nombre:</label>
         <input type="text" placeholder="Nombre" />
-
-        <label>Apellido:</label>
-        <input type="text" placeholder="Apellido" />
 
         <label>Correo electrónico:</label>
         <input type="email" placeholder="correo@electronico.com" />
