@@ -176,3 +176,23 @@ th {
     width: 100%;
   }
 }
+.btn-grupal {
+  background-color: #4a90e2;
+  color: #fff;
+  padding: 8px 16px;
+  margin-left: 10px;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.btn-grupal:hover {
+  background-color: #357ac9;
+}
+
+.btn-grupal:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}

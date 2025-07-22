@@ -20,8 +20,7 @@ class AlumnoController extends Controller
     }
 
     /**
-     * Registra manualmente un nuevo alumno (vía formulario).
-     * Valida datos y encripta la contraseña antes de guardar.
+     * Registra manualmente un nuevo alumno.
      */
     public function store(Request $request)
     {
@@ -39,7 +38,7 @@ class AlumnoController extends Controller
             'matricula' => $request->matricula,
             'nombre_completo' => $request->nombre_completo,
             'correo' => $request->correo,
-            'password' => Hash::make($request->password), // Encripta contraseña
+            'password' => Hash::make($request->password),
             'rol' => $request->rol ?? 'alumno',
             'curp' => $request->curp,
             'grupo' => $request->grupo,
@@ -55,8 +54,7 @@ class AlumnoController extends Controller
     }
 
     /**
-     *  Actualiza los datos de un alumno existente.
-     * Usa validación con excepciones para evitar errores con valores únicos repetidos.
+     * Actualiza los datos de un alumno existente.
      */
     public function update(Request $request, $id)
     {
@@ -89,7 +87,6 @@ class AlumnoController extends Controller
 
     /**
      * Carga masiva de alumnos desde archivo CSV.
-     * Valida cada fila y reporta errores detallados por línea si los hay.
      */
     public function importarDesdeCSV(Request $request)
     {
@@ -98,18 +95,17 @@ class AlumnoController extends Controller
         ]);
 
         $file = $request->file('archivo');
-        $data = array_map('str_getcsv', file($file)); // Parsea el CSV en array
+        $data = array_map('str_getcsv', file($file));
         $header = array_map('trim', $data[0]);
-        unset($data[0]); // Remueve la cabecera
+        unset($data[0]);
 
         $errores = [];
         $importados = 0;
 
         foreach ($data as $index => $fila) {
-            // Valida que la fila tenga la misma cantidad de columnas que el encabezado
             if (count($fila) !== count($header)) {
                 $errores[] = [
-                    'linea' => $index + 2, // +2 porque se omite cabecera y se empieza en línea 1
+                    'linea' => $index + 2,
                     'errores' => ['Cantidad de columnas inválida.']
                 ];
                 continue;
@@ -138,7 +134,7 @@ class AlumnoController extends Controller
                 'matricula' => $fila['matricula'],
                 'nombre_completo' => $fila['nombre_completo'],
                 'correo' => $fila['correo'],
-                'password' => Hash::make($fila['matricula']), // Se usa matrícula como contraseña inicial
+                'password' => Hash::make($fila['matricula']),
                 'rol' => 'alumno',
                 'curp' => $fila['curp'],
                 'grupo' => $fila['grupo'] ?? null,
@@ -163,5 +159,26 @@ class AlumnoController extends Controller
             'insertados' => $importados
         ], 201);
     }
-}
 
+    /**
+     * Desactiva múltiples alumnos por sus IDs.
+     */
+    public function desactivarVarios(Request $request)
+    {
+        $request->validate([
+            'ids' => 'required|array',
+            'ids.*' => 'integer|exists:alumnos,id_alumno'
+        ]);
+
+        Alumno::whereIn('id_alumno', $request->ids)
+            ->update([
+                'status' => 'inactivo',
+                'modified_by' => 'frontend',
+                'updated_at' => now(),
+            ]);
+
+        return response()->json([
+            'message' => 'Alumnos desactivados correctamente.'
+        ]);
+    }
+}

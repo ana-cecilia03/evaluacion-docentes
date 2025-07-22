@@ -11,6 +11,15 @@
         </select>
         <button class="btn-register" @click="mostrarFormulario = true">Registrar Alumno Manual</button>
         <button class="btn-upload" @click="mostrarCSV = true">Cargar CSV</button>
+
+        <!-- Botón para desactivar múltiples alumnos -->
+        <button
+          class="btn-grupal"
+          :disabled="alumnosSeleccionados.length === 0"
+          @click="realizarAccionGrupal"
+        >
+          DESACTIVAR ({{ alumnosSeleccionados.length }})
+        </button>
       </div>
 
       <!-- Modal: Registro Manual -->
@@ -43,6 +52,13 @@
         <table>
           <thead>
             <tr>
+              <th>
+                <input
+                  type="checkbox"
+                  @change="toggleSeleccionarTodos"
+                  :checked="todosSeleccionados"
+                />
+              </th>
               <th>Matrícula</th>
               <th>Nombre</th>
               <th>Curp</th>
@@ -52,7 +68,18 @@
             </tr>
           </thead>
           <tbody>
-            <tr v-for="alumno in alumnosFiltrados" :key="alumno.id_alumno">
+            <tr
+              v-for="alumno in alumnosFiltrados"
+              :key="alumno.id_alumno"
+              :class="{ 'fila-inactiva': alumno.status === 'inactivo' }"
+            >
+              <td>
+                <input
+                  type="checkbox"
+                  :value="alumno.id_alumno"
+                  v-model="alumnosSeleccionados"
+                />
+              </td>
               <td>{{ alumno.matricula }}</td>
               <td>{{ alumno.nombre_completo }}</td>
               <td>{{ alumno.curp }}</td>
@@ -77,16 +104,18 @@ import AlumnosManual from '@/components/AlumnosManual.vue'
 import CsvAlumnos from '@/components/CsvAlumnos.vue'
 import EditarAlumno from '@/components/EditarAlumno.vue'
 
-// Modales y datos
+// Estados reactivos
 const mostrarFormulario = ref(false)
 const mostrarCSV = ref(false)
 const editarDatos = ref(false)
 
 const alumnos = ref([])
 const alumnoSeleccionado = ref(null)
+const alumnosSeleccionados = ref([])
+
 const busqueda = ref('')
 
-// Función para cargar desde backend
+// Cargar alumnos desde el backend
 const cargarAlumnos = async () => {
   try {
     const response = await axios.get('/api/alumnos')
@@ -96,7 +125,7 @@ const cargarAlumnos = async () => {
   }
 }
 
-// Buscar alumnos
+// Filtrar alumnos por búsqueda
 const alumnosFiltrados = computed(() => {
   if (!busqueda.value.trim()) return alumnos.value
   return alumnos.value.filter(a =>
@@ -106,13 +135,48 @@ const alumnosFiltrados = computed(() => {
   )
 })
 
-// Abrir edición
+// Verificar si todos los alumnos están seleccionados
+const todosSeleccionados = computed(() =>
+  alumnosFiltrados.value.length > 0 &&
+  alumnosFiltrados.value.every(a => alumnosSeleccionados.value.includes(a.id_alumno))
+)
+
+// Alternar selección de todos
+const toggleSeleccionarTodos = () => {
+  if (todosSeleccionados.value) {
+    alumnosSeleccionados.value = alumnosSeleccionados.value.filter(
+      id => !alumnosFiltrados.value.some(a => a.id_alumno === id)
+    )
+  } else {
+    const nuevos = alumnosFiltrados.value.map(a => a.id_alumno)
+    alumnosSeleccionados.value = Array.from(new Set([...alumnosSeleccionados.value, ...nuevos]))
+  }
+}
+
+// Abrir formulario de edición
 const abrirEdicion = (alumno) => {
   alumnoSeleccionado.value = alumno
   editarDatos.value = true
 }
 
-// Inicializar datos al montar
+// Acción grupal: desactivar seleccionados
+const realizarAccionGrupal = async () => {
+  if (alumnosSeleccionados.value.length === 0) return
+
+  try {
+    const response = await axios.post('/api/alumnos/desactivar', {
+      ids: alumnosSeleccionados.value
+    })
+    alert(response.data.message || 'Alumnos desactivados correctamente.')
+    alumnosSeleccionados.value = []
+    await cargarAlumnos()
+  } catch (error) {
+    console.error(error)
+    alert('Error al desactivar los alumnos.')
+  }
+}
+
+// Al cargar el componente
 onMounted(() => {
   cargarAlumnos()
 })

@@ -38,13 +38,19 @@ Route::get('/carreras', [CarreraController::class, 'index']);
 Route::post('/carreras', [CarreraController::class, 'store']);
 Route::put('/carreras/{id}', [CarreraController::class, 'update']);
 
-#REGISTROS vista de alumnos
+
+
+# REGISTROS vista de alumnos
 Route::get('/alumnos', [AlumnoController::class, 'index']);
 Route::post('/alumnos', [AlumnoController::class, 'store']);
 Route::post('/alumnos/csv', [AlumnoController::class, 'importarDesdeCSV']);
 Route::put('/alumnos/{id}', [AlumnoController::class, 'update']);
 Route::delete('/alumnos/{id}', [AlumnoController::class, 'destroy']);
 
+# NUEVA ruta para desactivar varios alumnos
+Route::post('/alumnos/desactivar', [AlumnoController::class, 'desactivarVarios']);
+
+#----------
 #REGISTROS vista de profesores
 
 Route::get('/profesores', [ProfesorController::class, 'index']);
