@@ -11,13 +11,18 @@ use Illuminate\Support\Facades\Validator;
 
 class AlumnoController extends Controller
 {
-    // Listado de alumnos
+    /**
+     * Devuelve la lista de alumnos ordenados por ID descendente.
+     */
     public function index()
     {
         return Alumno::orderBy('id_alumno', 'desc')->get();
     }
 
-    // Registro manual de alumno
+    /**
+     * Registra manualmente un nuevo alumno (vía formulario).
+     * Valida datos y encripta la contraseña antes de guardar.
+     */
     public function store(Request $request)
     {
         $request->validate([
@@ -34,7 +39,7 @@ class AlumnoController extends Controller
             'matricula' => $request->matricula,
             'nombre_completo' => $request->nombre_completo,
             'correo' => $request->correo,
-            'password' => Hash::make($request->password),
+            'password' => Hash::make($request->password), // Encripta contraseña
             'rol' => $request->rol ?? 'alumno',
             'curp' => $request->curp,
             'grupo' => $request->grupo,
@@ -49,7 +54,10 @@ class AlumnoController extends Controller
         ], 201);
     }
 
-    // Actualizar datos de un alumno
+    /**
+     *  Actualiza los datos de un alumno existente.
+     * Usa validación con excepciones para evitar errores con valores únicos repetidos.
+     */
     public function update(Request $request, $id)
     {
         $alumno = Alumno::findOrFail($id);
@@ -79,7 +87,10 @@ class AlumnoController extends Controller
         ]);
     }
 
-    // Carga masiva desde archivo CSV
+    /**
+     * Carga masiva de alumnos desde archivo CSV.
+     * Valida cada fila y reporta errores detallados por línea si los hay.
+     */
     public function importarDesdeCSV(Request $request)
     {
         $request->validate([
@@ -87,17 +98,18 @@ class AlumnoController extends Controller
         ]);
 
         $file = $request->file('archivo');
-        $data = array_map('str_getcsv', file($file));
+        $data = array_map('str_getcsv', file($file)); // Parsea el CSV en array
         $header = array_map('trim', $data[0]);
-        unset($data[0]);
+        unset($data[0]); // Remueve la cabecera
 
         $errores = [];
         $importados = 0;
 
         foreach ($data as $index => $fila) {
+            // Valida que la fila tenga la misma cantidad de columnas que el encabezado
             if (count($fila) !== count($header)) {
                 $errores[] = [
-                    'linea' => $index + 2,
+                    'linea' => $index + 2, // +2 porque se omite cabecera y se empieza en línea 1
                     'errores' => ['Cantidad de columnas inválida.']
                 ];
                 continue;
@@ -126,7 +138,7 @@ class AlumnoController extends Controller
                 'matricula' => $fila['matricula'],
                 'nombre_completo' => $fila['nombre_completo'],
                 'correo' => $fila['correo'],
-                'password' => Hash::make($fila['matricula']),
+                'password' => Hash::make($fila['matricula']), // Se usa matrícula como contraseña inicial
                 'rol' => 'alumno',
                 'curp' => $fila['curp'],
                 'grupo' => $fila['grupo'] ?? null,
@@ -152,3 +164,4 @@ class AlumnoController extends Controller
         ], 201);
     }
 }
+
