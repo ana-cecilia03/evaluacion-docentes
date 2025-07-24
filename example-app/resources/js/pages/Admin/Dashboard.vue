@@ -7,7 +7,7 @@
         <form class="formulario-periodo" @submit.prevent="crearPeriodo">
           <div class="campo-formulario">
             <label for="numero">Número:</label>
-            <input type="number" id="numero" v-model="form.numero" required />
+            <input type="number" id="numero" v-model="form.num_periodo" required />
           </div>
 
           <div class="campo-formulario">
@@ -52,7 +52,7 @@ import axios from 'axios'
 
 // Datos del formulario
 const form = ref({
-  numero: '',
+  num_periodo: '',
   nombre: '',
   inicio: '',
   fin: ''
@@ -65,7 +65,7 @@ const error = ref('')
 const crearPeriodo = async () => {
   try {
     const response = await axios.post('/api/periodos', {
-      numero: form.value.numero,
+      num_periodo: form.value.num_periodo,
       nombre_periodo: form.value.nombre,
       fecha_inicio: form.value.inicio,
       fecha_fin: form.value.fin,
@@ -81,7 +81,7 @@ const crearPeriodo = async () => {
 
 // Cancelar formulario
 function cancelar() {
-  form.value = { numero: '', nombre: '', inicio: '', fin: '' }
+  form.value = { num_periodo: '', nombre: '', inicio: '', fin: '' }
 }
 </script>
 
