@@ -1,60 +1,62 @@
 <template>
   <Menu>
     <main class="contenido-principal">
-      <!-- Barra de acciones: búsqueda, filtro por materia, botones -->
+      <!-- Barra de acciones -->
       <div class="actions">
-        <input type="text" placeholder="Buscar por nombre o ID" />
-        <select>
+        <input type="text" placeholder="Buscar por nombre o matrícula" v-model="busqueda" />
+        <select v-model="filtroEstado">
           <option value="">Estado</option>
-          <option>Activo</option>
-          <option>Inactivo</option>
+          <option value="activo">Activo</option>
+          <option value="inactivo">Inactivo</option>
         </select>
         <button class="btn-register" @click="mostrarFormulario = true">Registrar Profesor Manual</button>
         <button class="btn-upload" @click="mostrarCSV = true">Cargar CSV</button>
       </div>
 
-      <!-- Modal para formulario manual -->
+      <!-- Modal: Registro Manual -->
       <div v-if="mostrarFormulario" class="modal-overlay">
         <div class="modal-content">
           <ProfesoresManual @cerrar="mostrarFormulario = false" @guardado="obtenerProfesores" />
         </div>
       </div>
 
-      <!-- Modal para carga CSV -->
+      <!-- Modal: Carga CSV -->
       <div v-if="mostrarCSV" class="modal-csv">
         <div class="modal-content">
           <CsvProfesores @cerrar="mostrarCSV = false" @guardado="obtenerProfesores" />
         </div>
       </div>
 
-      <!-- Modal para actualizar -->
+      <!-- Modal: Edición -->
       <div v-if="editarProfesores" class="modal-csv">
         <div class="modal-content">
           <EditarProfesores
             :profesor="profesorSeleccionado"
             @cerrar="editarProfesores = false"
-            @actualizado="() => { editarProfesores = false; obtenerProfesores() }"
+            @actualizado="() => { editarProfesores.value = false; obtenerProfesores() }"
           />
         </div>
       </div>
 
-      <!-- Tabla con profesores cargados desde la BD -->
+      <!-- Tabla con profesores -->
       <div class="table-wrapper">
         <table>
           <thead>
             <tr>
               <th>Matrícula</th>
               <th>Nombre</th>
-              <th>Curp</th>
               <th>Estado</th>
               <th>Acciones</th>
             </tr>
           </thead>
           <tbody>
-            <tr v-for="profesor in profesores" :key="profesor.id_profesor">
+            <tr
+              v-for="profesor in profesoresFiltrados"
+              :key="profesor.id_profesor"
+              :class="{ 'fila-inactiva': profesor.status === 'inactivo' }"
+            >
               <td>{{ profesor.matricula }}</td>
               <td>{{ profesor.nombre_completo }}</td>
-              <td>{{ profesor.curp }}</td>
               <td>{{ profesor.status }}</td>
               <td>
                 <button class="btn-edit" @click="editar(profesor)">Editar</button>
@@ -68,25 +70,24 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import axios from 'axios'
 
-// Layout y componentes modales
 import Menu from '@/layouts/Menu.vue'
 import ProfesoresManual from '@/components/ProfesoresManual.vue'
 import CsvProfesores from '@/components/CsvProfesores.vue'
 import EditarProfesores from '@/components/EditarProfesores.vue'
 
-// Estados de modales
 const mostrarFormulario = ref(false)
 const mostrarCSV = ref(false)
 const editarProfesores = ref(false)
 
-// Lista de profesores y seleccionado para editar
 const profesores = ref([])
 const profesorSeleccionado = ref(null)
 
-// Obtener todos los profesores desde la API
+const busqueda = ref('')
+const filtroEstado = ref('')
+
 const obtenerProfesores = async () => {
   try {
     const response = await axios.get('/api/profesores')
@@ -96,13 +97,21 @@ const obtenerProfesores = async () => {
   }
 }
 
-// Función para iniciar edición
+const profesoresFiltrados = computed(() => {
+  return profesores.value.filter(p => {
+    const coincideBusqueda =
+      p.nombre_completo.toLowerCase().includes(busqueda.value.toLowerCase()) ||
+      p.matricula.toLowerCase().includes(busqueda.value.toLowerCase())
+    const coincideEstado = !filtroEstado.value || p.status === filtroEstado.value
+    return coincideBusqueda && coincideEstado
+  })
+})
+
 const editar = (profesor) => {
   profesorSeleccionado.value = { ...profesor }
   editarProfesores.value = true
 }
 
-// Al montar el componente, cargar profesores
 onMounted(obtenerProfesores)
 </script>
 

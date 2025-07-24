@@ -10,19 +10,24 @@
             <!-- Nombre completo -->
             <div class="form-group">
               <label for="nombre_completo">Nombre completo</label>
-              <input type="text" id="nombre_completo" v-model="form.nombre_completo" placeholder="Ej. Laura Martínez" />
+              <input
+                type="text"
+                id="nombre_completo"
+                v-model="form.nombre_completo"
+                placeholder="Ej. Laura Martínez"
+              />
             </div>
 
             <!-- Matrícula -->
             <div class="form-group">
               <label for="matricula">Matrícula</label>
-              <input type="text" id="matricula" v-model="form.matricula" placeholder="Ej. 13122593103" maxlength="11" />
-            </div>
-
-            <!-- CURP -->
-            <div class="form-group">
-              <label for="curp">CURP</label>
-              <input type="text" id="curp" v-model="form.curp" placeholder="MDFI32URAS9RMVS7" maxlength="18" />
+              <input
+                type="text"
+                id="matricula"
+                v-model="form.matricula"
+                placeholder="Ej. 13122593103"
+                maxlength="11"
+              />
             </div>
           </div>
 
@@ -31,13 +36,23 @@
             <!-- Correo -->
             <div class="form-group">
               <label for="correo">Correo electrónico</label>
-              <input type="email" id="correo" v-model="form.correo" placeholder="Ej. profesor@ejemplo.com" />
+              <input
+                type="email"
+                id="correo"
+                v-model="form.correo"
+                placeholder="Ej. profesor@ejemplo.com"
+              />
             </div>
 
             <!-- Contraseña -->
             <div class="form-group">
               <label for="password">Contraseña</label>
-              <input type="password" id="password" v-model="form.password" placeholder="********" />
+              <input
+                type="password"
+                id="password"
+                v-model="form.password"
+                placeholder="********"
+              />
             </div>
 
             <!-- Estado -->
@@ -58,6 +73,7 @@
           </div>
         </form>
 
+        <!-- Mensaje de error -->
         <div v-if="error" class="error-message">
           {{ error }}
         </div>
@@ -69,13 +85,13 @@
 <script setup>
 import { ref } from 'vue'
 import axios from 'axios'
+
 const emit = defineEmits(['cerrar', 'guardado'])
 
 const form = ref({
   matricula: '',
   nombre_completo: '',
   correo: '',
-  curp: '',
   password: '',
   status: ''
 })

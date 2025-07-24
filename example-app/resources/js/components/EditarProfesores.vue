@@ -24,10 +24,14 @@
             <input type="email" id="correo" v-model="form.correo" placeholder="Ej. profesor@ejemplo.com" />
           </div>
 
-          <!-- Campo: CURP -->
+          <!-- Campo: Cargo -->
           <div class="form-group">
-            <label for="curp">CURP</label>
-            <input type="text" id="curp" v-model="form.curp" placeholder="MDFI32URAS9RMVS7" />
+            <label for="cargo">Cargo</label>
+            <select id="cargo" v-model="form.cargo">
+              <option value="">Seleccione</option>
+              <option value="PA">PA</option>
+              <option value="PTC">PTC</option>
+            </select>
           </div>
 
           <!-- Campo: Estado -->
@@ -73,17 +77,25 @@ const emit = defineEmits(['cerrar', 'actualizado'])
 
 // Formulario editable
 const form = ref({
+  id_profesor: null,
   matricula: '',
   nombre_completo: '',
   correo: '',
-  curp: '',
+  cargo: '',
   status: ''
 })
 
 // Cargar datos iniciales cuando cambia la prop
 watch(() => props.profesor, (nuevo) => {
-  if (nuevo) {
-    form.value = { ...nuevo }
+  if (nuevo && typeof nuevo === 'object') {
+    form.value = {
+      id_profesor: nuevo.id_profesor ?? null,
+      matricula: nuevo.matricula ?? '',
+      nombre_completo: nuevo.nombre_completo ?? '',
+      correo: nuevo.correo ?? '',
+      cargo: nuevo.cargo ?? '',
+      status: nuevo.status ?? ''
+    }
   }
 }, { immediate: true })
 
@@ -98,7 +110,7 @@ const actualizarProfesor = async () => {
       matricula: form.value.matricula,
       nombre_completo: form.value.nombre_completo,
       correo: form.value.correo,
-      curp: form.value.curp,
+      cargo: form.value.cargo,
       status: form.value.status,
       modified_by: 'frontend'
     })

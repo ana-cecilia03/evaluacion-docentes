@@ -11,18 +11,13 @@ use Illuminate\Validation\Rule;
 
 class ProfesorController extends Controller
 {
-    /**
-     *  Mostrar todos los profesores registrados, ordenados por el ID descendente.
-     */
+    // Listar profesores
     public function index()
     {
         return Profesor::orderBy('id_profesor', 'desc')->get();
     }
 
-    /**
-     * Registrar manualmente un nuevo profesor desde formulario.
-     * Valida campos requeridos y encripta la contraseña antes de guardar.
-     */
+    // Registrar nuevo profesor
     public function store(Request $request)
     {
         $request->validate([
@@ -30,18 +25,18 @@ class ProfesorController extends Controller
             'nombre_completo' => 'required|string|max:100',
             'correo' => 'required|email|unique:profesores',
             'password' => 'required|string|min:6',
-            'curp' => 'required|unique:profesores|size:18',
-            'status' => 'in:activo,inactivo',
+            'cargo' => 'required|in:PTC,PA',
+            'status' => 'required|in:activo,inactivo',
         ]);
 
         $profesor = Profesor::create([
             'matricula' => $request->matricula,
             'nombre_completo' => $request->nombre_completo,
             'correo' => $request->correo,
-            'password' => Hash::make($request->password), // 🔐 Se encripta la contraseña
+            'password' => Hash::make($request->password),
             'rol' => $request->rol ?? 'profesor',
-            'curp' => $request->curp,
-            'status' => $request->status ?? 'activo',
+            'cargo' => $request->cargo,
+            'status' => $request->status,
             'created_by' => 'frontend',
             'modified_by' => 'frontend',
         ]);
@@ -52,10 +47,7 @@ class ProfesorController extends Controller
         ], 201);
     }
 
-    /**
-     * Actualizar los datos de un profesor existente.
-     * Usa validación condicional para permitir mantener valores únicos (como email o curp).
-     */
+    // Actualizar profesor
     public function update(Request $request, $id)
     {
         $profesor = Profesor::findOrFail($id);
@@ -64,16 +56,23 @@ class ProfesorController extends Controller
             'matricula' => ['required', 'size:11', Rule::unique('profesores')->ignore($profesor->id_profesor, 'id_profesor')],
             'nombre_completo' => 'required|string|max:100',
             'correo' => ['required', 'email', Rule::unique('profesores')->ignore($profesor->id_profesor, 'id_profesor')],
-            'curp' => ['required', 'size:18', Rule::unique('profesores')->ignore($profesor->id_profesor, 'id_profesor')],
-            'status' => 'in:activo,inactivo',
+            'password' => 'nullable|string|min:6',
+            'cargo' => 'required|in:PTC,PA',
+            'status' => 'required|in:activo,inactivo',
         ]);
+
+        // Si viene nueva contraseña, la encriptamos
+        $profesor->password = $request->filled('password')
+            ? Hash::make($request->password)
+            : $profesor->password;
 
         $profesor->update([
             'matricula' => $request->matricula,
             'nombre_completo' => $request->nombre_completo,
             'correo' => $request->correo,
-            'curp' => $request->curp,
+            'cargo' => $request->cargo,
             'status' => $request->status,
+            'password' => $profesor->password,
             'modified_by' => 'frontend',
         ]);
 
@@ -83,10 +82,7 @@ class ProfesorController extends Controller
         ]);
     }
 
-    /**
-     * Carga masiva de profesores desde un archivo CSV.
-     * Cada fila es validada individualmente. Se reportan errores por línea si ocurren.
-     */
+    // Importar desde CSV
     public function importarDesdeCSV(Request $request)
     {
         $request->validate([
@@ -96,13 +92,12 @@ class ProfesorController extends Controller
         $file = $request->file('archivo');
         $data = array_map('str_getcsv', file($file));
         $header = array_map('trim', $data[0]);
-        unset($data[0]); // Se elimina la cabecera
+        unset($data[0]);
 
         $errores = [];
         $importados = 0;
 
         foreach ($data as $index => $fila) {
-            // Validación: cantidad de columnas debe coincidir con encabezado
             if (count($fila) !== count($header)) {
                 $errores[] = [
                     'linea' => $index + 2,
@@ -118,7 +113,7 @@ class ProfesorController extends Controller
                 'nombre_completo' => 'required|string|max:100',
                 'correo' => 'required|email|unique:profesores,correo',
                 'password' => 'required|string|min:6',
-                'curp' => 'required|unique:profesores,curp|size:18',
+                'cargo' => 'required|in:PTC,PA',
                 'status' => 'nullable|in:activo,inactivo',
             ]);
 
@@ -136,7 +131,7 @@ class ProfesorController extends Controller
                 'correo' => $fila['correo'],
                 'password' => Hash::make($fila['password']),
                 'rol' => 'profesor',
-                'curp' => $fila['curp'],
+                'cargo' => $fila['cargo'],
                 'status' => $fila['status'] ?? 'activo',
                 'created_by' => 'frontend',
                 'modified_by' => 'frontend',
@@ -145,7 +140,6 @@ class ProfesorController extends Controller
             $importados++;
         }
 
-        // Si hubo errores, devolverlos con código 422
         if (count($errores)) {
             return response()->json([
                 'message' => 'Carga completada con errores',
@@ -154,7 +148,6 @@ class ProfesorController extends Controller
             ], 422);
         }
 
-        // Todo correcto
         return response()->json([
             'message' => 'Todos los profesores fueron importados correctamente.',
             'insertados' => $importados
