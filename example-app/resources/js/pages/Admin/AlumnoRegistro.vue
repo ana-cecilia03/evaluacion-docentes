@@ -12,14 +12,12 @@
         <button class="btn-register" @click="mostrarFormulario = true">Registrar Alumno Manual</button>
         <button class="btn-upload" @click="mostrarCSV = true">Cargar CSV</button>
 
-        <!-- Botón para desactivar múltiples alumnos -->
-        <button
-          class="btn-grupal"
-          :disabled="alumnosSeleccionados.length === 0"
-          @click="realizarAccionGrupal"
-        >
-          DESACTIVAR ({{ alumnosSeleccionados.length }})
-        </button>
+        <!-- Botón para desactivar múltiples alumnos, solo visible si hay selección -->
+        <template v-if="alumnosSeleccionados.length > 0">
+          <button class="btn-grupal" @click="realizarAccionGrupal">
+            DESACTIVAR ({{ alumnosSeleccionados.length }})
+          </button>
+        </template>
       </div>
 
       <!-- Modal: Registro Manual -->
@@ -61,7 +59,6 @@
               </th>
               <th>Matrícula</th>
               <th>Nombre</th>
-              <th>Curp</th>
               <th>Grupo</th>
               <th>Estado</th>
               <th>Acciones</th>
@@ -82,7 +79,6 @@
               </td>
               <td>{{ alumno.matricula }}</td>
               <td>{{ alumno.nombre_completo }}</td>
-              <td>{{ alumno.curp }}</td>
               <td>{{ alumno.grupo }}</td>
               <td>{{ alumno.status }}</td>
               <td>
@@ -104,18 +100,19 @@ import AlumnosManual from '@/components/AlumnosManual.vue'
 import CsvAlumnos from '@/components/CsvAlumnos.vue'
 import EditarAlumno from '@/components/EditarAlumno.vue'
 
-// Estados reactivos
+// Estados para los modales
 const mostrarFormulario = ref(false)
 const mostrarCSV = ref(false)
 const editarDatos = ref(false)
 
+// Datos de alumnos
 const alumnos = ref([])
 const alumnoSeleccionado = ref(null)
 const alumnosSeleccionados = ref([])
 
 const busqueda = ref('')
 
-// Cargar alumnos desde el backend
+// Cargar alumnos desde la API
 const cargarAlumnos = async () => {
   try {
     const response = await axios.get('/api/alumnos')
@@ -125,23 +122,22 @@ const cargarAlumnos = async () => {
   }
 }
 
-// Filtrar alumnos por búsqueda
+// Computed para filtrar por búsqueda
 const alumnosFiltrados = computed(() => {
   if (!busqueda.value.trim()) return alumnos.value
   return alumnos.value.filter(a =>
     a.nombre_completo.toLowerCase().includes(busqueda.value.toLowerCase()) ||
-    a.matricula.toLowerCase().includes(busqueda.value.toLowerCase()) ||
-    a.curp.toLowerCase().includes(busqueda.value.toLowerCase())
+    a.matricula.toLowerCase().includes(busqueda.value.toLowerCase())
   )
 })
 
-// Verificar si todos los alumnos están seleccionados
+// Verifica si todos los alumnos están seleccionados
 const todosSeleccionados = computed(() =>
   alumnosFiltrados.value.length > 0 &&
   alumnosFiltrados.value.every(a => alumnosSeleccionados.value.includes(a.id_alumno))
 )
 
-// Alternar selección de todos
+// Seleccionar/deseleccionar todos los alumnos visibles
 const toggleSeleccionarTodos = () => {
   if (todosSeleccionados.value) {
     alumnosSeleccionados.value = alumnosSeleccionados.value.filter(
@@ -153,13 +149,13 @@ const toggleSeleccionarTodos = () => {
   }
 }
 
-// Abrir formulario de edición
+// Editar alumno individual
 const abrirEdicion = (alumno) => {
   alumnoSeleccionado.value = alumno
   editarDatos.value = true
 }
 
-// Acción grupal: desactivar seleccionados
+// Desactivar alumnos seleccionados
 const realizarAccionGrupal = async () => {
   if (alumnosSeleccionados.value.length === 0) return
 
@@ -176,7 +172,7 @@ const realizarAccionGrupal = async () => {
   }
 }
 
-// Al cargar el componente
+// Ejecutar al montar componente
 onMounted(() => {
   cargarAlumnos()
 })

@@ -18,16 +18,16 @@
             <input type="text" id="matricula" v-model="alumno.matricula" placeholder="Ej. 20230101" />
           </div>
 
-          <!-- Campo: CURP -->
+          <!-- Campo: Contraseña -->
           <div class="form-group">
-            <label for="curp">CURP</label>
-            <input type="text" id="curp" v-model="alumno.curp" placeholder="VG6F6FGDX4YGMSC2" />
+            <label for="password">Contraseña</label>
+            <input type="password" id="password" v-model="alumno.password" placeholder="********" />
           </div>
 
           <!-- Campo: Grupo -->
           <div class="form-group">
-            <label for="grupo">Grupo</label>
-            <input type="text" id="grupo" v-model="alumno.grupo" placeholder="Grupo A" />
+            <label for="grupo">Grupo (número)</label>
+            <input type="number" id="grupo" v-model.number="alumno.grupo" placeholder="Ej. 1" />
           </div>
 
           <!-- Campo: Correo -->
@@ -65,16 +65,15 @@
 <script setup>
 import { ref } from 'vue'
 import axios from 'axios'
-import { defineEmits } from 'vue'
 
 const emit = defineEmits(['cerrar', 'guardado'])
 
 const alumno = ref({
   nombre_completo: '',
   matricula: '',
-  curp: '',
-  grupo: '',
-  correo: '', // nuevo campo
+  password: '',
+  grupo: null,
+  correo: '',
   status: 'activo'
 })
 
@@ -85,7 +84,6 @@ const registrarAlumno = async () => {
   try {
     await axios.post('/api/alumnos', {
       ...alumno.value,
-      password: alumno.value.matricula,
       rol: 'alumno',
       created_by: 'frontend',
       modified_by: 'frontend'
@@ -94,11 +92,7 @@ const registrarAlumno = async () => {
     emit('guardado')
     emit('cerrar')
   } catch (err) {
-    if (err.response?.data?.message) {
-      error.value = err.response.data.message
-    } else {
-      error.value = 'Error al registrar alumno.'
-    }
+    error.value = err.response?.data?.message || 'Error al registrar alumno.'
     console.error('Error al registrar alumno:', err)
   }
 }

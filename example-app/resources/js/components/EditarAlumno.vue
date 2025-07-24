@@ -9,25 +9,56 @@
           <!-- Campo: Nombre completo -->
           <div class="form-group">
             <label for="nombre">Nombre completo</label>
-            <input type="text" id="nombre" v-model="alumnoLocal.nombre_completo" placeholder="Ej. Ana López" />
+            <input
+              type="text"
+              id="nombre"
+              v-model="alumnoLocal.nombre_completo"
+              placeholder="Ej. Ana López"
+            />
           </div>
 
           <!-- Campo: Matrícula -->
           <div class="form-group">
             <label for="matricula">Matrícula</label>
-            <input type="text" id="matricula" v-model="alumnoLocal.matricula" placeholder="Ej. 20230101" />
+            <input
+              type="text"
+              id="matricula"
+              v-model="alumnoLocal.matricula"
+              placeholder="Ej. 20230101"
+            />
           </div>
 
-          <!-- Campo: CURP -->
+          <!-- Campo: Correo -->
           <div class="form-group">
-            <label for="curp">CURP</label>
-            <input type="text" id="curp" v-model="alumnoLocal.curp" placeholder="VG6F6FGDX4YGMSC2" />
+            <label for="correo">Correo electrónico</label>
+            <input
+              type="email"
+              id="correo"
+              v-model="alumnoLocal.correo"
+              placeholder="correo@ejemplo.com"
+            />
+          </div>
+
+          <!-- Campo: Contraseña -->
+          <div class="form-group">
+            <label for="password">Contraseña</label>
+            <input
+              type="password"
+              id="password"
+              v-model="alumnoLocal.password"
+              placeholder="Nueva contraseña o deje vacío para no cambiarla"
+            />
           </div>
 
           <!-- Campo: Grupo -->
           <div class="form-group">
-            <label for="grupo">Grupo</label>
-            <input type="text" id="grupo" v-model="alumnoLocal.grupo" placeholder="Grupo A" />
+            <label for="grupo">Grupo (ID numérico)</label>
+            <input
+              type="number"
+              id="grupo"
+              v-model.number="alumnoLocal.grupo"
+              placeholder="Ej. 1"
+            />
           </div>
 
           <!-- Campo: Estado -->
@@ -70,22 +101,26 @@ const props = defineProps({
   }
 })
 
-// Crear una copia local para edición sin mutar la prop
+// Estado local para edición
 const alumnoLocal = ref({
   id_alumno: null,
   nombre_completo: '',
   matricula: '',
-  curp: '',
-  grupo: '',
+  correo: '',
+  password: '',
+  grupo: null,
   status: ''
 })
 
-// Copiar datos cuando se actualiza la prop
+// Copiar datos de la prop a la copia local al cargarse o actualizarse
 watch(
   () => props.alumno,
   (nuevo) => {
     if (nuevo) {
-      alumnoLocal.value = { ...nuevo }
+      alumnoLocal.value = {
+        ...nuevo,
+        password: '' // no mostramos la contraseña actual por seguridad
+      }
     }
   },
   { immediate: true }
@@ -93,22 +128,31 @@ watch(
 
 const error = ref(null)
 
-// Función para enviar actualización al backend
+// Función para actualizar el alumno
 const actualizarAlumno = async () => {
   error.value = null
+
   try {
-    await axios.put(`/api/alumnos/${alumnoLocal.value.id_alumno}`, {
-      ...alumnoLocal.value,
+    const payload = {
+      nombre_completo: alumnoLocal.value.nombre_completo,
+      matricula: alumnoLocal.value.matricula,
+      correo: alumnoLocal.value.correo,
+      grupo: alumnoLocal.value.grupo,
+      status: alumnoLocal.value.status,
       modified_by: 'frontend'
-    })
-    emit('actualizado') // Recarga la tabla en la vista principal
-    emit('cerrar')      // Cierra el modal
-  } catch (err) {
-    if (err.response?.data?.message) {
-      error.value = err.response.data.message
-    } else {
-      error.value = 'Error al actualizar alumno.'
     }
+
+    // Solo enviamos la nueva contraseña si fue escrita
+    if (alumnoLocal.value.password && alumnoLocal.value.password.trim() !== '') {
+      payload.password = alumnoLocal.value.password
+    }
+
+    await axios.put(`/api/alumnos/${alumnoLocal.value.id_alumno}`, payload)
+
+    emit('actualizado')
+    emit('cerrar')
+  } catch (err) {
+    error.value = err.response?.data?.message || 'Error al actualizar alumno.'
     console.error('Error al actualizar alumno:', err)
   }
 }

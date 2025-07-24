@@ -11,17 +11,11 @@ use Illuminate\Support\Facades\Validator;
 
 class AlumnoController extends Controller
 {
-    /**
-     * Devuelve la lista de alumnos ordenados por ID descendente.
-     */
     public function index()
     {
         return Alumno::orderBy('id_alumno', 'desc')->get();
     }
 
-    /**
-     * Registra manualmente un nuevo alumno.
-     */
     public function store(Request $request)
     {
         $request->validate([
@@ -29,8 +23,7 @@ class AlumnoController extends Controller
             'nombre_completo' => 'required|string|max:100',
             'correo' => 'required|email|unique:alumnos',
             'password' => 'required|string|min:6',
-            'curp' => 'required|unique:alumnos|size:18',
-            'grupo' => 'nullable|string|max:10',
+            'grupo' => 'nullable|integer',
             'status' => 'in:activo,inactivo',
         ]);
 
@@ -40,7 +33,6 @@ class AlumnoController extends Controller
             'correo' => $request->correo,
             'password' => Hash::make($request->password),
             'rol' => $request->rol ?? 'alumno',
-            'curp' => $request->curp,
             'grupo' => $request->grupo,
             'status' => $request->status ?? 'activo',
             'created_by' => 'frontend',
@@ -53,9 +45,6 @@ class AlumnoController extends Controller
         ], 201);
     }
 
-    /**
-     * Actualiza los datos de un alumno existente.
-     */
     public function update(Request $request, $id)
     {
         $alumno = Alumno::findOrFail($id);
@@ -64,8 +53,7 @@ class AlumnoController extends Controller
             'matricula' => ['required', 'size:11', Rule::unique('alumnos')->ignore($alumno->id_alumno, 'id_alumno')],
             'nombre_completo' => 'required|string|max:100',
             'correo' => ['required', 'email', Rule::unique('alumnos')->ignore($alumno->id_alumno, 'id_alumno')],
-            'curp' => ['required', 'size:18', Rule::unique('alumnos')->ignore($alumno->id_alumno, 'id_alumno')],
-            'grupo' => 'nullable|string|max:10',
+            'grupo' => 'nullable|integer',
             'status' => 'in:activo,inactivo',
         ]);
 
@@ -73,7 +61,6 @@ class AlumnoController extends Controller
             'matricula' => $request->matricula,
             'nombre_completo' => $request->nombre_completo,
             'correo' => $request->correo,
-            'curp' => $request->curp,
             'grupo' => $request->grupo,
             'status' => $request->status,
             'modified_by' => 'frontend',
@@ -85,9 +72,6 @@ class AlumnoController extends Controller
         ]);
     }
 
-    /**
-     * Carga masiva de alumnos desde archivo CSV.
-     */
     public function importarDesdeCSV(Request $request)
     {
         $request->validate([
@@ -117,8 +101,7 @@ class AlumnoController extends Controller
                 'matricula' => 'required|unique:alumnos,matricula|size:11',
                 'nombre_completo' => 'required|string|max:100',
                 'correo' => 'required|email|unique:alumnos,correo',
-                'curp' => 'required|unique:alumnos,curp|size:18',
-                'grupo' => 'nullable|string|max:10',
+                'grupo' => 'nullable|integer',
                 'status' => 'in:activo,inactivo',
             ]);
 
@@ -136,7 +119,6 @@ class AlumnoController extends Controller
                 'correo' => $fila['correo'],
                 'password' => Hash::make($fila['matricula']),
                 'rol' => 'alumno',
-                'curp' => $fila['curp'],
                 'grupo' => $fila['grupo'] ?? null,
                 'status' => $fila['status'] ?? 'activo',
                 'created_by' => 'frontend',
@@ -160,9 +142,6 @@ class AlumnoController extends Controller
         ], 201);
     }
 
-    /**
-     * Desactiva múltiples alumnos por sus IDs.
-     */
     public function desactivarVarios(Request $request)
     {
         $request->validate([
