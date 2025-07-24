@@ -32,6 +32,8 @@ Route::post('/admin/login', [LoginProfesor::class, 'login']);
 #Registar Peridos
 Route::post('/periodos', [PeriodoController::class, 'store']);
 Route::get('/periodos', [PeriodoController::class, 'index']);
+Route::put('/periodos/{id}/estado', [PeriodoController::class, 'cambiarEstado']);
+
 
 #REGISTROS vista de carreras
 Route::get('/carreras', [CarreraController::class, 'index']);
