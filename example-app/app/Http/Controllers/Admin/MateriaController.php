@@ -31,11 +31,12 @@ class MateriaController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'nombre_materia' => 'required|string|max:100',
-            'clave' => 'nullable|string|max:50'
+            'clave' => 'required|string|max:15|unique:materias,clave',
+            'nombre_materia' => 'required|string|max:100'
         ]);
 
         $materia = Materia::create([
+            'clave' => $request->clave,
             'nombre_materia' => $request->nombre_materia,
             'created_by' => 'frontend',
             'modified_by' => 'frontend',
@@ -57,10 +58,12 @@ class MateriaController extends Controller
         }
 
         $request->validate([
+            'clave' => 'required|string|max:15|unique:materias,clave,' . $materia->id_materia . ',id_materia',
             'nombre_materia' => 'required|string|max:100'
         ]);
 
         $materia->update([
+            'clave' => $request->clave,
             'nombre_materia' => $request->nombre_materia,
             'modified_by' => 'frontend',
         ]);
@@ -98,6 +101,7 @@ class MateriaController extends Controller
             $fila = array_combine($header, array_map('trim', $fila));
 
             $validator = Validator::make($fila, [
+                'clave' => 'required|string|max:15|unique:materias,clave',
                 'nombre_materia' => 'required|string|max:100',
             ]);
 
@@ -110,6 +114,7 @@ class MateriaController extends Controller
             }
 
             Materia::create([
+                'clave' => $fila['clave'],
                 'nombre_materia' => $fila['nombre_materia'],
                 'created_by' => 'frontend',
                 'modified_by' => 'frontend',

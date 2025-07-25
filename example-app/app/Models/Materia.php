@@ -8,12 +8,12 @@ class Materia extends Model
 {
     protected $table = 'materias';
     protected $primaryKey = 'id_materia';
+    public $timestamps = true;
 
     protected $fillable = [
+        'clave',            // <- Añadido
         'nombre_materia',
         'created_by',
         'modified_by',
     ];
-
-    public $timestamps = true; 
 }

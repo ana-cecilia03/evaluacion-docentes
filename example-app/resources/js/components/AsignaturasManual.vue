@@ -6,6 +6,18 @@
         <h1 class="titulo">Registrar Materia Manualmente</h1>
 
         <form @submit.prevent="registrarAsignatura" class="register-form">
+          <!-- Campo: Clave de la materia -->
+          <div class="form-group">
+            <label for="clave">Clave</label>
+            <input
+              type="text"
+              id="clave"
+              v-model="materia.clave"
+              placeholder="Ej. MAT101"
+              required
+            />
+          </div>
+
           <!-- Campo: Nombre de la materia -->
           <div class="form-group">
             <label for="nombre_materia">Nombre de la Materia</label>
@@ -39,6 +51,7 @@ import axios from 'axios'
 const emit = defineEmits(['cerrar', 'guardado'])
 
 const materia = ref({
+  clave: '',
   nombre_materia: ''
 })
 
@@ -57,7 +70,7 @@ const registrarAsignatura = async () => {
     emit('guardado')
     emit('cerrar')
   } catch (err) {
-    console.error(err)
+    console.error('Error al registrar materia:', err)
     if (err.response?.data?.errors) {
       const errores = Object.values(err.response.data.errors).flat()
       error.value = errores.join(', ')
@@ -68,5 +81,4 @@ const registrarAsignatura = async () => {
 }
 </script>
 
-<!-- Estilos específicos del formulario de registro -->
 <style src="@/../css/RegistroManual.css"></style>

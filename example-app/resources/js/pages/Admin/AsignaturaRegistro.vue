@@ -35,14 +35,14 @@
         <table>
           <thead>
             <tr>
-              <th>ID</th>
+              <th>Clave</th>
               <th>Nombre de la Materia</th>
               <th>Acciones</th>
             </tr>
           </thead>
           <tbody>
             <tr v-for="materia in materiasFiltradas" :key="materia.id_materia">
-              <td>{{ materia.id_materia }}</td>
+              <td>{{ materia.clave }}</td>
               <td>{{ materia.nombre_materia }}</td>
               <td>
                 <button class="btn-edit" @click="abrirEditar(materia)">Editar</button>
@@ -59,11 +59,13 @@
 import { ref, computed, onMounted } from 'vue'
 import axios from 'axios'
 
+// Componentes
 import Menu from '@/layouts/Menu.vue'
 import AsignaturasManual from '@/components/AsignaturasManual.vue'
 import CsvAsignatura from '@/components/CsvAsignatura.vue'
 import EditarAsignaturas from '@/components/EditarAsignaturas.vue'
 
+// Estados
 const mostrarFormulario = ref(false)
 const mostrarCSV = ref(false)
 const editarMateria = ref(false)
@@ -71,6 +73,7 @@ const materiaSeleccionada = ref(null)
 const materias = ref([])
 const busqueda = ref('')
 
+// Cargar materias desde API
 const cargarMaterias = async () => {
   try {
     const response = await axios.get('/api/materias')
@@ -80,21 +83,26 @@ const cargarMaterias = async () => {
   }
 }
 
+// Filtro por nombre o clave
 const materiasFiltradas = computed(() => {
   return materias.value.filter(m =>
-    m.nombre_materia.toLowerCase().includes(busqueda.value.toLowerCase())
+    m.nombre_materia.toLowerCase().includes(busqueda.value.toLowerCase()) ||
+    m.clave.toLowerCase().includes(busqueda.value.toLowerCase())
   )
 })
 
+// Abrir modal de edición
 const abrirEditar = (materia) => {
   materiaSeleccionada.value = { ...materia }
   editarMateria.value = true
 }
 
+// Cerrar modales
 const cerrarFormulario = () => mostrarFormulario.value = false
 const cerrarCSV = () => mostrarCSV.value = false
 const cerrarEditar = () => editarMateria.value = false
 
+// Al montar
 onMounted(() => {
   cargarMaterias()
 })

@@ -6,6 +6,18 @@
         <h1 class="titulo">Actualizar Materia</h1>
 
         <form @submit.prevent="actualizarMateria" class="register-form">
+          <!-- Campo: Clave de la materia -->
+          <div class="form-group">
+            <label for="clave">Clave</label>
+            <input
+              type="text"
+              id="clave"
+              v-model="formulario.clave"
+              placeholder="Ej. MAT101"
+              required
+            />
+          </div>
+
           <!-- Campo: Nombre de la materia -->
           <div class="form-group">
             <label for="nombre_materia">Nombre de la Materia</label>
@@ -47,6 +59,7 @@ const props = defineProps({
 const emit = defineEmits(['cerrar', 'guardado'])
 
 const formulario = ref({
+  clave: '',
   nombre_materia: ''
 })
 
@@ -60,6 +73,7 @@ onMounted(() => {
   }
 
   formulario.value = {
+    clave: props.materia.clave,
     nombre_materia: props.materia.nombre_materia
   }
 })
