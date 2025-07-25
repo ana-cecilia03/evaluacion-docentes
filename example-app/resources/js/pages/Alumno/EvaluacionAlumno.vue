@@ -1,9 +1,11 @@
 <template>
-  <Menu>
+  <MenuAlumno>
     <main class="contenido-principal">
       <!-- Barra superior -->
       <div class="barra-superior">
-        <button type="submit" class="boton-azul">Publicar</button>
+        <div class="rectangulo">Profesor</div>
+        <div class="rectangulo">Materia</div>
+        <div class="rectangulo">Grupo</div>
       </div>
 
       <!-- FORMULARIOS -->
@@ -57,7 +59,10 @@
               </tr>
             </tbody>
           </table>
+        </div>
 
+        <!-- 2. Utilización de Medios Didácticos -->
+        <div v-if="step === 2">
           <h3>3.- Utilización de los Medios Didácticos</h3>
           <table>
             <thead>
@@ -105,7 +110,10 @@
               </tr>
             </tbody>
           </table>
+        </div>
 
+        <!-- 3. Autoevaluación del Alumno -->
+        <div v-if="step === 3">
           <h3>5.- Autoevaluación del Alumno</h3>
           <table>
             <thead>
@@ -138,16 +146,22 @@
 
           <label>¿Consideras necesario realizar algún otro comentario respecto a tu docente?</label>
           <textarea v-model="comentario2" rows="3"></textarea>
+        </div>
 
+        <!-- BOTÓN -->
+        <div class="boton-container">
+          <button type="submit" class="boton-azul">
+            {{ step < 3 ? 'Siguiente' : 'Enviar' }}
+          </button>
         </div>
       </form>
     </main>
-  </Menu>
+  </MenuAlumno>
 </template>
 
 <script setup>
 import { ref } from 'vue'
-import Menu from '@/layouts/Menu.vue'
+import MenuAlumno from '@/layouts/MenuAlumno.vue'
 
 const step = ref(1)
 
@@ -179,7 +193,7 @@ const comentario1 = ref('')
 const comentario2 = ref('')
 
 function handleSubmit() {
-  if (step.value < 1) {
+  if (step.value < 3) {
     step.value++
   } else {
     console.log("Evaluación enviada")

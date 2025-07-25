@@ -101,16 +101,48 @@ Route::get('/reporte/grupos', function () {
 })->name('reporte.grupos');
 
 #
-Route::get('/relacion/alumno-profesor', function () {
-    return Inertia::render('Admin/AlumnoProfesor');
-})->name('relacion.alumnoprofesor');
-
-#
-Route::get('/relacion/meteria-periodo-carrera', function () {
+Route::get('/relacion/materia-periodo-carrera', function () {
     return Inertia::render('Admin/MateriaPeriodoCarrera');
 })->name('relacion.materia-periodo-carrera');
+
+#
+Route::get('/relacion/profesor-materia', function () {
+    return Inertia::render('Admin/ProfeMateria');
+})->name('relacion.profesor-materia');
 
 #
 Route::get('/estadisticas', function () {
     return Inertia::render('Admin/Estadisticas');
 })->name('admin.estadisticas');
+
+################################
+#app
+Route::get('/apps', function () {
+    return Inertia::render('auth/app');
+});
+
+#contacto
+Route::get('/contacto', function () {
+    return Inertia::render('auth/contacto');
+});
+
+#evaluacion Alumno
+Route::get('/evaluacion', function () {
+    return Inertia::render('Alumno/EvaluacionAlumno');
+});
+
+#evaluacion profesores
+Route::get('/evaluacionProfesorPTC', function () {
+    return Inertia::render('Admin/EvaluacionProfesorPTC');
+});
+
+#evaluacion profesores
+Route::get('/evaluacionProfesorPA', function () {
+    return Inertia::render('Admin/EvaluacionProfesorPA');
+});
+
+#
+Route::get('/relacion/cuatri', function () {
+    return Inertia::render('Admin/numCuatri');
+})->name('relacion.numCuatri');
+

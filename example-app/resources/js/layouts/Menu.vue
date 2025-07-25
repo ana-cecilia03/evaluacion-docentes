@@ -31,14 +31,18 @@
           <li><a href="/registro/grupo"><img src="/img/grupos.png" /> Grupos</a></li>
           <li><a href="/registro/asignaturas"><img src="/img/asignatura.png" /> Materias</a></li>
 
+          <li class="seccion">Relación</li>
+          <li><a href="/relacion/cuatri"><img src="/img/Alum-Prof.png" /> Num_Cuatri </a></li>
+          <li><a href="/relacion/materia-periodo-carrera"><img src="/img/Mat-Per-Carr.png" /> Mat-Cuatri-Carr</a></li>
+          <li><a href="/relacion/profesor-materia"><img src="/img/Alum-Prof.png" /> Profe_Materia</a></li>
+          
+
+
           <li class="seccion">Reportes</li>
+          <li><a href="/reportes/profesores"><img src="/img/reprof.png" /> Profesores</a></li>          
           <li><a href="/reportes/materias"><img src="/img/repasig.png" /> Materias</a></li>
-          <li><a href="/reportes/profesores"><img src="/img/reprof.png" /> Profesores</a></li>
           <li><a href="/reporte/grupos"><img src="/img/repgrup.png" /> Grupos</a></li>
 
-          <li class="seccion">Relación</li>
-          <li><a href="/relacion/alumno-profesor"><img src="/img/Alum-Prof.png" /> Alumno-Prof</a></li>
-          <li><a href="/relacion/meteria-periodo-carrera"><img src="/img/Mat-Per-Carr.png" /> Mat-Per-Carr</a></li>
 
           <li class="seccion">Extras</li>
           <li><a href="/encuesta"><img src="/img/reportes.png" /> Encuesta</a></li>

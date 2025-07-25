@@ -1,0 +1,115 @@
+/* --- Contenedor principal --- */
+.contenido-principal {
+  flex-grow: 1;
+  padding: 20px 30px;
+  min-height: calc(100vh - 140px);
+  background-color: #f5f5f5;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+}
+
+/* --- Sección de filtros --- */
+.relacion-filtros {
+  display: flex;
+  align-items: flex-start;
+  gap: 1.5rem;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+}
+
+/* Columnas de selects y inputs */
+.relacion-columna {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.relacion-columna select,
+.relacion-columna input {
+  width: 200px;
+  padding: 8px;
+  border: 1px solid #888;
+  border-radius: 4px;
+  font-size: 1rem;
+  background-color: #fff;
+}
+
+/* --- Botón Agregar --- */
+.btn-agregar {
+  align-self: flex-end;
+  background-color: #1500d6;
+  color: white;
+  padding: 10px 18px;
+  border: none;
+  border-radius: 12px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.btn-agregar:hover {
+  background-color: #0000a5;
+  transform: scale(1.05);
+}
+
+/* --- Tabla --- */
+.table-wrapper {
+  overflow-x: auto;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: white;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+th,
+td {
+  padding: 0.75rem;
+  text-align: left;
+  border-bottom: 1px solid #eee;
+}
+
+th {
+  background-color: #f1f1f1;
+  font-weight: bold;
+}
+
+.btn-edit {
+  background-color: #067a2f;
+  color: #fff;
+  padding: 6px 12px;
+  border: none;
+  border-radius: 20px;
+  cursor: pointer;
+}
+
+.btn-edit:hover {
+  background-color: #048a35;
+}
+
+/* --- Responsivo --- */
+@media (max-width: 768px) {
+  .relacion-filtros {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .relacion-columna {
+    width: 100%;
+  }
+
+  .relacion-columna select,
+  .relacion-columna input {
+    width: 100%;
+  }
+
+  .btn-agregar {
+    width: 100%;
+    align-self: center;
+  }
+}
