@@ -1,4 +1,4 @@
-<template> 
+<template>
   <div class="modal-overlay">
     <div class="modal-content">
       <div class="register-container">
@@ -15,6 +15,7 @@
                 id="nombre_completo"
                 v-model="form.nombre_completo"
                 placeholder="Ej. Laura Martínez"
+                required
               />
             </div>
 
@@ -27,6 +28,7 @@
                 v-model="form.matricula"
                 placeholder="Ej. 13122593103"
                 maxlength="11"
+                required
               />
             </div>
           </div>
@@ -41,6 +43,7 @@
                 id="correo"
                 v-model="form.correo"
                 placeholder="Ej. profesor@ejemplo.com"
+                required
               />
             </div>
 
@@ -52,13 +55,24 @@
                 id="password"
                 v-model="form.password"
                 placeholder="********"
+                required
               />
+            </div>
+
+            <!-- Cargo -->
+            <div class="form-group">
+              <label for="cargo">Cargo</label>
+              <select id="cargo" v-model="form.cargo" required>
+                <option value="">Seleccione</option>
+                <option value="PA">PA</option>
+                <option value="PTC">PTC</option>
+              </select>
             </div>
 
             <!-- Estado -->
             <div class="form-group">
               <label for="status">Estado</label>
-              <select id="status" v-model="form.status">
+              <select id="status" v-model="form.status" required>
                 <option value="">Seleccione</option>
                 <option value="activo">Activo</option>
                 <option value="inactivo">Inactivo</option>
@@ -93,6 +107,7 @@ const form = ref({
   nombre_completo: '',
   correo: '',
   password: '',
+  cargo: '',
   status: ''
 })
 
@@ -104,7 +119,7 @@ const registrarProfesor = async () => {
   try {
     await axios.post('/api/profesores', {
       ...form.value,
-      rol: 'profesor',
+      rol: 'profesor', // puede cambiarse si se desea registrar administradores
       created_by: 'frontend',
       modified_by: 'frontend'
     })

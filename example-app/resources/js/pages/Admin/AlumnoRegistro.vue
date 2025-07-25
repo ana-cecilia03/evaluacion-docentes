@@ -4,11 +4,14 @@
       <!-- Barra de acciones -->
       <div class="actions">
         <input type="text" placeholder="Buscar alumno..." v-model="busqueda" />
-        <select>
+
+        <select v-model="grupoSeleccionado">
           <option value="">Filtrar por grupo</option>
-          <option>Grupo A</option>
-          <option>Grupo B</option>
+          <option v-for="grupo in grupos" :key="grupo.id_grupo" :value="grupo.id_grupo">
+            {{ grupo.nombre }}
+          </option>
         </select>
+
         <button class="btn-register" @click="mostrarFormulario = true">Registrar Alumno Manual</button>
         <button class="btn-upload" @click="mostrarCSV = true">Cargar CSV</button>
 
@@ -100,19 +103,22 @@ import AlumnosManual from '@/components/AlumnosManual.vue'
 import CsvAlumnos from '@/components/CsvAlumnos.vue'
 import EditarAlumno from '@/components/EditarAlumno.vue'
 
-// Estados para los modales
+// Modales
 const mostrarFormulario = ref(false)
 const mostrarCSV = ref(false)
 const editarDatos = ref(false)
 
-// Datos de alumnos
+// Alumnos y selección
 const alumnos = ref([])
 const alumnoSeleccionado = ref(null)
 const alumnosSeleccionados = ref([])
 
+// Búsqueda y grupo
 const busqueda = ref('')
+const grupos = ref([])
+const grupoSeleccionado = ref('')
 
-// Cargar alumnos desde la API
+// Cargar alumnos
 const cargarAlumnos = async () => {
   try {
     const response = await axios.get('/api/alumnos')
@@ -122,22 +128,33 @@ const cargarAlumnos = async () => {
   }
 }
 
-// Computed para filtrar por búsqueda
+// Cargar grupos desde la base de datos
+const cargarGrupos = async () => {
+  try {
+    const response = await axios.get('/api/grupos')
+    grupos.value = response.data
+  } catch (error) {
+    console.error('Error al cargar grupos:', error)
+  }
+}
+
+// Filtrado por búsqueda y grupo
 const alumnosFiltrados = computed(() => {
-  if (!busqueda.value.trim()) return alumnos.value
-  return alumnos.value.filter(a =>
-    a.nombre_completo.toLowerCase().includes(busqueda.value.toLowerCase()) ||
-    a.matricula.toLowerCase().includes(busqueda.value.toLowerCase())
-  )
+  return alumnos.value.filter(a => {
+    const coincideBusqueda = a.nombre_completo.toLowerCase().includes(busqueda.value.toLowerCase()) ||
+                             a.matricula.toLowerCase().includes(busqueda.value.toLowerCase())
+    const coincideGrupo = !grupoSeleccionado.value || a.grupo == grupoSeleccionado.value
+    return coincideBusqueda && coincideGrupo
+  })
 })
 
-// Verifica si todos los alumnos están seleccionados
+// Verifica si todos están seleccionados
 const todosSeleccionados = computed(() =>
   alumnosFiltrados.value.length > 0 &&
   alumnosFiltrados.value.every(a => alumnosSeleccionados.value.includes(a.id_alumno))
 )
 
-// Seleccionar/deseleccionar todos los alumnos visibles
+// Seleccionar todos
 const toggleSeleccionarTodos = () => {
   if (todosSeleccionados.value) {
     alumnosSeleccionados.value = alumnosSeleccionados.value.filter(
@@ -149,13 +166,13 @@ const toggleSeleccionarTodos = () => {
   }
 }
 
-// Editar alumno individual
+// Editar alumno
 const abrirEdicion = (alumno) => {
   alumnoSeleccionado.value = alumno
   editarDatos.value = true
 }
 
-// Desactivar alumnos seleccionados
+// Desactivar múltiples
 const realizarAccionGrupal = async () => {
   if (alumnosSeleccionados.value.length === 0) return
 
@@ -172,9 +189,10 @@ const realizarAccionGrupal = async () => {
   }
 }
 
-// Ejecutar al montar componente
+// Al cargar
 onMounted(() => {
   cargarAlumnos()
+  cargarGrupos()
 })
 </script>
 

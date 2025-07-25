@@ -23,7 +23,7 @@ use App\Http\Controllers\Admin\MateriaController;
 |
 */
 
-// ✅ Ruta funcional para probar Login Alumno
+//  Ruta funcional para probar Login Alumno
 Route::post('/login/alumno', [LoginAlumno::class, 'login']);
 
 #Api Loginprofesores

@@ -4,33 +4,32 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
-use Laravel\Sanctum\HasApiTokens; // Permite generar y validar tokens de acceso (Laravel Sanctum)
+use Laravel\Sanctum\HasApiTokens; // Permite generar y validar tokens con Sanctum
 
 class Profesor extends Authenticatable
 {
-    // Traits utilizados:
     use HasApiTokens, HasFactory;
 
-    // Nombre de la tabla asociada en la base de datos
+    // Tabla asociada a este modelo
     protected $table = 'profesores';
 
-    // Clave primaria personalizada (por defecto sería "id")
+    // Clave primaria personalizada
     protected $primaryKey = 'id_profesor';
 
-    // Campos que se pueden asignar masivamente (por ejemplo al crear o actualizar registros)
+    // Campos que se pueden asignar masivamente
     protected $fillable = [
         'matricula',
         'nombre_completo',
         'correo',
         'password',
-        'rol',
-        'curp',
-        'status',
-        'created_by',
-        'modified_by',
+        'rol',          // Enum: 'profesor' o 'administrador'
+        'cargo',        // Enum: 'PTC' o 'PA'
+        'status',       // Enum: 'activo' o 'inactivo'
+        'created_by',   // Usuario que creó el registro
+        'modified_by',  // Usuario que modificó por última vez
     ];
 
-    // Campos que se ocultarán al convertir el modelo a JSON (por seguridad)
+    // Ocultar el campo de contraseña cuando se serializa a JSON
     protected $hidden = [
         'password',
     ];

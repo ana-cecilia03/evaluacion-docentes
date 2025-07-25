@@ -10,7 +10,7 @@
           <input type="file" accept=".csv" @change="handleFileUpload" />
           <p>
             Formato esperado:
-            <strong>matricula, nombre_completo, correo, password, curp, status</strong>
+            <strong>matricula,nombre_completo,correo,password,curp,cargo,status</strong>
           </p>
         </div>
 
@@ -33,19 +33,17 @@
 import { ref } from 'vue'
 import axios from 'axios'
 
-// Emitir eventos al componente padre
 const emit = defineEmits(['cerrar', 'guardado'])
 
-// Estado del archivo y errores
 const file = ref(null)
 const error = ref(null)
 
-// Captura el archivo seleccionado
+// Captura el archivo
 const handleFileUpload = (event) => {
   file.value = event.target.files[0]
 }
 
-// Enviar el CSV al backend
+// Enviar CSV al backend
 const cargarCSV = async () => {
   error.value = null
 
@@ -58,10 +56,10 @@ const cargarCSV = async () => {
   formData.append('archivo', file.value)
 
   try {
-    await axios.post('/api/profesores/csv', formData, {
+    const response = await axios.post('/api/profesores/csv', formData, {
       headers: {
-        'Content-Type': 'multipart/form-data'
-      }
+        'Content-Type': 'multipart/form-data',
+      },
     })
 
     alert('Profesores cargados correctamente.')
@@ -71,7 +69,7 @@ const cargarCSV = async () => {
     console.error('Error al cargar CSV:', err)
     if (err.response?.data?.errores) {
       error.value = err.response.data.errores
-        .map((e) => `Línea ${e.linea}: ${e.errores.join(', ')}`)
+        .map(e => `Línea ${e.linea}: ${e.errores.join(', ')}`)
         .join('\n')
     } else if (err.response?.data?.message) {
       error.value = err.response.data.message

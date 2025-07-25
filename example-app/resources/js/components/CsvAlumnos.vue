@@ -8,7 +8,7 @@
         <!-- Área de carga de archivo -->
         <div class="csv-upload">
           <input type="file" accept=".csv" @change="handleFileUpload" />
-          <p>Formato esperado: <strong>matricula,nombre_completo,correo,curp,grupo,status</strong></p>
+          <p>Formato esperado: <strong>matricula,nombre_completo,correo,grupo,status</strong></p>
         </div>
 
         <!-- Botones para cancelar o confirmar carga -->
@@ -57,10 +57,9 @@ const cargarCSV = async () => {
 
     alert('Archivo de alumnos cargado correctamente')
     file.value = null
-    // Aquí puedes emitir evento para actualizar tabla
-    // $emit('guardado') si lo deseas
-    // y cerrar modal
-    // $emit('cerrar')
+    // Emitir eventos si es necesario
+    // emit('guardado')
+    // emit('cerrar')
   } catch (err) {
     if (err.response?.data?.message) {
       error.value = err.response.data.message

@@ -33,7 +33,7 @@
           <EditarProfesores
             :profesor="profesorSeleccionado"
             @cerrar="editarProfesores = false"
-            @actualizado="() => { editarProfesores.value = false; obtenerProfesores() }"
+            @actualizado="() => { editarProfesores = false; obtenerProfesores() }"
           />
         </div>
       </div>
@@ -88,6 +88,7 @@ const profesorSeleccionado = ref(null)
 const busqueda = ref('')
 const filtroEstado = ref('')
 
+// Obtener profesores desde la API
 const obtenerProfesores = async () => {
   try {
     const response = await axios.get('/api/profesores')
@@ -97,6 +98,7 @@ const obtenerProfesores = async () => {
   }
 }
 
+// Computado para buscar y filtrar por estado
 const profesoresFiltrados = computed(() => {
   return profesores.value.filter(p => {
     const coincideBusqueda =
@@ -107,6 +109,7 @@ const profesoresFiltrados = computed(() => {
   })
 })
 
+// Función para seleccionar profesor y mostrar modal de edición
 const editar = (profesor) => {
   profesorSeleccionado.value = { ...profesor }
   editarProfesores.value = true
