@@ -11,8 +11,7 @@ class Grupo extends Model
     public $timestamps = true;
 
     protected $fillable = [
-        'clave',
-        'carrera',
+        'nombre',
         'created_by',
         'modified_by'
     ];

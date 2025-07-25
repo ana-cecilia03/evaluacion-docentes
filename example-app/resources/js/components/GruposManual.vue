@@ -7,16 +7,16 @@
 
         <!-- Formulario de registro -->
         <form @submit.prevent="registrarGrupo" class="register-form">
-          <!-- Campo: clave -->
+          <!-- Campo: nombre del grupo -->
           <div class="form-group">
-            <label for="clave">Clave</label>
-            <input type="text" id="clave" v-model="form.clave" placeholder="Ej. MSC8" />
-          </div>
-
-          <!-- Campo: carrera -->
-          <div class="form-group">
-            <label for="carrera">Carrera</label>
-            <input type="text" id="carrera" v-model="form.carrera" placeholder="Ej. Ingeniería en Robótica" />
+            <label for="nombre">Nombre del Grupo</label>
+            <input
+              type="text"
+              id="nombre"
+              v-model="form.nombre"
+              placeholder="Ej. MSC8"
+              required
+            />
           </div>
 
           <!-- Botones de acción -->
@@ -42,8 +42,7 @@ import axios from 'axios'
 const emit = defineEmits(['cerrar', 'guardado'])
 
 const form = ref({
-  clave: '',
-  carrera: ''
+  nombre: ''
 })
 
 const error = ref(null)

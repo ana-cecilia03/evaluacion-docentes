@@ -25,7 +25,11 @@
       <!-- Modal para actualizar grupo -->
       <div v-if="editarGrupos" class="modal-overlay">
         <div class="modal-content">
-          <EditarGrupos :grupo="grupoSeleccionado" @cerrar="cerrarEdicion" @actualizado="obtenerGrupos" />
+          <EditarGrupos
+            :grupo="grupoSeleccionado"
+            @cerrar="cerrarEdicion"
+            @actualizado="obtenerGrupos"
+          />
         </div>
       </div>
 
@@ -34,15 +38,15 @@
         <table>
           <thead>
             <tr>
-              <th>Clave</th>
-              <th>Carrera</th>
+              <th>ID</th>
+              <th>Nombre Grupo</th>
               <th>Acciones</th>
             </tr>
           </thead>
           <tbody>
             <tr v-for="grupo in grupos" :key="grupo.id_grupo">
-              <td>{{ grupo.clave }}</td>
-              <td>{{ grupo.carrera }}</td>
+              <td>{{ grupo.id_grupo }}</td>
+              <td>{{ grupo.nombre }}</td>
               <td>
                 <button class="btn-edit" @click="abrirModalEditar(grupo)">Editar</button>
               </td>
@@ -90,9 +94,9 @@ const abrirModalEditar = (grupo) => {
 }
 
 // Cerrar modales
-const cerrarFormulario = () => mostrarFormulario.value = false
-const cerrarCSV = () => mostrarCSV.value = false
-const cerrarEdicion = () => editarGrupos.value = false
+const cerrarFormulario = () => (mostrarFormulario.value = false)
+const cerrarCSV = () => (mostrarCSV.value = false)
+const cerrarEdicion = () => (editarGrupos.value = false)
 
 // Cargar grupos al montar
 onMounted(obtenerGrupos)

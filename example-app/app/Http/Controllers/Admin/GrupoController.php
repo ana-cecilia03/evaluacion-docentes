@@ -9,21 +9,21 @@ use Illuminate\Support\Facades\Validator;
 
 class GrupoController extends Controller
 {
+    // Listar todos los grupos
     public function index()
     {
         return Grupo::orderBy('id_grupo', 'desc')->get();
     }
 
+    // Registrar grupo manualmente
     public function store(Request $request)
     {
         $request->validate([
-            'clave' => 'required|unique:grupos|max:10',
-            'carrera' => 'required|max:100',
+            'nombre' => 'required|unique:grupos|max:15',
         ]);
 
         $grupo = Grupo::create([
-            'clave' => $request->clave,
-            'carrera' => $request->carrera,
+            'nombre' => $request->nombre,
             'created_by' => 'frontend',
             'modified_by' => 'frontend',
         ]);
@@ -34,18 +34,17 @@ class GrupoController extends Controller
         ], 201);
     }
 
+    // Actualizar grupo
     public function update(Request $request, $id)
     {
         $grupo = Grupo::findOrFail($id);
 
         $request->validate([
-            'clave' => 'required|max:10|unique:grupos,clave,' . $grupo->id_grupo . ',id_grupo',
-            'carrera' => 'required|max:100',
+            'nombre' => 'required|max:15|unique:grupos,nombre,' . $grupo->id_grupo . ',id_grupo',
         ]);
 
         $grupo->update([
-            'clave' => $request->clave,
-            'carrera' => $request->carrera,
+            'nombre' => $request->nombre,
             'modified_by' => 'frontend',
         ]);
 
@@ -55,6 +54,7 @@ class GrupoController extends Controller
         ]);
     }
 
+    // Importar grupos desde CSV
     public function importarDesdeCSV(Request $request)
     {
         $request->validate([
@@ -81,8 +81,7 @@ class GrupoController extends Controller
             $fila = array_combine($header, array_map('trim', $fila));
 
             $validator = Validator::make($fila, [
-                'clave' => 'required|unique:grupos,clave|max:10',
-                'carrera' => 'required|max:100',
+                'nombre' => 'required|unique:grupos,nombre|max:15',
             ]);
 
             if ($validator->fails()) {
@@ -94,8 +93,7 @@ class GrupoController extends Controller
             }
 
             Grupo::create([
-                'clave' => $fila['clave'],
-                'carrera' => $fila['carrera'],
+                'nombre' => $fila['nombre'],
                 'created_by' => 'frontend',
                 'modified_by' => 'frontend',
             ]);

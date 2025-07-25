@@ -8,12 +8,15 @@
         <!-- Área de carga de archivo -->
         <div class="csv-upload">
           <input type="file" accept=".csv" @change="handleFileUpload" />
-          <p>Formato: <strong>clave, carrera</strong></p>
+          <p>
+            Formato esperado:
+            <strong>nombre</strong>
+          </p>
         </div>
 
         <!-- Mensaje de error -->
         <div v-if="error" class="error-message">
-          {{ error }}
+          <pre>{{ error }}</pre>
         </div>
 
         <!-- Botones para cancelar o confirmar carga -->
@@ -35,12 +38,10 @@ const emit = defineEmits(['cerrar', 'guardado'])
 const file = ref(null)
 const error = ref(null)
 
-// Captura el archivo seleccionado
 const handleFileUpload = (event) => {
   file.value = event.target.files[0]
 }
 
-// Enviar archivo al backend
 const cargarCSV = async () => {
   error.value = null
 
@@ -68,8 +69,10 @@ const cargarCSV = async () => {
       error.value = err.response.data.errores.map((e) =>
         `Línea ${e.linea}: ${e.errores.join(', ')}`
       ).join('\n')
+    } else if (err.response?.data?.message) {
+      error.value = err.response.data.message
     } else {
-      error.value = 'Error al cargar archivo CSV.'
+      error.value = 'Error desconocido al cargar archivo CSV.'
     }
   }
 }

@@ -7,16 +7,16 @@
 
         <!-- Formulario de edición -->
         <form @submit.prevent="actualizarGrupo" class="register-form">
-          <!-- Campo: clave -->
+          <!-- Campo: nombre -->
           <div class="form-group">
-            <label for="clave">Clave</label>
-            <input type="text" id="clave" v-model="form.clave" placeholder="Ej. MSC8" />
-          </div>
-
-          <!-- Campo: carrera -->
-          <div class="form-group">
-            <label for="carrera">Carrera</label>
-            <input type="text" id="carrera" v-model="form.carrera" placeholder="Ej. Ingeniería en Robótica" />
+            <label for="nombre">Nombre del Grupo</label>
+            <input
+              type="text"
+              id="nombre"
+              v-model="form.nombre"
+              placeholder="Ej. MSC8"
+              required
+            />
           </div>
 
           <!-- Botones -->
@@ -39,21 +39,39 @@
 import { ref, watch, defineProps, defineEmits } from 'vue'
 import axios from 'axios'
 
+// Props
 const props = defineProps({
-  grupo: Object // Se espera { id_grupo, clave, carrera }
+  grupo: {
+    type: Object,
+    required: true // { id_grupo, nombre }
+  }
 })
 
 const emit = defineEmits(['cerrar', 'actualizado'])
 
-const form = ref({ ...props.grupo })
+const form = ref({
+  id_grupo: null,
+  nombre: ''
+})
+
 const error = ref(null)
 
+// Sincronizar props iniciales
+watch(() => props.grupo, (nuevo) => {
+  if (nuevo && typeof nuevo === 'object') {
+    form.value = {
+      id_grupo: nuevo.id_grupo ?? null,
+      nombre: nuevo.nombre ?? ''
+    }
+  }
+}, { immediate: true })
+
+// Enviar la actualización
 const actualizarGrupo = async () => {
   error.value = null
   try {
     await axios.put(`/api/grupos/${form.value.id_grupo}`, {
-      clave: form.value.clave,
-      carrera: form.value.carrera,
+      nombre: form.value.nombre,
       modified_by: 'frontend'
     })
     emit('actualizado')
@@ -68,11 +86,6 @@ const actualizarGrupo = async () => {
     }
   }
 }
-
-// Si las props cambian, actualiza el formulario
-watch(() => props.grupo, (nuevo) => {
-  form.value = { ...nuevo }
-})
 </script>
 
 <style src="@/../css/EditarDatos.css"></style>
