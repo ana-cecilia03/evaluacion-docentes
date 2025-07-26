@@ -7,7 +7,7 @@
 
         <select v-model="grupoSeleccionado">
           <option value="">Filtrar por grupo</option>
-          <option v-for="grupo in grupos" :key="grupo.id_grupo" :value="grupo.id_grupo">
+          <option v-for="grupo in grupos" :key="grupo.id_grupo" :value="grupo.nombre">
             {{ grupo.nombre }}
           </option>
         </select>
@@ -15,7 +15,6 @@
         <button class="btn-register" @click="mostrarFormulario = true">Registrar Alumno Manual</button>
         <button class="btn-upload" @click="mostrarCSV = true">Cargar CSV</button>
 
-        <!-- Botón para desactivar múltiples alumnos, solo visible si hay selección -->
         <template v-if="alumnosSeleccionados.length > 0">
           <button class="btn-grupal" @click="realizarAccionGrupal">
             DESACTIVAR ({{ alumnosSeleccionados.length }})
@@ -53,16 +52,11 @@
         <table>
           <thead>
             <tr>
-              <th>
-                <input
-                  type="checkbox"
-                  @change="toggleSeleccionarTodos"
-                  :checked="todosSeleccionados"
-                />
-              </th>
+              <th><input type="checkbox" @change="toggleSeleccionarTodos" :checked="todosSeleccionados" /></th>
               <th>Matrícula</th>
               <th>Nombre</th>
               <th>Grupo</th>
+              <th>Correo</th>
               <th>Estado</th>
               <th>Acciones</th>
             </tr>
@@ -83,6 +77,7 @@
               <td>{{ alumno.matricula }}</td>
               <td>{{ alumno.nombre_completo }}</td>
               <td>{{ alumno.grupo }}</td>
+              <td>{{ alumno.correo }}</td>
               <td>{{ alumno.status }}</td>
               <td>
                 <button class="btn-edit" @click="abrirEdicion(alumno)">Editar</button>
@@ -103,22 +98,20 @@ import AlumnosManual from '@/components/AlumnosManual.vue'
 import CsvAlumnos from '@/components/CsvAlumnos.vue'
 import EditarAlumno from '@/components/EditarAlumno.vue'
 
-// Modales
+// Estados
 const mostrarFormulario = ref(false)
 const mostrarCSV = ref(false)
 const editarDatos = ref(false)
-
-// Alumnos y selección
 const alumnos = ref([])
 const alumnoSeleccionado = ref(null)
 const alumnosSeleccionados = ref([])
 
-// Búsqueda y grupo
+// Filtros
 const busqueda = ref('')
 const grupos = ref([])
 const grupoSeleccionado = ref('')
 
-// Cargar alumnos
+// Funciones
 const cargarAlumnos = async () => {
   try {
     const response = await axios.get('/api/alumnos')
@@ -128,7 +121,6 @@ const cargarAlumnos = async () => {
   }
 }
 
-// Cargar grupos desde la base de datos
 const cargarGrupos = async () => {
   try {
     const response = await axios.get('/api/grupos')
@@ -138,23 +130,21 @@ const cargarGrupos = async () => {
   }
 }
 
-// Filtrado por búsqueda y grupo
 const alumnosFiltrados = computed(() => {
   return alumnos.value.filter(a => {
-    const coincideBusqueda = a.nombre_completo.toLowerCase().includes(busqueda.value.toLowerCase()) ||
-                             a.matricula.toLowerCase().includes(busqueda.value.toLowerCase())
+    const coincideBusqueda =
+      a.nombre_completo.toLowerCase().includes(busqueda.value.toLowerCase()) ||
+      a.matricula.toLowerCase().includes(busqueda.value.toLowerCase())
     const coincideGrupo = !grupoSeleccionado.value || a.grupo == grupoSeleccionado.value
     return coincideBusqueda && coincideGrupo
   })
 })
 
-// Verifica si todos están seleccionados
 const todosSeleccionados = computed(() =>
   alumnosFiltrados.value.length > 0 &&
   alumnosFiltrados.value.every(a => alumnosSeleccionados.value.includes(a.id_alumno))
 )
 
-// Seleccionar todos
 const toggleSeleccionarTodos = () => {
   if (todosSeleccionados.value) {
     alumnosSeleccionados.value = alumnosSeleccionados.value.filter(
@@ -166,13 +156,11 @@ const toggleSeleccionarTodos = () => {
   }
 }
 
-// Editar alumno
 const abrirEdicion = (alumno) => {
   alumnoSeleccionado.value = alumno
   editarDatos.value = true
 }
 
-// Desactivar múltiples
 const realizarAccionGrupal = async () => {
   if (alumnosSeleccionados.value.length === 0) return
 
@@ -189,7 +177,7 @@ const realizarAccionGrupal = async () => {
   }
 }
 
-// Al cargar
+// Inicializar
 onMounted(() => {
   cargarAlumnos()
   cargarGrupos()

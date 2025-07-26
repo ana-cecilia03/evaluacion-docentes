@@ -45,6 +45,7 @@
             <tr>
               <th>Matrícula</th>
               <th>Nombre</th>
+              <th>Correo</th>
               <th>Estado</th>
               <th>Acciones</th>
             </tr>
@@ -57,6 +58,7 @@
             >
               <td>{{ profesor.matricula }}</td>
               <td>{{ profesor.nombre_completo }}</td>
+              <td>{{ profesor.correo }}</td>
               <td>{{ profesor.status }}</td>
               <td>
                 <button class="btn-edit" @click="editar(profesor)">Editar</button>
