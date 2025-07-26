@@ -10,6 +10,7 @@ use App\Http\Controllers\Admin\AlumnoController;
 use App\Http\Controllers\Admin\ProfesorController;
 use App\Http\Controllers\Admin\GrupoController;
 use App\Http\Controllers\Admin\MateriaController;
+use App\Http\Controllers\Admin\CuatrimestreController;
 
 
 /*
@@ -74,3 +75,11 @@ Route::prefix('materias')->group(function () {
     Route::put('/{id}', [MateriaController::class, 'update']);
     Route::post('/csv', [MateriaController::class, 'importarDesdeCSV']);
 });
+
+#cuatrimestres
+
+
+
+Route::get('/cuatrimestres', [CuatrimestreController::class, 'index']);
+Route::post('/cuatrimestres', [CuatrimestreController::class, 'store']);
+Route::put('/cuatrimestres/{id}', [CuatrimestreController::class, 'update']);
