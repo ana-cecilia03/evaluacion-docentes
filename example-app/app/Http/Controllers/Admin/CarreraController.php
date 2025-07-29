@@ -8,6 +8,12 @@ use App\Models\Carrera;
 
 class CarreraController extends Controller
 {
+    // Obtener solo los nombres de carrera (para dropdowns)
+    public function nombres()
+    {
+        return Carrera::select('nombre_carrera')->orderBy('nombre_carrera')->get();
+    }
+
     // Obtener todas las carreras (historial)
     public function index()
     {
@@ -35,7 +41,7 @@ class CarreraController extends Controller
         ], 201);
     }
 
-    // 🔄 Actualizar una carrera existente
+    // Actualizar una carrera existente
     public function update(Request $request, $id)
     {
         $carrera = Carrera::find($id);

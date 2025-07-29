@@ -9,6 +9,12 @@ use Illuminate\Support\Facades\Validator;
 
 class MateriaController extends Controller
 {
+    // Obtener solo los nombres de materias (para dropdowns)
+    public function nombres()
+    {
+        return Materia::select('nombre_materia')->orderBy('nombre_materia')->get();
+    }
+
     // Obtener todas las materias
     public function index()
     {

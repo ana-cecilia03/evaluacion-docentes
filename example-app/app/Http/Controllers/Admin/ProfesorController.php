@@ -61,7 +61,6 @@ class ProfesorController extends Controller
             'status' => 'required|in:activo,inactivo',
         ]);
 
-        // Si viene nueva contraseña, la encriptamos
         $profesor->password = $request->filled('password')
             ? Hash::make($request->password)
             : $profesor->password;

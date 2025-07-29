@@ -11,75 +11,81 @@ use App\Http\Controllers\Admin\ProfesorController;
 use App\Http\Controllers\Admin\GrupoController;
 use App\Http\Controllers\Admin\MateriaController;
 use App\Http\Controllers\Admin\CuatrimestreController;
-
+use App\Http\Controllers\Admin\MatCuatriCarController;
+use App\Http\Controllers\Admin\RelacionController;
 
 /*
 |--------------------------------------------------------------------------
 | API Routes
 |--------------------------------------------------------------------------
-|
-| Aquí registras las rutas de la API de tu aplicación. Estas rutas son
-| cargadas por RouteServiceProvider dentro del grupo "api".
-| Puedes acceder a ellas desde /api/...
-|
 */
 
-//  Ruta funcional para probar Login Alumno
+// Login
 Route::post('/login/alumno', [LoginAlumno::class, 'login']);
-
-#Api Loginprofesores
 Route::post('/admin/login', [LoginProfesor::class, 'login']);
 
-#Registar Peridos
+// Periodos
 Route::post('/periodos', [PeriodoController::class, 'store']);
 Route::get('/periodos', [PeriodoController::class, 'index']);
 Route::put('/periodos/{id}/estado', [PeriodoController::class, 'cambiarEstado']);
+Route::get('/periodos/activos', [PeriodoController::class, 'activos']);
 
 
-#REGISTROS vista de carreras
+// Carreras
 Route::get('/carreras', [CarreraController::class, 'index']);
 Route::post('/carreras', [CarreraController::class, 'store']);
 Route::put('/carreras/{id}', [CarreraController::class, 'update']);
+Route::get('/carreras/nombres', [CarreraController::class, 'nombres']);
 
-
-
-# REGISTROS vista de alumnos
+// Alumnos
 Route::get('/alumnos', [AlumnoController::class, 'index']);
 Route::post('/alumnos', [AlumnoController::class, 'store']);
 Route::post('/alumnos/csv', [AlumnoController::class, 'importarDesdeCSV']);
 Route::put('/alumnos/{id}', [AlumnoController::class, 'update']);
 Route::delete('/alumnos/{id}', [AlumnoController::class, 'destroy']);
-
-# NUEVA ruta para desactivar varios alumnos
 Route::post('/alumnos/desactivar', [AlumnoController::class, 'desactivarVarios']);
 
-#----------
-#REGISTROS vista de profesores
-
+// Profesores
 Route::get('/profesores', [ProfesorController::class, 'index']);
 Route::post('/profesores', [ProfesorController::class, 'store']);
 Route::put('/profesores/{id}', [ProfesorController::class, 'update']);
 Route::post('/profesores/csv', [ProfesorController::class, 'importarDesdeCSV']);
 
-#REGISTROS vista Grupos
+// Grupos
 Route::get('/grupos', [GrupoController::class, 'index']);
 Route::post('/grupos', [GrupoController::class, 'store']);
 Route::put('/grupos/{id}', [GrupoController::class, 'update']);
 Route::post('/grupos/csv', [GrupoController::class, 'importarDesdeCSV']);
 
-#REGISTROS de vista Materias
-
+// Materias
 Route::prefix('materias')->group(function () {
     Route::get('/', [MateriaController::class, 'index']);
     Route::post('/', [MateriaController::class, 'store']);
     Route::put('/{id}', [MateriaController::class, 'update']);
     Route::post('/csv', [MateriaController::class, 'importarDesdeCSV']);
 });
+Route::get('/materias/nombres', [MateriaController::class, 'nombres']);
 
-#cuatrimestres
-
-
-
+// Cuatrimestres
 Route::get('/cuatrimestres', [CuatrimestreController::class, 'index']);
 Route::post('/cuatrimestres', [CuatrimestreController::class, 'store']);
 Route::put('/cuatrimestres/{id}', [CuatrimestreController::class, 'update']);
+Route::get('/cuatrimestres/numeros', [CuatrimestreController::class, 'numeros']);
+
+// MatCuatriCar (Relaciones entre carrera, cuatrimestre y materia)
+Route::get('/mat-cuatri-car', [MatCuatriCarController::class, 'index']);
+Route::post('/mat-cuatri-car', [MatCuatriCarController::class, 'store']);
+Route::get('/carreras/por-periodo/{num}', [MatCuatriCarController::class, 'carrerasPorPeriodo']);
+Route::get('/materias/por-periodo/{num}', [MatCuatriCarController::class, 'materiasPorPeriodo']);
+
+//prof_materia
+Route::get('/relaciones', [RelacionController::class, 'index']);
+Route::post('/relaciones', [RelacionController::class, 'store']);
+
+// Para llenar selects
+Route::get('/profesores', fn() => \App\Models\Profesor::all());
+Route::get('/periodos', fn() => \App\Models\Periodo::all());
+Route::get('/carreras', fn() => \App\Models\Carrera::all());
+Route::get('/materias', fn() => \App\Models\Materia::all());
+Route::get('/grupos', fn() => \App\Models\Grupo::all());
+

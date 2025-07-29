@@ -8,11 +8,13 @@ use Illuminate\Http\Request;
 
 class CuatrimestreController extends Controller
 {
+    // Obtener todos los cuatrimestres
     public function index()
     {
         return Cuatrimestre::all();
     }
 
+    // Registrar nuevo cuatrimestre
     public function store(Request $request)
     {
         $validated = $request->validate([
@@ -26,6 +28,7 @@ class CuatrimestreController extends Controller
         return Cuatrimestre::create($validated);
     }
 
+    // Actualizar cuatrimestre existente
     public function update(Request $request, $id)
     {
         $cuatrimestre = Cuatrimestre::findOrFail($id);
@@ -39,5 +42,11 @@ class CuatrimestreController extends Controller
         $cuatrimestre->update($validated);
 
         return $cuatrimestre;
+    }
+
+    // Obtener solo los números de cuatrimestres (para dropdowns)
+    public function numeros()
+    {
+        return Cuatrimestre::select('num')->orderBy('num')->get();
     }
 }
