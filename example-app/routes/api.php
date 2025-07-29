@@ -14,6 +14,9 @@ use App\Http\Controllers\Admin\CuatrimestreController;
 use App\Http\Controllers\Admin\MatCuatriCarController;
 use App\Http\Controllers\Admin\RelacionController;
 
+use App\Models\MatCuatriCar;
+
+
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -85,7 +88,12 @@ Route::post('/relaciones', [RelacionController::class, 'store']);
 // Para llenar selects
 Route::get('/profesores', fn() => \App\Models\Profesor::all());
 Route::get('/periodos', fn() => \App\Models\Periodo::all());
-Route::get('/carreras', fn() => \App\Models\Carrera::all());
+Route::get('/carreras', function () {
+    return MatCuatriCar::selectRaw('MIN(id_mat_cuatri_car) as id_mat_cuatri_car, carrera_nombre')
+        ->groupBy('carrera_nombre')
+        ->get();
+});
+
 Route::get('/materias', fn() => \App\Models\Materia::all());
 Route::get('/grupos', fn() => \App\Models\Grupo::all());
 

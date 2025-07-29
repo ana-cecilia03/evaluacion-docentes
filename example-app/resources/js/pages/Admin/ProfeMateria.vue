@@ -1,9 +1,11 @@
 <template>
   <Menu>
     <div class="contenido-principal">
-      <!-- Filtros -->
+      <!-- Filtros para seleccionar cada elemento de la relación -->
       <div class="relacion-filtros">
-        <!-- Profesor -->
+
+        <!-- Select: Profesores -->
+        <!-- Carga desde API: /api/profesores -->
         <div class="relacion-columna">
           <select v-model="form.profesor_nombre">
             <option value="">Profesor</option>
@@ -13,7 +15,9 @@
           </select>
         </div>
 
-        <!-- Periodo -->
+        <!-- Select: Periodos -->
+        <!-- Carga desde API: /api/periodos -->
+        <!-- Al cambiar, se llama a cargarRelacionados -->
         <div class="relacion-columna">
           <select v-model="form.periodo_num" @change="cargarRelacionados">
             <option value="">Periodo</option>
@@ -23,27 +27,40 @@
           </select>
         </div>
 
-        <!-- Carrera -->
+        <!-- Select: Carreras -->
+        <!-- Carga desde API: /api/carreras -->
+        <!-- Devuelve datos desde tabla mat_cuatri_carr -->
         <div class="relacion-columna">
-          <select v-model="form.carrera_nom">
+          <select v-model="form.id_mat_cuatri_car">
             <option value="">Carreras</option>
-            <option v-for="c in carreras" :key="c.id_mat_cuatri_car" :value="c.id_mat_cuatri_car">
+            <option
+              v-for="c in carreras"
+              :key="c.id_mat_cuatri_car"
+              :value="c.id_mat_cuatri_car"
+            >
               {{ c.carrera_nombre }}
             </option>
           </select>
         </div>
 
-        <!-- Materia -->
+        <!-- Select: Materias -->
+        <!-- Carga desde API: /api/materias -->
+        <!-- Aquí estamos esperando campo: nombre_materia -->
         <div class="relacion-columna">
           <select v-model="form.materia_nom">
             <option value="">Materia</option>
-            <option v-for="m in materias" :key="m.materia_nombre" :value="m.materia_nombre">
-              {{ m.materia_nombre }}
+            <option
+              v-for="m in materias"
+              :key="m.id_materia"
+              :value="m.nombre_materia"
+            >
+              {{ m.nombre_materia }}
             </option>
           </select>
         </div>
 
-        <!-- Grupo -->
+        <!-- Select: Grupos -->
+        <!-- Carga desde API: /api/grupos -->
         <div class="relacion-columna">
           <select v-model="form.clave">
             <option value="">Grupo</option>
@@ -53,13 +70,14 @@
           </select>
         </div>
 
-        <!-- Botón agregar -->
+        <!-- Botón para enviar la relación -->
         <div class="relacion-columna">
           <button class="btn-agregar" @click="agregarRelacion">Agregar</button>
         </div>
       </div>
 
-      <!-- Tabla -->
+      <!-- Tabla: muestra las relaciones ya registradas -->
+      <!-- Carga desde API: /api/relaciones -->
       <div class="table-wrapper">
         <table>
           <thead>
@@ -93,61 +111,94 @@ import { ref, onMounted } from 'vue'
 import axios from 'axios'
 import Menu from '@/layouts/Menu.vue'
 
+// Datos que llenan los selects
 const profesores = ref([])
 const periodos = ref([])
 const carreras = ref([])
 const materias = ref([])
 const grupos = ref([])
+
+// Datos de la tabla
 const relaciones = ref([])
 
+// Formulario a enviar
 const form = ref({
   profesor_nombre: '',
   periodo_num: '',
-  carrera_nom: '',
+  id_mat_cuatri_car: '',
   materia_nom: '',
   clave: ''
 })
 
+// Al cargar la vista
 onMounted(() => {
-  axios.get('/api/profesores').then(res => profesores.value = res.data)
-  axios.get('/api/periodos').then(res => periodos.value = res.data)
-  axios.get('/api/grupos').then(res => grupos.value = res.data)
+  axios.get('/api/profesores').then(res => {
+    console.log('Profesores:', res.data)
+    profesores.value = res.data
+  })
+
+  axios.get('/api/periodos').then(res => {
+    console.log('Periodos:', res.data)
+    periodos.value = res.data
+  })
+
+  axios.get('/api/grupos').then(res => {
+    console.log('Grupos:', res.data)
+    grupos.value = res.data
+  })
+
   cargarRelaciones()
 })
 
+// Cuando se cambia periodo, se cargan carreras y materias relacionadas
 const cargarRelacionados = () => {
-  axios.get('/api/carreras').then(res => carreras.value = res.data)
-  axios.get('/api/materias').then(res => materias.value = res.data)
+  axios.get('/api/carreras').then(res => {
+    console.log('Carreras:', res.data)
+    carreras.value = res.data
+  })
+
+  axios.get('/api/materias').then(res => {
+    console.log('Materias:', res.data)
+    materias.value = res.data
+  })
 }
 
+// Cargar tabla de relaciones actuales
 const cargarRelaciones = () => {
-  axios.get('/api/relaciones').then(res => relaciones.value = res.data)
+  axios.get('/api/relaciones').then(res => {
+    console.log('Relaciones:', res.data)
+    relaciones.value = res.data
+  })
 }
 
+// Enviar nueva relación al backend
 const agregarRelacion = async () => {
   const f = { ...form.value }
 
-  if (!f.profesor_nombre || !f.periodo_num || !f.carrera_nom || !f.materia_nom || !f.clave) {
+  if (!f.profesor_nombre || !f.periodo_num || !f.id_mat_cuatri_car || !f.materia_nom || !f.clave) {
     alert('Completa todos los campos')
     return
   }
 
   try {
+    console.log('Enviando relación:', f)
     await axios.post('/api/relaciones', f)
     cargarRelaciones()
     form.value = {
       profesor_nombre: '',
       periodo_num: '',
-      carrera_nom: '',
+      id_mat_cuatri_car: '',
       materia_nom: '',
       clave: ''
     }
   } catch (e) {
+    console.error('Error al guardar relación:', e)
     alert('Error al guardar relación')
   }
 }
 </script>
 
+<!-- Estilos -->
 <style src="@/../css/Registros.css"></style>
 <style src="@/../css/relacion.css"></style>
 <style src="@/../css/botones.css"></style>
