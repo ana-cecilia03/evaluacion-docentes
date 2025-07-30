@@ -36,9 +36,12 @@
       </div>
 
       <!-- Modal: Edición -->
-       <EditarMat v-if="modoEditar" 
-       :relacion="datosEdicion" 
-       @cerrar="modoEditar = false; obtenerDatos()" />
+      <EditarMat
+        v-if="modoEditar"
+        :relacion="datosEdicion"
+        @cerrar="modoEditar = false"
+        @guardar="modoEditar = false; obtenerDatos()"
+      />
 
       <!-- Tabla -->
       <div class="table-wrapper">

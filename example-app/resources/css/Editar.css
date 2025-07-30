@@ -113,6 +113,14 @@ input[type="number"]:focus {
   box-shadow: 0 0 0 1px rgb(7, 7, 7);
 }
 
+/*La materia ya está asignada a esa carrera y cuatrimestre.*/
+.error {
+  color: red;
+  font-size: 0.85rem;
+  margin-top: 4px;
+  display: block;
+}
+
 /* Responsive */
 @media (max-width: 600px) {
   input[type="text"],

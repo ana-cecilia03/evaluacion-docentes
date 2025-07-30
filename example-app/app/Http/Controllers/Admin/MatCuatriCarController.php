@@ -14,7 +14,12 @@ class MatCuatriCarController extends Controller
      */
     public function index()
     {
-        return response()->json(MatCuatriCar::all());
+        return response()->json(
+            MatCuatriCar::orderBy('carrera_nombre')
+                ->orderBy('cuatri_num')
+                ->orderBy('materia_nombre')
+                ->get()
+        );
     }
 
     /**
@@ -24,17 +29,61 @@ class MatCuatriCarController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'carrera_nombre'   => 'required|string|max:100',
-            'cuatri_num'       => 'required|integer',
-            'materia_nombre'   => 'required|string|max:100',
+            'carrera_nombre' => 'required|string|max:100',
+            'cuatri_num'     => 'required|integer',
+            'materia_nombre' => 'required|string|max:100',
         ]);
 
-        $relacion = MatCuatriCar::create($request->all());
+        $relacion = MatCuatriCar::create([
+            'carrera_nombre' => $request->carrera_nombre,
+            'cuatri_num'     => $request->cuatri_num,
+            'materia_nombre' => $request->materia_nombre,
+        ]);
 
         return response()->json([
             'message' => 'Relación registrada correctamente',
             'data'    => $relacion
         ], 201);
+    }
+
+    /**
+     * PUT /api/mat-cuatri-car/{id}
+     * Actualiza una relación existente carrera-cuatrimestre-materia
+     */
+    public function update(Request $request, $id)
+    {
+        $relacion = MatCuatriCar::findOrFail($id);
+
+        $request->validate([
+            'carrera_nombre' => 'required|string|max:100',
+            'cuatri_num'     => 'required|integer',
+            'materia_nombre' => 'required|string|max:100',
+        ]);
+
+        $relacion->update([
+            'carrera_nombre' => $request->carrera_nombre,
+            'cuatri_num'     => $request->cuatri_num,
+            'materia_nombre' => $request->materia_nombre,
+        ]);
+
+        return response()->json([
+            'message' => 'Relación actualizada correctamente',
+            'data'    => $relacion
+        ]);
+    }
+
+    /**
+     * GET /api/carreras/nombres
+     * Devuelve todas las carreras distintas en orden alfabético
+     */
+    public function carrerasAlfabetico()
+    {
+        $carreras = MatCuatriCar::select('carrera_nombre')
+            ->distinct()
+            ->orderBy('carrera_nombre', 'asc')
+            ->get();
+
+        return response()->json($carreras);
     }
 
     /**
@@ -44,8 +93,9 @@ class MatCuatriCarController extends Controller
     public function carrerasPorPeriodo($num)
     {
         $carreras = MatCuatriCar::where('cuatri_num', $num)
-            ->select('id_mat_cuatri_car', 'carrera_nombre')
+            ->select('carrera_nombre')
             ->distinct()
+            ->orderBy('carrera_nombre', 'asc')
             ->get();
 
         return response()->json($carreras);
@@ -60,6 +110,7 @@ class MatCuatriCarController extends Controller
         $materias = MatCuatriCar::where('cuatri_num', $num)
             ->select('materia_nombre')
             ->distinct()
+            ->orderBy('materia_nombre', 'asc')
             ->get();
 
         return response()->json($materias);

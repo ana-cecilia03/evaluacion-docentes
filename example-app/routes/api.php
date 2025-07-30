@@ -128,6 +128,7 @@ Route::prefix('cuatrimestres')->group(function () {
 Route::prefix('mat-cuatri-car')->group(function () {
     Route::get('/', [MatCuatriCarController::class, 'index']);
     Route::post('/', [MatCuatriCarController::class, 'store']);
+    Route::put('/{id}', [MatCuatriCarController::class, 'update']); // ✅ nuevo: actualizar relación
 });
 
 // =======================
