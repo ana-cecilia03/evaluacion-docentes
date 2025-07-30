@@ -66,4 +66,16 @@ class CarreraController extends Controller
             'data' => $carrera
         ]);
     }
+
+    // Obtener las materias asociadas a una carrera específica
+    public function materiasPorCarrera($nombre)
+    {
+        $materias = \DB::table('mat_cuatri_carr')
+        ->select('materia_nombre')
+        ->where('carrera_nombre', $nombre)
+        ->orderBy('materia_nombre')
+        ->get();
+
+        return response()->json($materias);
+    }
 }

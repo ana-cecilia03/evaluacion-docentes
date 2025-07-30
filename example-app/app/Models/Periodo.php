@@ -30,4 +30,9 @@ class Periodo extends Model
         'created_by',        // Usuario o sistema que creó el registro
         'modified_by',       // Usuario o sistema que modificó por última vez
     ];
+
+    public function scopeActivos($query)
+    {
+        return $query->where('estado', 'activo');
+    }
 }

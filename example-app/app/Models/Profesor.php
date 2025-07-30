@@ -33,4 +33,9 @@ class Profesor extends Authenticatable
     protected $hidden = [
         'password',
     ];
+    
+    public function scopeActivos($query)
+    {
+        return $query->where('status', 'activo');
+    }
 }
