@@ -6,38 +6,34 @@ use Illuminate\Database\Eloquent\Model;
 
 class Relacion extends Model
 {
-    // Especificar nombre de la tabla si no sigue convención Laravel
     protected $table = 'relacions';
-
     protected $primaryKey = 'id_relacion';
 
     protected $fillable = [
-        'profesor_nombre',
-        'periodo_num',
-        'carrera_nom',
-        'materia_nom',
-        'clave',
+        'profesor_id',
+        'periodo_id',
+        'id_mat_cuatri_car',
+        'grupo_id',
         'modified_by'
     ];
 
-    // Relaciones con otras tablas
     public function profesor()
     {
-        return $this->belongsTo(Profesor::class, 'profesor_nombre', 'id_profesor');
+        return $this->belongsTo(Profesor::class, 'profesor_id');
     }
 
     public function periodo()
     {
-        return $this->belongsTo(Periodo::class, 'periodo_num', 'id_periodo'); // corregido si usas id_periodo
+        return $this->belongsTo(Periodo::class, 'periodo_id');
     }
 
-    public function carrera()
+    public function matCuatriCar()
     {
-        return $this->belongsTo(Carrera::class, 'carrera_nom', 'id_mat_cuatri_car');
+        return $this->belongsTo(MatCuatriCar::class, 'id_mat_cuatri_car');
     }
 
     public function grupo()
     {
-        return $this->belongsTo(Grupo::class, 'clave', 'clave');
+        return $this->belongsTo(Grupo::class, 'grupo_id');
     }
 }
