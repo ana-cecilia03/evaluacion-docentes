@@ -58,6 +58,9 @@ Route::prefix('carreras')->group(function () {
     });
     Route::get('/por-periodo/{num}', [MatCuatriCarController::class, 'carrerasPorPeriodo']);
 });
+// 📘 Materias por carrera (basado en ID)
+Route::get('/materias/por-carrera/{id}', [CarreraController::class, 'materiasPorCarrera']);
+
 
 // =======================
 // 👨‍🎓 Alumnos

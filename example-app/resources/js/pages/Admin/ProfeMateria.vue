@@ -27,7 +27,7 @@
         <div class="relacion-columna">
           <select v-model="form.carrera_nom" @change="cargarMaterias">
             <option value="">Carrera</option>
-            <option v-for="c in carreras" :key="c.id_carrera" :value="c.nombre_carrera">
+            <option v-for="c in carreras" :key="c.id_carrera" :value="c.id_carrera">
               {{ c.nombre_carrera }}
             </option>
           </select>
