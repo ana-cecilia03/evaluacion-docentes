@@ -5,7 +5,7 @@
 
         <!-- Profesores activos -->
         <div class="relacion-columna">
-          <select v-model="form.profesor_nombre">
+          <select v-model="form.profesor_id">
             <option value="">Profesor</option>
             <option v-for="p in profesores" :key="p.id_profesor" :value="p.id_profesor">
               {{ p.nombre_completo }}
@@ -15,45 +15,44 @@
 
         <!-- Periodos activos -->
         <div class="relacion-columna">
-          <select v-model="form.periodo_num" @change="cargarCarreras">
+          <select v-model="form.periodo_id" @change="cargarCarreras">
             <option value="">Periodo</option>
             <option v-for="p in periodos" :key="p.id_periodo" :value="p.id_periodo">
-              {{ p.num_periodo }}
+              {{ p.nombre_periodo }}
             </option>
           </select>
         </div>
 
         <!-- Carreras -->
         <div class="relacion-columna">
-          <select v-model="form.carrera_nom" @change="cargarMaterias">
+          <select v-model="form.carrera_nombre" @change="cargarMaterias">
             <option value="">Carrera</option>
-            <option v-for="c in carreras" :key="c.id_carrera" :value="c.id_carrera">
+            <option v-for="c in carreras" :key="c.id_carrera" :value="c.nombre_carrera">
               {{ c.nombre_carrera }}
             </option>
           </select>
         </div>
 
-        <!-- Materias filtradas por carrera -->
+        <!-- Materias -->
         <div class="relacion-columna">
-          <select v-model="form.materia_nom">
+          <select v-model="form.id_mat_cuatri_car">
             <option value="">Materia</option>
-            <option v-for="m in materias" :key="m.id_mat_cuatri_car" :value="m.materia_nombre">
-              {{ m.materia_nombre }}
+            <option v-for="m in materias" :key="m.id_mat_cuatri_car" :value="m.id_mat_cuatri_car">
+              {{ m.materia_nombre }} (Cuatri {{ m.cuatri_num }})
             </option>
           </select>
         </div>
 
         <!-- Grupos -->
         <div class="relacion-columna">
-          <select v-model="form.clave">
+          <select v-model="form.grupo_id">
             <option value="">Grupo</option>
-            <option v-for="g in grupos" :key="g.id_grupo" :value="g.nombre">
+            <option v-for="g in grupos" :key="g.id_grupo" :value="g.id_grupo">
               {{ g.nombre }}
             </option>
           </select>
         </div>
 
-        <!-- Botón de enviar -->
         <div class="relacion-columna">
           <button class="btn-agregar" @click="agregarRelacion">Agregar</button>
         </div>
@@ -74,16 +73,17 @@
           </thead>
           <tbody>
             <tr v-for="r in relaciones" :key="r.id_relacion">
-              <td>{{ r.profesor?.nombre_completo ?? r.profesor_nombre }}</td>
-              <td>{{ r.periodo?.num_periodo ?? r.periodo_num }}</td>
-              <td>{{ r.carrera?.nombre_carrera ?? r.carrera_nom }}</td>
-              <td>{{ r.materia_nom }}</td>
-              <td>{{ r.grupo?.nombre ?? r.clave }}</td>
+              <td>{{ r.profesor?.nombre_completo }}</td>
+              <td>{{ r.periodo?.nombre_periodo }}</td>
+              <td>{{ r.mat_cuatri_car?.carrera_nombre }}</td>
+              <td>{{ r.mat_cuatri_car?.materia_nombre }}</td>
+              <td>{{ r.grupo?.nombre }}</td>
               <td><button class="boton-verde">Editar</button></td>
             </tr>
           </tbody>
         </table>
       </div>
+
     </div>
   </Menu>
 </template>
@@ -101,16 +101,17 @@ const grupos = ref([])
 const relaciones = ref([])
 
 const form = ref({
-  profesor_nombre: '',
-  periodo_num: '',
-  carrera_nom: '',
-  materia_nom: '',
-  clave: ''
+  profesor_id: '',
+  periodo_id: '',
+  carrera_nombre: '',
+  id_mat_cuatri_car: '',
+  grupo_id: ''
 })
 
 onMounted(() => {
   axios.get('/api/profesores/activos').then(res => profesores.value = res.data)
   axios.get('/api/periodos/activos').then(res => periodos.value = res.data)
+  axios.get('/api/carreras').then(res => carreras.value = res.data)
   axios.get('/api/grupos').then(res => grupos.value = res.data)
   cargarRelaciones()
 })
@@ -120,8 +121,8 @@ const cargarCarreras = () => {
 }
 
 const cargarMaterias = () => {
-  if (!form.value.carrera_nom) return
-  axios.get(`/api/materias/por-carrera/${encodeURIComponent(form.value.carrera_nom)}`)
+  if (!form.value.carrera_nombre) return
+  axios.get(`/api/materias/por-carrera/${encodeURIComponent(form.value.carrera_nombre)}`)
     .then(res => materias.value = res.data)
 }
 
@@ -130,24 +131,20 @@ const cargarRelaciones = () => {
 }
 
 const agregarRelacion = async () => {
-  const f = { ...form.value }
-  if (!f.profesor_nombre || !f.periodo_num || !f.carrera_nom || !f.materia_nom || !f.clave) {
+  const f = { ...form.value, modified_by: 'admin' }
+  if (!f.profesor_id || !f.periodo_id || !f.id_mat_cuatri_car || !f.grupo_id) {
     alert('Completa todos los campos')
     return
   }
-
   try {
     await axios.post('/api/relaciones', f)
-    cargarRelaciones()
+    alert('Relación registrada')
     form.value = {
-      profesor_nombre: '',
-      periodo_num: '',
-      carrera_nom: '',
-      materia_nom: '',
-      clave: ''
+      profesor_id: '', periodo_id: '', carrera_nombre: '', id_mat_cuatri_car: '', grupo_id: ''
     }
+    cargarRelaciones()
   } catch (e) {
-    console.error('Error al guardar relación:', e)
+    console.error(e)
     alert('Error al guardar relación')
   }
 }

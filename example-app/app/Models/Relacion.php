@@ -10,31 +10,30 @@ class Relacion extends Model
     protected $primaryKey = 'id_relacion';
 
     protected $fillable = [
-        'profesor_nombre',
-        'periodo_num',
-        'carrera_nom',
-        'materia_nom',
-        'clave',
-        'modified_by',
+        'profesor_id',
+        'periodo_id',
+        'id_mat_cuatri_car',
+        'grupo_id',
+        'modified_by'
     ];
 
     public function profesor()
     {
-        return $this->belongsTo(Profesor::class, 'profesor_nombre', 'id_profesor');
+        return $this->belongsTo(Profesor::class, 'profesor_id');
     }
 
     public function periodo()
     {
-        return $this->belongsTo(Periodo::class, 'periodo_num', 'id_periodo');
+        return $this->belongsTo(Periodo::class, 'periodo_id');
     }
 
-    public function carrera()
+    public function matCuatriCar()
     {
-        return $this->belongsTo(Carrera::class, 'carrera_nom', 'id_carrera');
+        return $this->belongsTo(MatCuatriCar::class, 'id_mat_cuatri_car');
     }
 
     public function grupo()
     {
-        return $this->belongsTo(Grupo::class, 'clave', 'nombre');
+        return $this->belongsTo(Grupo::class, 'grupo_id');
     }
 }

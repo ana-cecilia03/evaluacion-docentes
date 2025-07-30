@@ -58,9 +58,14 @@ Route::prefix('carreras')->group(function () {
     });
     Route::get('/por-periodo/{num}', [MatCuatriCarController::class, 'carrerasPorPeriodo']);
 });
-// 📘 Materias por carrera (basado en ID)
-Route::get('/materias/por-carrera/{id}', [CarreraController::class, 'materiasPorCarrera']);
 
+// 📘 Materias por carrera (por nombre de carrera)
+Route::get('/materias/por-carrera/{nombre}', function ($nombre) {
+    return MatCuatriCar::where('carrera_nombre', $nombre)
+        ->select('id_mat_cuatri_car', 'materia_nombre', 'cuatri_num')
+        ->orderBy('cuatri_num')
+        ->get();
+});
 
 // =======================
 // 👨‍🎓 Alumnos
@@ -93,7 +98,6 @@ Route::prefix('grupos')->group(function () {
     Route::post('/', [GrupoController::class, 'store']);
     Route::put('/{id}', [GrupoController::class, 'update']);
     Route::post('/csv', [GrupoController::class, 'importarDesdeCSV']);
-    Route::get('/nombres', fn() => Grupo::select('nombre')->get());
 });
 
 // =======================
@@ -106,12 +110,6 @@ Route::prefix('materias')->group(function () {
     Route::post('/csv', [MateriaController::class, 'importarDesdeCSV']);
     Route::get('/nombres', [MateriaController::class, 'nombres']);
     Route::get('/por-periodo/{num}', [MatCuatriCarController::class, 'materiasPorPeriodo']);
-    Route::get('/por-carrera/{nombre}', function ($nombre) {
-        return MatCuatriCar::where('carrera_nombre', $nombre)
-            ->select('materia_nombre')
-            ->distinct()
-            ->get();
-    });
 });
 
 // =======================
@@ -133,15 +131,16 @@ Route::prefix('mat-cuatri-car')->group(function () {
 });
 
 // =======================
-// 📋 Relaciones prof-materia-grupo
+// 📋 Relaciones prof-mat-grupo
 // =======================
 Route::prefix('relaciones')->group(function () {
     Route::get('/', [RelacionController::class, 'index']);
     Route::post('/', [RelacionController::class, 'store']);
+    Route::put('/{id}', [RelacionController::class, 'update']);
 });
 
 // =======================
-// 📥 Selects genéricos para formularios
+// 📥 Selects genéricos
 // =======================
 Route::prefix('selects')->group(function () {
     Route::get('/profesores', fn() => Profesor::all());
