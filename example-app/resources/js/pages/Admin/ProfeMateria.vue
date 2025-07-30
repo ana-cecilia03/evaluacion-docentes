@@ -59,7 +59,7 @@
       </div>
 
       <!-- Tabla relaciones -->
->>>>>>> 2889beca9e45edd741ed1b7d8dd7cf409d989a6c
+
       <div class="table-wrapper">
         <table>
           <thead>
