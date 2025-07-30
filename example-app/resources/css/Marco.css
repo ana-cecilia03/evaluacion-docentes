@@ -53,7 +53,7 @@
 
 /* PIE DE PÁGINA AZUL */
 .footer-admin {
-  background-color: #628ecb;
+  background-color: rgba(98, 142, 203, 0.8);
   color: white;
   text-align: center;
   padding: 10px;
@@ -228,7 +228,7 @@
 
 /* PIE DE PÁGINA AZUL */
 .footer-admin {
-  background-color: #628ecb;
+  background-color: rgba(98, 142, 203, 0.8);
   color: white;
   text-align: center;
   padding: 10px;

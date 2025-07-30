@@ -35,4 +35,6 @@
 import MenuAlumno from '@/layouts/MenuAlumno.vue'
 // script vacío
 </script>
+
 <style src="@/../css/materias.css"></style>
+<style src="@/../css/botones.css"></style>

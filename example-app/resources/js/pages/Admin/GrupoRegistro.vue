@@ -48,7 +48,7 @@
               <td>{{ grupo.id_grupo }}</td>
               <td>{{ grupo.nombre }}</td>
               <td>
-                <button class="btn-edit" @click="abrirModalEditar(grupo)">Editar</button>
+                <button class="boton-verde" @click="abrirModalEditar(grupo)">Editar</button>
               </td>
             </tr>
           </tbody>
@@ -103,3 +103,4 @@ onMounted(obtenerGrupos)
 </script>
 
 <style src="@/../css/Registros.css"></style>
+<style src="@/../css/botones.css"></style>

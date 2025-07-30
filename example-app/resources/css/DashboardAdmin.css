@@ -1,12 +1,18 @@
+body {
+  background-color: #f3f3f3;/* Gris claro */
+  margin: 0;
+  padding: 0;
+}
+
 .contenedor-cuadro {
-  border: 2px solid #add8e6;
+  border: 1px solid #add8e6;
   padding: 15px;  /* Reducir padding */
   border-radius: 10px;
-  background-color: #ffffff;
+  background-color: #fdfcfc;
   width: 100%;
   max-width: 800px;
   margin: 0 auto;
-  box-shadow: 0 10px 30px rgba(103, 125, 255, 0.5);
+  box-shadow: 0 10px 30px rgba(83, 102, 212, 0.5);
 }
 
 /* Estilo del contenedor principal */
@@ -14,7 +20,7 @@
   flex-grow: 1;
   padding: 10px;  /* Reducir padding */
   margin: 0;
-  background-color: #f5f5f5;
+  background-color: #cfcdcd;
   display: flex;
   justify-content: center;
   align-items: flex-start;
@@ -79,35 +85,36 @@
 }
 
 .btn-cancelar {
-  background-color: #d32f2f;
+  background-color: #aa1a28;
   color: white;
   border: none;
-  padding: 12px 24px;
-  font-size: 16px;
-  border-radius: 20px;
+  padding: 6px 12px;
+  border-radius: 6px;
   cursor: pointer;
-  transition: background-color 0.3s ease;
 }
 
 .btn-cancelar:hover {
-  background-color: #b71c1c;
+  background-color: #e44c5b;
 }
 
 .btn-crear {
-  background-color: #388e3c;
+  background-color: #156827;
   color: white;
   border: none;
-  padding: 12px 24px;
-  font-size: 16px;
-  border-radius: 20px;
+  padding: 6px 12px;
+  border-radius: 6px;
   cursor: pointer;
-  transition: background-color 0.3s ease;
 }
 
 .btn-crear:hover {
-  background-color: #2e7d32;
+  background-color: #3dbe59;
 }
 
+
+.btn-crear:hover,
+.btn-cancelar:hover {
+  transform: scale(1.10); /* Aumenta el tamaño en un 5% */
+}
 
 @media (max-width: 768px) {
   .contenido-periodo {

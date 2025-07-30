@@ -48,7 +48,7 @@
               <td>{{ carrera.clave }}</td>
               <td>{{ carrera.nombre_carrera }}</td>
               <td>
-                <button class="btn-edit" @click="editar(carrera)">Editar</button>
+                <button class="boton-verde" @click="editar(carrera)">Editar</button>
               </td>
             </tr>
           </tbody>
@@ -104,3 +104,4 @@ onMounted(() => {
 </script>
 
 <style src="@/../css/Registros.css"></style>
+<style src="@/../css/botones.css"></style>

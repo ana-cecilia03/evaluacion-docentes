@@ -31,9 +31,14 @@
         </div>
 
         <div class="relacion-columna">
-          <button class="btn-agregar" @click="agregarRelacion">Agregar</button>
+          <button class="boton-azul" @click="agregarRelacion">Agregar</button>
         </div>
       </div>
+
+      <!-- Modal: Edición -->
+       <EditarMat v-if="modoEditar" 
+       :relacion="datosEdicion" 
+       @cerrar="modoEditar = false; obtenerDatos()" />
 
       <!-- Tabla -->
       <div class="table-wrapper">
@@ -52,7 +57,7 @@
               <td>{{ rel.cuatri_num }}</td>
               <td>{{ rel.materia_nombre }}</td>
               <td>
-                <button class="boton-verde">Editar</button>
+                <button class="boton-verde" @click="editarRelacion(rel)">Editar</button>
               </td>
             </tr>
           </tbody>
@@ -66,6 +71,10 @@
 import { ref, onMounted } from 'vue'
 import axios from 'axios'
 import Menu from '@/layouts/Menu.vue'
+import EditarMat from '@/components/EditarMat.vue'
+
+const modoEditar = ref(false)
+const datosEdicion = ref(null)
 
 const carreras = ref([])
 const cuatrimestres = ref([])
@@ -77,6 +86,11 @@ const form = ref({
   cuatri_num: '',
   materia_nombre: ''
 })
+
+const editarRelacion = (rel) => {
+  datosEdicion.value = { ...rel }
+  modoEditar.value = true
+}
 
 const obtenerDatos = async () => {
   const [resCarreras, resCuatris, resMaterias, resRelaciones] = await Promise.all([

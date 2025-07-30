@@ -23,7 +23,7 @@ html, body {
 
 /* === Encabezado === */
 .header {
-  background-color: #628ecb;
+  background-color: rgba(98, 142, 203, 0.8);
   padding: 10px;
   text-align: left;
 }
@@ -34,7 +34,7 @@ html, body {
 
 /* === Pie de página === */
 .footer {
-  background-color: #628ecb;
+  background-color: rgba(98, 142, 203, 0.8);
   color: white;
   text-align: center;
   padding: 5px 10px;

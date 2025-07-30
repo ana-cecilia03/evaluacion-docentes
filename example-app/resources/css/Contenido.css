@@ -1,3 +1,9 @@
+body {
+  background-color: #f3f3f3;/* Gris claro */
+  margin: 0;
+  padding: 0;
+}
+
 /* Tabla de periodos */
 .tabla-periodos {
   width: 90%;  /* Hace que la tabla ocupe el 100% del ancho disponible */
@@ -8,7 +14,7 @@
   font-family: Arial, sans-serif;
   padding: 0 20px; /* Agrega espacio en los laterales */
   box-sizing: border-box; /* Incluye el padding en el ancho total */
-  box-shadow: 0 5px 20px rgba(94, 172, 245, 0.555);
+  box-shadow: 0 5px 20px rgba(98, 142, 203, 0.8);
 }
 
 .table-wrapper {
@@ -84,7 +90,7 @@
 }
 
 .boton-actualizar:hover {
-  background-color: #4d86d1;
+  background-color: rgba(98, 142, 203, 0.8);
   transform: scale(1.10); /* Aumenta el tamaño en un 5% */
 }
 
@@ -178,7 +184,7 @@
 }
 
 .sesion {
-  background-color: #628ecb;
+  background-color: rgba(98, 142, 203, 0);
   color: white;
   border: none;
   padding: 10px 20px;

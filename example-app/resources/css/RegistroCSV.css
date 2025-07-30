@@ -2,6 +2,9 @@
   position: fixed;
   top: 0;
   left: 0;
+  right: 0; /* <-- Asegura que cubra completamente el ancho */
+  bottom: 0; /* <-- Asegura que cubra completamente el alto */
+  overflow: hidden;
   z-index: 1000;
   width: 100vw;
   height: 100vh;
@@ -36,6 +39,8 @@
   border-radius: 10px;
   text-align: center;
   background-color: #f9f9f9;
+  overflow: hidden;  /* Evita que el contenido desborde */
+  word-wrap: break-word;  /* Asegura que las palabras largas se rompan */
 }
 
 .csv-upload p {
@@ -93,4 +98,13 @@
   .csv-buttons button {
     width: 100%;
   }
+
+  .csv-upload p {
+    font-size: 0.8rem;  /* Más pequeño en móviles */
+  }
+
+  .csv-upload strong {
+    font-size: 0.9rem;  /* Aseguramos que el texto aún se vea bien */
+  }
+
 }

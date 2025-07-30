@@ -80,7 +80,7 @@
               <td>{{ alumno.correo }}</td>
               <td>{{ alumno.status }}</td>
               <td>
-                <button class="btn-edit" @click="abrirEdicion(alumno)">Editar</button>
+                <button class="boton-verde" @click="abrirEdicion(alumno)">Editar</button>
               </td>
             </tr>
           </tbody>
@@ -185,3 +185,4 @@ onMounted(() => {
 </script>
 
 <style src="@/../css/Registros.css"></style>
+<style src="@/../css/botones.css"></style>

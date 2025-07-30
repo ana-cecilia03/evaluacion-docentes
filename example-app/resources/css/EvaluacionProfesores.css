@@ -1,6 +1,12 @@
 /* No tocar tus reglas globales (.contenido-principal, .menu-lateral, etc.).
    Solo agrego clases específicas para esta página para no romper nada. */
 
+body {
+  background-color: #f3f3f3;/* Gris claro */
+  margin: 0;
+  padding: 0;
+}   
+
 .evaluacion-page {
   /* Respeta tu margen lateral definido en tu CSS global (.contenido-principal) */
   max-width: 1200px;

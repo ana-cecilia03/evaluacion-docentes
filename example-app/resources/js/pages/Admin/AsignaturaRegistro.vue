@@ -45,7 +45,7 @@
               <td>{{ materia.clave }}</td>
               <td>{{ materia.nombre_materia }}</td>
               <td>
-                <button class="btn-edit" @click="abrirEditar(materia)">Editar</button>
+                <button class="boton-verde" @click="abrirEditar(materia)">Editar</button>
               </td>
             </tr>
           </tbody>
@@ -109,3 +109,4 @@ onMounted(() => {
 </script>
 
 <style src="@/../css/Registros.css"></style>
+<style src="@/../css/botones.css"></style>

@@ -26,6 +26,15 @@
   cursor: pointer;
 }
 
+.boton-azulClaro {
+  background-color: #628ECB;
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
 /* Botones al pasar el cursor */
 .boton-verde:hover {
   background-color: #3dbe59;
@@ -39,16 +48,21 @@
   background-color: #4d86d1;
 }
 
+.boton-azulClaro:hover {
+  background-color: #395886;
+}
+
 
 /* Efecto de aumento al pasar el cursor */
 .boton-verde:hover,
 .boton-rojo:hover,
-.boton-azul:hover {
+.boton-azul:hover,
+.boton-azulClaro:hover {
   transform: scale(1.10); /* Aumenta el tamaño en un 5% */
 }
 
 @media (max-width: 600px) {
-    .boton-verde, .boton-rojo, .boton-azul {
+    .boton-verde, .boton-rojo, .boton-azul, .boton-azulClaro {
         padding: 5px 10px;
         font-size: 13px;
   }

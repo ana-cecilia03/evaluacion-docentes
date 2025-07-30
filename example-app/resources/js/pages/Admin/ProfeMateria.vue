@@ -72,9 +72,14 @@
 
         <!-- Botón para enviar la relación -->
         <div class="relacion-columna">
-          <button class="btn-agregar" @click="agregarRelacion">Agregar</button>
+          <button class="boton-azul" @click="agregarRelacion">Agregar</button>
         </div>
       </div>
+
+      <!-- Modal: Edición -->
+       <EditarProf v-if="modoEditar" 
+       :relacion="datosEdicion" 
+       @cerrar="modoEditar = false; obtenerDatos()" />      
 
       <!-- Tabla: muestra las relaciones ya registradas -->
       <!-- Carga desde API: /api/relaciones -->
@@ -97,7 +102,7 @@
               <td>{{ r.carrera_nom }}</td>
               <td>{{ r.materia_nom }}</td>
               <td>{{ r.clave }}</td>
-              <td><button class="boton-verde">Editar</button></td>
+              <td><button class="boton-verde" >Editar</button></td>
             </tr>
           </tbody>
         </table>
@@ -110,6 +115,7 @@
 import { ref, onMounted } from 'vue'
 import axios from 'axios'
 import Menu from '@/layouts/Menu.vue'
+import EditarProf from '@/components/EditarProf.vue'
 
 // Datos que llenan los selects
 const profesores = ref([])

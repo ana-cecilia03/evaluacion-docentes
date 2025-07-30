@@ -4,20 +4,28 @@
       <!-- Filtros y botón Agregar -->
       <div class="relacion-filtros">
         <div class="relacion-columna">
-          <label>Número:</label>
+          <label>No°:</label>
           <input type="number" v-model="nuevoCuatrimestre.num" placeholder="1-10" />
         </div>
 
         <div class="relacion-columna">
-          <label>Nombre:</label>
+          <label>Cuatrimestre:</label>
           <input type="text" v-model="nuevoCuatrimestre.nombre" placeholder="Primer Cuatrimestre" />
         </div>
 
         <div class="relacion-columna">
           <label> </label>
-          <button class="btn-agregar" @click="agregarCuatrimestre">Agregar</button>
+          <button class="boton-azul" @click="agregarCuatrimestre">Agregar</button>
         </div>
       </div>
+
+      <!-- Modal: Edición -->
+      <EditarCuatri
+        v-if="modoEditar"
+        :relacion="datosEdicion"
+        @cerrar="modoEditar = false"
+        @guardar="actualizarCuatrimestre"
+      />
 
       <!-- Tabla -->
       <div class="table-wrapper">
@@ -48,6 +56,10 @@
 import { ref, onMounted } from 'vue'
 import axios from 'axios'
 import Menu from '@/layouts/Menu.vue'
+import EditarCuatri from '@/components/EditarCuatri.vue'
+
+const modoEditar = ref(false)
+const datosEdicion = ref({})
 
 const cuatrimestres = ref([])
 const nuevoCuatrimestre = ref({
@@ -74,22 +86,21 @@ const agregarCuatrimestre = async () => {
 }
 
 // Editar cuatrimestre (aquí puedes abrir un modal en lugar de inline)
-const editarCuatrimestre = async (cuatri) => {
-  const nuevoNombre = prompt('Nuevo nombre:', cuatri.nombre)
-  const nuevoNum = prompt('Nuevo número:', cuatri.num)
-  if (nuevoNombre && nuevoNum) {
-    try {
-      await axios.put(`/api/cuatrimestres/${cuatri.id_cuatrimestre}`, {
-        nombre: nuevoNombre,
-        num: nuevoNum,
-        modified_by: 'admin'
-      })
-      await obtenerCuatrimestres()
-    } catch (error) {
-      alert('Error al editar: ' + error.response.data.message)
-    }
+const editarCuatrimestre = (cuatri) => {
+  datosEdicion.value = { ...cuatri }
+  modoEditar.value = true
+}
+
+const actualizarCuatrimestre = async (cuatriActualizado) => {
+  try {
+    await axios.put(`/api/cuatrimestres/${cuatriActualizado.id_cuatrimestre}`, cuatriActualizado)
+    modoEditar.value = false
+    await obtenerCuatrimestres()
+  } catch (error) {
+    alert('Error al actualizar: ' + error.response.data.message)
   }
 }
+
 
 onMounted(obtenerCuatrimestres)
 </script>

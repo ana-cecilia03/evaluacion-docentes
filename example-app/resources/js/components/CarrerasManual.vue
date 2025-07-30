@@ -1,4 +1,5 @@
 <template>
+  <teleport to="body">
   <!-- Modal de registro manual de carrera -->
   <div class="modal-overlay">
     <div class="modal-content">
@@ -30,6 +31,7 @@
       </div>
     </div>
   </div>
+  </teleport>
 </template>
 
 <script setup>

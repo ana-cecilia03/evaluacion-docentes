@@ -115,7 +115,7 @@
 
 .login-box button {
   width: 60%;
-  background-color: #628ecb;
+  background-color: rgba(98, 142, 203, 0.8);
   color: white;
   border: none;
   padding: 10px;
@@ -266,7 +266,7 @@
 
 /*     --------------------           APP            --------------------    */
 :root {
-  --brand: #6d97d4;
+  --brand: rgba(98, 142, 203, 0.8);
   --text: #0f172a;
   --muted: #475569;
   --bg: #ffffff;

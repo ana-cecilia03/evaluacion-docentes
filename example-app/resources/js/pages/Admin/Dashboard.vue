@@ -1,6 +1,5 @@
 <template>
   <Menu>
-    <div class="contenido-periodo">
       <div class="contenedor-cuadro">
         <h1 class="titulo">Crear periodo</h1>
         
@@ -34,14 +33,13 @@
 
           <div class="botones-formulario">
             <button type="button" class="btn-cancelar" @click="cancelar">Cancelar</button>
-            <button type="submit" class="btn-crear">Crear</button>
+            <button type="button" class="btn-crear">Crear</button>
           </div>
 
           <p v-if="mensaje" class="mensaje-exito">{{ mensaje }}</p>
           <p v-if="error" class="mensaje-error">{{ error }}</p>
         </form>
       </div>
-    </div>
   </Menu>
 </template>
 
@@ -85,4 +83,5 @@ function cancelar() {
 }
 </script>
 
-<style src="@/../css/DashboardAdmin.css" scoped></style>
+<style src="@/../css/DashboardAdmin.css"></style>
+<style src="@/../css/botones.css"></style>

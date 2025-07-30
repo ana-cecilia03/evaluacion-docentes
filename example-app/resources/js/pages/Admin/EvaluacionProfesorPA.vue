@@ -7,7 +7,7 @@
         
         <div class="acciones">
           <div class="download-wrapper">
-            <button class="btn-descargar" @click="toggleDropdown">
+            <button class="boton-verde" @click="toggleDropdown">
               Descargar
             </button>
             <ul v-if="showDownload" class="dropdown">
