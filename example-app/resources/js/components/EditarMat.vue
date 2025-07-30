@@ -128,11 +128,4 @@ async function guardar() {
 
 <style src="@/../css/Editar.css"></style>
 
-<style scoped>
-.error {
-  color: red;
-  font-size: 0.85rem;
-  margin-top: 4px;
-  display: block;
-}
-</style>
+
