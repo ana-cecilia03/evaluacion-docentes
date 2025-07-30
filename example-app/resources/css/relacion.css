@@ -35,6 +35,11 @@
   background-color: #fff;
 }
 
+/* --- Estilo adicional: mostrar <option> en negritas --- */
+select option {
+  font-weight: bold; /* Aplica negrita al texto de cada opción del select */
+}
+
 /* --- Botón Agregar --- */
 .btn-agregar {
   align-self: flex-end;

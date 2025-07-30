@@ -2,7 +2,6 @@
   <Menu>
     <div class="contenido-principal">
       <div class="relacion-filtros">
-
         <!-- Profesores activos -->
         <div class="relacion-columna">
           <select v-model="form.profesor_id">
@@ -26,8 +25,13 @@
         <!-- Carreras -->
         <div class="relacion-columna">
           <select v-model="form.carrera_nombre" @change="cargarMaterias">
-            <option value="">Carrera</option>
-            <option v-for="c in carreras" :key="c.id_carrera" :value="c.nombre_carrera">
+            <option disabled value="">Carrera</option>
+            <option
+              v-for="c in carreras"
+              :key="c.id_carrera"
+              :value="c.nombre_carrera"
+              style="font-weight: bold"
+            >
               {{ c.nombre_carrera }}
             </option>
           </select>
@@ -38,7 +42,7 @@
           <select v-model="form.id_mat_cuatri_car">
             <option value="">Materia</option>
             <option v-for="m in materias" :key="m.id_mat_cuatri_car" :value="m.id_mat_cuatri_car">
-              {{ m.materia_nombre }} (Cuatri {{ m.cuatri_num }})
+              {{ m.materia_nombre }}
             </option>
           </select>
         </div>
@@ -53,13 +57,13 @@
           </select>
         </div>
 
+        <!-- Botón Agregar -->
         <div class="relacion-columna">
           <button class="boton-azul" @click="agregarRelacion">Agregar</button>
         </div>
       </div>
 
       <!-- Tabla relaciones -->
-
       <div class="table-wrapper">
         <table>
           <thead>
@@ -74,18 +78,26 @@
           </thead>
           <tbody>
             <tr v-for="r in relaciones" :key="r.id_relacion">
-
               <td>{{ r.profesor?.nombre_completo }}</td>
               <td>{{ r.periodo?.nombre_periodo }}</td>
               <td>{{ r.mat_cuatri_car?.carrera_nombre }}</td>
               <td>{{ r.mat_cuatri_car?.materia_nombre }}</td>
               <td>{{ r.grupo?.nombre }}</td>
-              <td><button class="boton-verde">Editar</button></td>
+              <td>
+                <button class="boton-verde" @click="editarRelacion(r)">Editar</button>
+              </td>
             </tr>
           </tbody>
         </table>
       </div>
 
+      <!-- Modal editar -->
+      <EditarProf
+        v-if="modoEditar"
+        :relacion="relacionActual"
+        @cerrar="modoEditar = false"
+        @guardar="modoEditar = false; cargarRelaciones()"
+      />
     </div>
   </Menu>
 </template>
@@ -102,6 +114,9 @@ const carreras = ref([])
 const materias = ref([])
 const grupos = ref([])
 const relaciones = ref([])
+
+const modoEditar = ref(false)
+const relacionActual = ref(null)
 
 const form = ref({
   profesor_id: '',
@@ -150,6 +165,11 @@ const agregarRelacion = async () => {
     console.error(e)
     alert('Error al guardar relación')
   }
+}
+
+const editarRelacion = (rel) => {
+  relacionActual.value = rel
+  modoEditar.value = true
 }
 </script>
 
