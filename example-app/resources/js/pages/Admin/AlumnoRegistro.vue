@@ -7,7 +7,7 @@
 
         <select v-model="grupoSeleccionado">
           <option value="">Filtrar por grupo</option>
-          <option v-for="grupo in grupos" :key="grupo.id_grupo" :value="grupo.nombre">
+          <option v-for="grupo in grupos" :key="grupo.id_grupo" :value="grupo.id_grupo">
             {{ grupo.nombre }}
           </option>
         </select>
@@ -76,7 +76,7 @@
               </td>
               <td>{{ alumno.matricula }}</td>
               <td>{{ alumno.nombre_completo }}</td>
-              <td>{{ alumno.grupo }}</td>
+              <td>{{ alumno.grupo?.nombre || 'Sin grupo' }}</td>
               <td>{{ alumno.correo }}</td>
               <td>{{ alumno.status }}</td>
               <td>
@@ -135,7 +135,7 @@ const alumnosFiltrados = computed(() => {
     const coincideBusqueda =
       a.nombre_completo.toLowerCase().includes(busqueda.value.toLowerCase()) ||
       a.matricula.toLowerCase().includes(busqueda.value.toLowerCase())
-    const coincideGrupo = !grupoSeleccionado.value || a.grupo == grupoSeleccionado.value
+    const coincideGrupo = !grupoSeleccionado.value || a.grupo?.id_grupo == grupoSeleccionado.value
     return coincideBusqueda && coincideGrupo
   })
 })

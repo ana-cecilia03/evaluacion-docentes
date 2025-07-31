@@ -1,5 +1,4 @@
 <template>
-  <!-- Modal para cargar alumnos desde un archivo CSV -->
   <div class="modal-csv">
     <div class="modal-content">
       <div class="csv-container">
@@ -8,18 +7,32 @@
         <!-- Área de carga de archivo -->
         <div class="csv-upload">
           <input type="file" accept=".csv" @change="handleFileUpload" />
-          <p>Formato esperado: <strong>matricula,nombre_completo,correo,grupo,status</strong></p>
+          <p>Formato esperado: 
+            <strong>matricula,nombre_completo,correo,grupo,status</strong>
+            <br />
+            <em>* El campo <code>grupo</code> debe ser el ID del grupo (número), no su nombre.</em>
+          </p>
         </div>
 
-        <!-- Botones para cancelar o confirmar carga -->
+        <!-- Botones -->
         <div class="csv-buttons">
           <button @click="$emit('cerrar')" class="cancel-button">Cancelar</button>
           <button @click="cargarCSV" class="cargar-button">Cargar CSV</button>
         </div>
 
-        <!-- Mostrar errores si los hay -->
+        <!-- Mostrar errores globales -->
         <div v-if="error" class="error-message">
           {{ error }}
+        </div>
+
+        <!-- Mostrar errores detallados por línea -->
+        <div v-if="errores.length" class="errores-detallados">
+          <h3>Errores en la carga:</h3>
+          <ul>
+            <li v-for="(e, index) in errores" :key="index">
+              Línea {{ e.linea }}: {{ e.errores.join(', ') }}
+            </li>
+          </ul>
         </div>
       </div>
     </div>
@@ -32,13 +45,19 @@ import axios from 'axios'
 
 const file = ref(null)
 const error = ref(null)
+const errores = ref([])
+
+const emit = defineEmits(['cerrar', 'guardado'])
 
 const handleFileUpload = (event) => {
   file.value = event.target.files[0]
+  error.value = null
+  errores.value = []
 }
 
 const cargarCSV = async () => {
   error.value = null
+  errores.value = []
 
   if (!file.value) {
     error.value = 'Por favor, selecciona un archivo CSV.'
@@ -49,24 +68,21 @@ const cargarCSV = async () => {
   formData.append('archivo', file.value)
 
   try {
-    await axios.post('/api/alumnos/csv', formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      }
+    const response = await axios.post('/api/alumnos/csv', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
     })
 
-    alert('Archivo de alumnos cargado correctamente')
-    file.value = null
-    // Emitir eventos si es necesario
-    // emit('guardado')
-    // emit('cerrar')
+    alert(response.data.message || 'Archivo cargado correctamente')
+    emit('guardado')
+    emit('cerrar')
   } catch (err) {
-    if (err.response?.data?.message) {
-      error.value = err.response.data.message
+    if (err.response?.status === 422 && err.response.data?.errores) {
+      errores.value = err.response.data.errores
+      error.value = err.response.data.message || 'Errores en el archivo CSV.'
     } else {
-      error.value = 'Error al subir el archivo CSV.'
+      error.value = err.response?.data?.message || 'Error al subir el archivo CSV.'
     }
-    console.error('Error al subir archivo CSV:', err)
+    console.error('Error al subir CSV:', err)
   }
 }
 </script>

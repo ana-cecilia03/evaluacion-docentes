@@ -52,13 +52,13 @@
 
           <!-- Campo: Grupo -->
           <div class="form-group">
-            <label for="grupo">Grupo (ID numérico)</label>
-            <input
-              type="number"
-              id="grupo"
-              v-model.number="alumnoLocal.grupo"
-              placeholder="Ej. 1"
-            />
+            <label for="grupo">Grupo</label>
+            <select id="grupo" v-model="alumnoLocal.grupo">
+              <option value="">Seleccione un grupo</option>
+              <option v-for="grupo in grupos" :key="grupo.id_grupo" :value="grupo.id_grupo">
+                {{ grupo.nombre }}
+              </option>
+            </select>
           </div>
 
           <!-- Campo: Estado -->
@@ -88,7 +88,7 @@
 </template>
 
 <script setup>
-import { ref, watch } from 'vue'
+import { ref, watch, onMounted } from 'vue'
 import axios from 'axios'
 import { defineProps, defineEmits } from 'vue'
 
@@ -108,27 +108,37 @@ const alumnoLocal = ref({
   matricula: '',
   correo: '',
   password: '',
-  grupo: null,
+  grupo: '',
   status: ''
 })
 
-// Copiar datos de la prop a la copia local al cargarse o actualizarse
+const grupos = ref([])
+const error = ref(null)
+
+// Cargar lista de grupos desde API
+const cargarGrupos = async () => {
+  try {
+    const res = await axios.get('/api/grupos')
+    grupos.value = res.data
+  } catch (e) {
+    console.error('Error al cargar grupos:', e)
+  }
+}
+
+// Copiar datos de la prop al estado local
 watch(
   () => props.alumno,
   (nuevo) => {
     if (nuevo) {
       alumnoLocal.value = {
         ...nuevo,
-        password: '' // no mostramos la contraseña actual por seguridad
+        password: ''
       }
     }
   },
   { immediate: true }
 )
 
-const error = ref(null)
-
-// Función para actualizar el alumno
 const actualizarAlumno = async () => {
   error.value = null
 
@@ -142,8 +152,7 @@ const actualizarAlumno = async () => {
       modified_by: 'frontend'
     }
 
-    // Solo enviamos la nueva contraseña si fue escrita
-    if (alumnoLocal.value.password && alumnoLocal.value.password.trim() !== '') {
+    if (alumnoLocal.value.password?.trim()) {
       payload.password = alumnoLocal.value.password
     }
 
@@ -156,6 +165,10 @@ const actualizarAlumno = async () => {
     console.error('Error al actualizar alumno:', err)
   }
 }
+
+onMounted(() => {
+  cargarGrupos()
+})
 </script>
 
 <style src="@/../css/EditarDatos.css"></style>
