@@ -12,6 +12,7 @@ use App\Http\Controllers\Admin\MateriaController;
 use App\Http\Controllers\Admin\CuatrimestreController;
 use App\Http\Controllers\Admin\MatCuatriCarController;
 use App\Http\Controllers\Admin\RelacionController;
+use App\Http\Controllers\Admin\ReporteProfcontrol;
 
 use App\Models\MatCuatriCar;
 use App\Models\Profesor;
@@ -149,3 +150,6 @@ Route::prefix('selects')->group(function () {
     Route::get('/materias', fn() => Materia::all());
     Route::get('/grupos', fn() => Grupo::all());
 });
+
+#Reportes PROFESOR
+Route::get('/profesores', [ReporteProfcontrol::class, 'index']);
