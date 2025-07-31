@@ -23,6 +23,7 @@
               <th>Matrícula</th>
               <th>Nombre</th>
               <th>Cargo</th>
+              <th>Estado</th>
               <th>Acciones</th>
             </tr>
           </thead>
@@ -34,12 +35,13 @@
               <td>{{ profesor.matricula }}</td>
               <td>{{ profesor.nombre_completo }}</td>
               <td>{{ profesor.cargo }}</td>
+              <td>{{ profesor.status }}</td>
               <td>
                 <button class="boton-azul">Evaluar</button>
               </td>
             </tr>
             <tr v-if="profesoresFiltrados.length === 0">
-              <td colspan="4">No se encontraron resultados.</td>
+              <td colspan="5">No se encontraron resultados.</td>
             </tr>
           </tbody>
         </table>
@@ -57,17 +59,17 @@ const profesores = ref([])
 const busqueda = ref('')
 const filtroCargo = ref('')
 
-// Obtener datos al montar
+// Obtener solo profesores activos desde el backend
 onMounted(async () => {
   try {
-    const response = await axios.get('/api/profesores')
+    const response = await axios.get('/api/profesores/activos')
     profesores.value = response.data
   } catch (error) {
-    console.error('Error al obtener profesores:', error)
+    console.error('Error al obtener profesores activos:', error)
   }
 })
 
-// Computed para aplicar filtros
+// Computed para aplicar filtros de búsqueda y cargo
 const profesoresFiltrados = computed(() => {
   return profesores.value.filter((prof) => {
     const coincideBusqueda =

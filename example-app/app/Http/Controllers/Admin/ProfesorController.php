@@ -152,4 +152,13 @@ class ProfesorController extends Controller
             'insertados' => $importados
         ], 201);
     }
+    
+    // Listar profesores activos (solo para historial o select)
+    public function activos()
+    {
+    return Profesor::where('status', 'activo')
+        ->select('id_profesor', 'matricula', 'nombre_completo', 'cargo')
+        ->orderBy('nombre_completo')
+        ->get();
+    }
 }
