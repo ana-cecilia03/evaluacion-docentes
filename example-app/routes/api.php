@@ -78,6 +78,8 @@ Route::prefix('profesores')->group(function () {
     Route::put('/{id}', [ProfesorController::class, 'update']);
     Route::post('/csv', [ProfesorController::class, 'importarDesdeCSV']);
     Route::get('/activos', fn() => Profesor::where('status', 'activo')->get());
+    Route::get('/{id}', [ProfesorController::class, 'show']);
+
 });
 
 // 🏫 Grupos

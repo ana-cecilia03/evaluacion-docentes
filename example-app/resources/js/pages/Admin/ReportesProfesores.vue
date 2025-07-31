@@ -1,21 +1,19 @@
 <template>
   <Menu>
     <main class="contenido-principal">
-      <!-- Filtros de búsqueda -->
       <div class="actions">
         <input
           type="text"
           v-model="busqueda"
           placeholder="Buscar por nombre o matrícula"
         />
-        <select v-model="filtroCargo" class="filtro">
+        <select v-model="filtroCargo">
           <option value="">Filtrar por cargo</option>
           <option value="PTC">PTC</option>
           <option value="PA">PA</option>
         </select>
       </div>
 
-      <!-- Tabla de profesores -->
       <div class="table-wrapper">
         <table>
           <thead>
@@ -37,7 +35,9 @@
               <td>{{ profesor.cargo }}</td>
               <td>{{ profesor.status }}</td>
               <td>
-                <button class="boton-azul">Evaluar</button>
+                <button class="boton-azul" @click="evaluarProfesor(profesor)">
+                  Evaluar
+                </button>
               </td>
             </tr>
             <tr v-if="profesoresFiltrados.length === 0">
@@ -52,6 +52,7 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
+import { router } from '@inertiajs/vue3'
 import axios from 'axios'
 import Menu from '@/layouts/Menu.vue'
 
@@ -59,30 +60,39 @@ const profesores = ref([])
 const busqueda = ref('')
 const filtroCargo = ref('')
 
-// Obtener solo profesores activos desde el backend
+// Obtener profesores activos
 onMounted(async () => {
-  try {
-    const response = await axios.get('/api/profesores/activos')
-    profesores.value = response.data
-  } catch (error) {
-    console.error('Error al obtener profesores activos:', error)
-  }
+  const res = await axios.get('/api/profesores/activos')
+  profesores.value = res.data
 })
 
-// Computed para aplicar filtros de búsqueda y cargo
+// Filtros de búsqueda y cargo
 const profesoresFiltrados = computed(() => {
   return profesores.value.filter((prof) => {
-    const coincideBusqueda =
+    const matchBusqueda =
       prof.nombre_completo.toLowerCase().includes(busqueda.value.toLowerCase()) ||
       prof.matricula.includes(busqueda.value)
 
-    const coincideCargo = filtroCargo.value
+    const matchCargo = filtroCargo.value
       ? prof.cargo === filtroCargo.value
       : true
 
-    return coincideBusqueda && coincideCargo
+    return matchBusqueda && matchCargo
   })
 })
+
+// Redirección limpia con props
+function evaluarProfesor(profesor) {
+  const ruta = profesor.cargo === 'PA'
+    ? '/evaluacionProfesorPA'
+    : '/evaluacionProfesorPTC'
+
+  router.visit(ruta, {
+    method: 'get',
+    data: { id: profesor.id_profesor },
+    preserveState: false
+  })
+}
 </script>
 
 <style src="@/../css/Registros.css"></style>

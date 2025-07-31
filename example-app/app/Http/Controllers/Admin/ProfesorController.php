@@ -161,4 +161,9 @@ class ProfesorController extends Controller
         ->orderBy('nombre_completo')
         ->get();
     }
+
+    public function show($id)
+    {
+    return Profesor::findOrFail($id);
+    }
 }

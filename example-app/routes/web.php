@@ -131,15 +131,17 @@ Route::get('/evaluacion', function () {
     return Inertia::render('Alumno/EvaluacionAlumno');
 });
 
-#evaluacion profesores
+# Evaluación profesores PTC
 Route::get('/evaluacionProfesorPTC', function () {
     return Inertia::render('Admin/EvaluacionProfesorPTC');
 });
 
-#evaluacion profesores
+
+# Evaluación profesores PA
 Route::get('/evaluacionProfesorPA', function () {
     return Inertia::render('Admin/EvaluacionProfesorPA');
 });
+
 
 #
 Route::get('/relacion/cuatri', function () {

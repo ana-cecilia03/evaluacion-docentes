@@ -90,6 +90,7 @@
             </tr>
           </tbody>
 
+          <!-- FOOTER de tabla -->
           <tfoot>
             <tr>
               <td colspan="2" class="comentario-wrapper">
@@ -138,23 +139,26 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed, onMounted } from 'vue'
+import { ref, onMounted } from 'vue'
 import { usePage } from '@inertiajs/vue3'
 import axios from 'axios'
 import Menu from '@/layouts/Menu.vue'
 
-const showDownload = ref(false)
-const comentario = ref('')
-const califI = ref(0.0)
-const califII = ref(0.0)
+// Obtener el ID del profesor desde los props de Inertia
+const id = usePage().props.id
 
-// Usamos reactive para evitar problemas en el template
-const form = reactive({
+const showDownload = ref(false)
+
+const form = ref({
   nombre: '',
   puesto: '',
-  evaluador: 'Carlos López', // puedes usar el usuario logueado real aquí
+  evaluador: 'Carlos López', // puedes cambiar por usuario logueado
   periodo: '2023'
 })
+
+const califI = ref(0.0)
+const califII = ref(0.0)
+const comentario = ref('')
 
 const tablaDatos = ref([
   { factor: 'Trabajo en equipo', definicion: 'Capacidad de colaborar con otros', calificacion: 0.0 },
@@ -173,25 +177,18 @@ function toggleDropdown() {
 }
 
 function download(format) {
-  console.log(`Descargar en formato: ${format}`)
+  console.log(`Descargando en formato: ${format}`)
 }
 
-// Obtener ID desde props y cargar datos del profesor
-const page = usePage()
-const id = page.props.id
-
+// Cargar datos reales del profesor
 onMounted(async () => {
-  if (!id) {
-    console.error('ID no recibido')
-    return
-  }
-
   try {
     const res = await axios.get(`/api/profesores/${id}`)
-    form.nombre = res.data.nombre_completo
-    form.puesto = res.data.cargo
-  } catch (error) {
-    console.error('Error al cargar profesor:', error)
+    const prof = res.data
+    form.value.nombre = prof.nombre_completo
+    form.value.puesto = prof.cargo
+  } catch (err) {
+    console.error('Error al cargar el profesor:', err)
   }
 })
 </script>
