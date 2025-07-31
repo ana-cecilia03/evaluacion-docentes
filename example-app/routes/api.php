@@ -12,7 +12,6 @@ use App\Http\Controllers\Admin\MateriaController;
 use App\Http\Controllers\Admin\CuatrimestreController;
 use App\Http\Controllers\Admin\MatCuatriCarController;
 use App\Http\Controllers\Admin\RelacionController;
-use App\Http\Controllers\Admin\ReporteProfcontrol;
 
 use App\Models\MatCuatriCar;
 use App\Models\Profesor;
@@ -27,15 +26,11 @@ use App\Models\Carrera;
 |--------------------------------------------------------------------------
 */
 
-// =======================
 // 🔐 Autenticación
-// =======================
 Route::post('/login/alumno', [LoginAlumno::class, 'login']);
 Route::post('/admin/login', [LoginProfesor::class, 'login']);
 
-// =======================
 // 📆 Periodos
-// =======================
 Route::prefix('periodos')->group(function () {
     Route::post('/', [PeriodoController::class, 'store']);
     Route::get('/', [PeriodoController::class, 'index']);
@@ -43,9 +38,7 @@ Route::prefix('periodos')->group(function () {
     Route::get('/activos', [PeriodoController::class, 'activos']);
 });
 
-// =======================
 // 🎓 Carreras
-// =======================
 Route::prefix('carreras')->group(function () {
     Route::get('/', [CarreraController::class, 'index']);
     Route::post('/', [CarreraController::class, 'store']);
@@ -60,7 +53,7 @@ Route::prefix('carreras')->group(function () {
     Route::get('/por-periodo/{num}', [MatCuatriCarController::class, 'carrerasPorPeriodo']);
 });
 
-// 📘 Materias por carrera (por nombre de carrera)
+// 📘 Materias por carrera
 Route::get('/materias/por-carrera/{nombre}', function ($nombre) {
     return MatCuatriCar::where('carrera_nombre', $nombre)
         ->select('id_mat_cuatri_car', 'materia_nombre', 'cuatri_num')
@@ -68,9 +61,7 @@ Route::get('/materias/por-carrera/{nombre}', function ($nombre) {
         ->get();
 });
 
-// =======================
 // 👨‍🎓 Alumnos
-// =======================
 Route::prefix('alumnos')->group(function () {
     Route::get('/', [AlumnoController::class, 'index']);
     Route::post('/', [AlumnoController::class, 'store']);
@@ -80,9 +71,7 @@ Route::prefix('alumnos')->group(function () {
     Route::post('/desactivar', [AlumnoController::class, 'desactivarVarios']);
 });
 
-// =======================
 // 👨‍🏫 Profesores
-// =======================
 Route::prefix('profesores')->group(function () {
     Route::get('/', [ProfesorController::class, 'index']);
     Route::post('/', [ProfesorController::class, 'store']);
@@ -91,9 +80,7 @@ Route::prefix('profesores')->group(function () {
     Route::get('/activos', fn() => Profesor::where('status', 'activo')->get());
 });
 
-// =======================
 // 🏫 Grupos
-// =======================
 Route::prefix('grupos')->group(function () {
     Route::get('/', [GrupoController::class, 'index']);
     Route::post('/', [GrupoController::class, 'store']);
@@ -101,9 +88,7 @@ Route::prefix('grupos')->group(function () {
     Route::post('/csv', [GrupoController::class, 'importarDesdeCSV']);
 });
 
-// =======================
 // 📚 Materias
-// =======================
 Route::prefix('materias')->group(function () {
     Route::get('/', [MateriaController::class, 'index']);
     Route::post('/', [MateriaController::class, 'store']);
@@ -113,9 +98,7 @@ Route::prefix('materias')->group(function () {
     Route::get('/por-periodo/{num}', [MatCuatriCarController::class, 'materiasPorPeriodo']);
 });
 
-// =======================
 // 📘 Cuatrimestres
-// =======================
 Route::prefix('cuatrimestres')->group(function () {
     Route::get('/', [CuatrimestreController::class, 'index']);
     Route::post('/', [CuatrimestreController::class, 'store']);
@@ -123,33 +106,24 @@ Route::prefix('cuatrimestres')->group(function () {
     Route::get('/numeros', [CuatrimestreController::class, 'numeros']);
 });
 
-// =======================
 // 🔁 MatCuatriCar
-// =======================
 Route::prefix('mat-cuatri-car')->group(function () {
     Route::get('/', [MatCuatriCarController::class, 'index']);
     Route::post('/', [MatCuatriCarController::class, 'store']);
-    Route::put('/{id}', [MatCuatriCarController::class, 'update']); // ✅ nuevo: actualizar relación
+    Route::put('/{id}', [MatCuatriCarController::class, 'update']);
 });
 
-// =======================
-// 📋 Relaciones prof-mat-grupo
-// =======================
+// 🔗 Relaciones prof-mat-grupo
 Route::prefix('relaciones')->group(function () {
     Route::get('/', [RelacionController::class, 'index']);
     Route::post('/', [RelacionController::class, 'store']);
     Route::put('/{id}', [RelacionController::class, 'update']);
 });
 
-// =======================
 // 📥 Selects genéricos
-// =======================
 Route::prefix('selects')->group(function () {
     Route::get('/profesores', fn() => Profesor::all());
     Route::get('/periodos', fn() => Periodo::all());
     Route::get('/materias', fn() => Materia::all());
     Route::get('/grupos', fn() => Grupo::all());
 });
-
-#Reportes PROFESOR
-Route::get('/profesores', [ReporteProfcontrol::class, 'index']);
