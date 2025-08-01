@@ -3,7 +3,7 @@
     <main class="contenido-principal evaluacion-page">
       <!-- CABECERA -->
       <header class="encabezado-evaluacion">
-        <h1 class="titulo">Evaluación de Desempeño</h1>
+        <h1 class="titulo">Evaluación de Profesores PTC</h1>
 
         <div class="acciones">
           <div class="download-wrapper">
@@ -19,11 +19,7 @@
 
         <div class="datos-grid">
           <div class="col-izq">
-            <div
-              class="campo"
-              v-for="(label, key) in camposFormulario"
-              :key="key"
-            >
+            <div class="campo" v-for="(label, key) in camposFormulario" :key="key">
               <label>{{ label }}:</label>
               <input :value="form[key]" type="text" disabled />
             </div>
@@ -33,12 +29,11 @@
             <div class="box-calif">
               <span class="titulo-box">Calificación I <br />Resp. PE</span>
               <input
-                v-model.number="califI"
-                type="number"
-                step="0.1"
-                min="0"
-                max="10"
+                :value="promedio.toFixed(1)"
+                type="text"
+                readonly
                 class="input-calif"
+                style="background-color: white; border: none; font-weight: bold; font-size: 1.2rem; text-align: center; pointer-events: none;"
               />
             </div>
             <div class="box-calif">
@@ -72,19 +67,19 @@
               <th>Calificación</th>
             </tr>
           </thead>
-
           <tbody>
-            <tr v-for="(item, index) in tablaDatos" :key="item.factor + index">
-              <td>{{ item.factor }}</td>
-              <td>{{ item.definicion }}</td>
+            <tr v-for="pregunta in preguntas" :key="pregunta.id">
+              <td>{{ pregunta.factor }}</td>
+              <td>{{ pregunta.definicion }}</td>
               <td>
                 <input
                   type="number"
-                  v-model.number="item.calificacion"
-                  class="input-calif"
+                  v-model.number="pregunta.calificacion"
+                  min="1"
+                  max="5"
                   step="0.1"
-                  min="0"
-                  max="10"
+                  class="input-calif"
+                  @input="limitarCalificacion(pregunta)"
                 />
               </td>
             </tr>
@@ -104,8 +99,8 @@
                   <tbody>
                     <tr>
                       <td rowspan="2" class="sub-total-titulo">Sub.<br />total</td>
-                      <td>{{ promedioTabla.toFixed(1) }}</td>
-                      <td>{{ (promedioTabla / 2).toFixed(1) }}</td>
+                      <td>{{ promedio.toFixed(1) }}</td>
+                      <td>{{ (promedio / 2).toFixed(1) }}</td>
                     </tr>
                     <tr>
                       <td colspan="2" class="calif-final-titulo">Calificación:</td>
@@ -125,7 +120,7 @@
       <section class="firma">
         <strong>Elaborado por: </strong>
         <span class="linea-firma"></span>
-        <div class="nombre-firma">Nombre y firma</div>
+        <div class="nombre-firma">{{ form.evaluador }}</div>
       </section>
     </main>
   </Menu>
@@ -136,21 +131,19 @@ import { ref, reactive, computed, onMounted } from 'vue'
 import axios from 'axios'
 import Menu from '@/layouts/Menu.vue'
 
-// Props desde Inertia (mejor explícito)
+// 🟢 RECIBE ID DEL PROFESOR A EVALUAR
 const props = defineProps({
   id: { type: Number, required: true }
 })
 
-// Estado
 const showDownload = ref(false)
-const comentario = ref('')
-const califI = ref(0)
 const califII = ref(0)
+const comentario = ref('')
 
 const form = reactive({
   nombre: '',
   puesto: '',
-  evaluador: 'Carlos López',
+  evaluador: '',
   periodo: '2023'
 })
 
@@ -161,37 +154,67 @@ const camposFormulario = {
   periodo: 'Periodo'
 }
 
-const tablaDatos = ref([
-  { factor: 'Trabajo en equipo', definicion: 'Capacidad de colaborar con otros', calificacion: 0 },
-  { factor: 'Creatividad', definicion: 'Generación de ideas nuevas', calificacion: 0 }
-])
+const preguntas = ref([])
 
-// Cálculos
-const promedioTabla = computed(() => {
-  const total = tablaDatos.value.reduce((sum, item) => sum + item.calificacion, 0)
-  return tablaDatos.value.length ? total / tablaDatos.value.length : 0
-})
-
-const calificacionFinal = computed(() => promedioTabla.value)
-
-// Métodos
-function toggleDropdown() {
-  showDownload.value = !showDownload.value
-}
-
-function download(format) {
-  console.log(`Descargar en formato: ${format}`)
-}
-
-// Cargar datos al iniciar
-onMounted(async () => {
+// 🔹 PREGUNTAS TIPO PTC
+const obtenerPreguntas = async () => {
   try {
-    const { data } = await axios.get(`/api/profesores/${props.id}`)
-    form.nombre = data.nombre_completo
-    form.puesto = data.cargo
+    const res = await axios.get('/api/evaluaciones/preguntas-ptc')
+    preguntas.value = res.data.map(p => ({
+      ...p,
+      calificacion: 0
+    }))
+  } catch (error) {
+    console.error('Error al obtener preguntas:', error)
+  }
+}
+
+// 🔹 DATOS DEL EVALUADOR (administrador)
+const obtenerEvaluador = async () => {
+  try {
+    const res = await axios.get('/api/evaluador')
+    form.evaluador = res.data.evaluador || 'Sin permiso'
+  } catch (error) {
+    console.error('Error al obtener evaluador:', error)
+    form.evaluador = 'Error'
+  }
+}
+
+// 🔹 DATOS DEL PROFESOR EVALUADO
+const cargarDatosProfesor = async () => {
+  try {
+    const res = await axios.get(`/api/profesores/${props.id}`)
+    form.nombre = res.data.nombre_completo
+    form.puesto = res.data.cargo
   } catch (error) {
     console.error('Error al cargar profesor:', error)
   }
+}
+
+// 🔸 PROMEDIOS
+const promedio = computed(() => {
+  const total = preguntas.value.reduce((sum, p) => sum + p.calificacion, 0)
+  return preguntas.value.length ? total / preguntas.value.length : 0
+})
+const calificacionFinal = computed(() => promedio.value)
+
+// 🔸 ACCIONES
+function toggleDropdown() {
+  showDownload.value = !showDownload.value
+}
+function download(format) {
+  console.log(`Descargar en formato: ${format}`)
+}
+function limitarCalificacion(pregunta) {
+  if (pregunta.calificacion > 5) pregunta.calificacion = 5
+  else if (pregunta.calificacion < 1) pregunta.calificacion = 1
+}
+
+// 🔸 MONTAJE INICIAL
+onMounted(() => {
+  obtenerPreguntas()
+  cargarDatosProfesor()
+  obtenerEvaluador()
 })
 </script>
 

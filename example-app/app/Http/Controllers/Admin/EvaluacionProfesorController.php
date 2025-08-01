@@ -23,6 +23,14 @@ class EvaluacionProfesorController extends Controller
             ->get();
     }
 
+    public function preguntasPTC()
+    {
+    return PreguntaProfesor::whereIn('tipo', ['PTC', 'ambos'])
+        ->where('activo', true)
+        ->orderBy('orden')
+        ->get();
+    }
+
     /**
      * ✅ Obtener datos del profesor a evaluar (por su ID).
      * Este método se llama desde Vue cuando se entra a la evaluación.
@@ -92,4 +100,5 @@ class EvaluacionProfesorController extends Controller
         // ✅ Devolver mensaje de éxito al frontend
         return response()->json(['message' => 'Evaluación guardada correctamente'], 201);
     }
+
 }

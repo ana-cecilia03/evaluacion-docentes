@@ -150,7 +150,7 @@ const comentario = ref('')
 const form = reactive({
   nombre: '',
   puesto: '',
-  evaluador: 'Carlos López',
+  evaluador: '', // ← ya no 'Carlos López'
   periodo: '2023'
 })
 
@@ -173,6 +173,21 @@ const obtenerPreguntas = async () => {
     }))
   } catch (error) {
     console.error('Error al obtener preguntas:', error)
+  }
+}
+
+// Cargar datos del profesor evaluador desde API protegida
+const obtenerEvaluador = async () => {
+  try {
+    const res = await axios.get('/api/evaluador') // Asegúrate que esta ruta exista en web.php o api.php
+    if (res.data.evaluador) {
+      form.evaluador = res.data.evaluador
+    } else {
+      form.evaluador = 'Sin permiso'
+    }   
+  } catch (error) {
+    console.error('Error al obtener evaluador:', error)
+    form.evaluador = 'Error'
   }
 }
 
@@ -207,6 +222,7 @@ const cargarDatosProfesor = async () => {
 onMounted(() => {
   obtenerPreguntas()
   cargarDatosProfesor()
+  obtenerEvaluador()
 })
 // Función que ajusta la calificación al máximo si se excede
 function limitarCalificacion(pregunta) {

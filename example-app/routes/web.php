@@ -132,8 +132,8 @@ Route::get('/evaluacion', function () {
 });
 
 # Evaluación profesores PTC
-Route::get('/evaluacionProfesorPTC', function () {
-    return Inertia::render('Admin/EvaluacionProfesorPTC');
+Route::get('/evaluacionProfesorPTC/{id}', function ($id) {
+    return Inertia::render('Admin/EvaluacionProfesorPTC', ['id' => $id]);
 });
 
 #Evaluacion profesores PA

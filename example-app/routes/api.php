@@ -21,6 +21,8 @@ use App\Models\Materia;
 use App\Models\Grupo;
 use App\Models\Carrera;
 
+use Illuminate\Support\Facades\Auth;
+
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -131,9 +133,25 @@ Route::prefix('selects')->group(function () {
     Route::get('/grupos', fn() => Grupo::all());
 });
 
-#Evaluaciones PRofesor
+#Evaluaciones PRofesorPA
 Route::prefix('evaluaciones')->group(function () {
     Route::get('/preguntas-pa', [EvaluacionProfesorController::class, 'preguntasPA']);
-        Route::get('/profesor/{id}', [EvaluacionProfesorController::class, 'getProfesor']);
+    Route::get('/preguntas-ptc', [EvaluacionProfesorController::class, 'preguntasPTC']);
+    Route::get('/profesor/{id}', [EvaluacionProfesorController::class, 'getProfesor']);
     Route::post('/', [EvaluacionProfesorController::class, 'store']);
+});
+
+
+
+#APi protegida con Middleware
+Route::middleware('auth:sanctum')->get('/evaluador', function () {
+    $user = Auth::user();
+
+    if (!$user || $user->rol !== 'administrador') {
+        return response()->json(['evaluador' => null]);
+    }
+
+    return response()->json([
+        'evaluador' => $user->nombre_completo
+    ]);
 });
