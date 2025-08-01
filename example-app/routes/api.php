@@ -21,6 +21,9 @@ use App\Models\Materia;
 use App\Models\Grupo;
 use App\Models\Carrera;
 
+use App\Http\Controllers\Admin\PreguntasController;
+
+
 use Illuminate\Support\Facades\Auth;
 
 /*
@@ -155,3 +158,10 @@ Route::middleware('auth:sanctum')->get('/evaluador', function () {
         'evaluador' => $user->nombre_completo
     ]);
 });
+
+#Api para gestion de preguntas
+Route::get('/preguntas-alumno', [PreguntasController::class, 'index']);
+Route::post('/preguntas-alumno', [PreguntasController::class, 'store']);
+Route::put('/preguntas-alumno/{id}', [PreguntasController::class, 'update']);
+Route::delete('/preguntas-alumno/{id}', [PreguntasController::class, 'destroy']);
+Route::post('/enviar-evaluacion', [PreguntasController::class, 'guardarEvaluacion']);

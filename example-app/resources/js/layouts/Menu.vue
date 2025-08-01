@@ -45,6 +45,7 @@
 
 
           <li class="seccion">Extras</li>
+          <li><a href="/preguntas"><img src="/img/reportes.png"/> Preguntas</a></li>
           <li><a href="/encuesta"><img src="/img/reportes.png" /> Encuesta</a></li>
           <li><a href="/estadisticas"><img src="/img/estadisticas.png" /> Estadísticas</a></li>
           <li><a href="/admin/configuracion"><img src="/img/confi.png" /> Configuración</a></li>

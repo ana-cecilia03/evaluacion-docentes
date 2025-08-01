@@ -146,3 +146,7 @@ Route::get('/relacion/cuatri', function () {
     return Inertia::render('Admin/numCuatri');
 })->name('relacion.numCuatri');
 
+#Preguntas
+Route::get('/preguntas', function () {
+    return Inertia::render('Admin/Preguntas');
+})->name('admin.preguntas');
