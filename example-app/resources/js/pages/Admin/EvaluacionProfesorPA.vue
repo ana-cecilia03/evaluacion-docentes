@@ -33,13 +33,13 @@
             <div class="box-calif">
               <span class="titulo-box">Calificación I <br />Resp. PE</span>
               <input
-                v-model.number="califI"
-                type="number"
-                step="0.1"
-                min="0"
-                max="10"
+                :value="promedio.toFixed(1)"  
+                type="text"
+                readonly
                 class="input-calif"
+                style="background-color: white; border: none; font-weight: bold; font-size: 1.2rem; text-align: center; pointer-events: none;"
               />
+
             </div>
             <div class="box-calif">
               <span class="titulo-box">Calificación II <br />ESTUDIANTE</span>
@@ -74,6 +74,7 @@
           </thead>
           <tbody>
             <tr v-for="pregunta in preguntas" :key="pregunta.id">
+               <!-- Campo de calificación por factor (de 1 a 5) -->
               <td>{{ pregunta.factor }}</td>
               <td>{{ pregunta.definicion }}</td>
               <td>
@@ -81,9 +82,11 @@
                   type="number"
                   v-model.number="pregunta.calificacion"
                   min="1"
-                  max="10"
+                  max="5"
                   step="0.1"
                   class="input-calif"
+                  
+                  @input="limitarCalificacion(pregunta)"  
                 />
               </td>
             </tr>
@@ -122,9 +125,9 @@
 
       <!-- FIRMA -->
       <section class="firma">
-        <strong>Elaborado por: </strong>
-        <span class="linea-firma"></span>
-        <div class="nombre-firma">Nombre y firma</div>
+      <strong>Elaborado por: </strong>
+      <span class="linea-firma"></span>
+      <div class="nombre-firma">{{ form.evaluador }}</div>
       </section>
     </main>
   </Menu>
@@ -205,6 +208,14 @@ onMounted(() => {
   obtenerPreguntas()
   cargarDatosProfesor()
 })
+// Función que ajusta la calificación al máximo si se excede
+function limitarCalificacion(pregunta) {
+  if (pregunta.calificacion > 5) {
+    pregunta.calificacion = 5
+  } else if (pregunta.calificacion < 1) {
+    pregunta.calificacion = 1
+  }
+}
 </script>
 
 <style src="@/../css/botones.css"></style>

@@ -3,15 +3,18 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\EvaluacionProfesor;
-use App\Models\RespuestaEvaluacion;
-use App\Models\PreguntaProfesor;
-use App\Models\Profesor;
+use App\Models\EvaluacionProfesor;       // Modelo de la tabla evaluaciones_profesores
+use App\Models\RespuestaEvaluacion;      // Modelo de la tabla respuestas_evaluacion
+use App\Models\PreguntaProfesor;         // Modelo de la tabla preguntas_profesores
+use App\Models\Profesor;                 // Modelo de la tabla profesores
 use Illuminate\Http\Request;
 
 class EvaluacionProfesorController extends Controller
 {
-    // Obtener preguntas para tipo PA
+    /**
+     * ✅ Obtener preguntas tipo PA o generales ("ambos").
+     * Se usa para cargar la tabla de evaluación desde el frontend (Vue).
+     */
     public function preguntasPA()
     {
         return PreguntaProfesor::whereIn('tipo', ['PA', 'ambos'])
@@ -20,7 +23,10 @@ class EvaluacionProfesorController extends Controller
             ->get();
     }
 
-    // Obtener los datos de un profesor por ID
+    /**
+     * ✅ Obtener datos del profesor a evaluar (por su ID).
+     * Este método se llama desde Vue cuando se entra a la evaluación.
+     */
     public function getProfesor($id)
     {
         $profesor = Profesor::find($id);
@@ -37,9 +43,13 @@ class EvaluacionProfesorController extends Controller
         ]);
     }
 
-    // Guardar evaluación completa
+    /**
+     * ✅ Guardar evaluación completa en la base de datos.
+     * Esta función guarda tanto la evaluación general como las respuestas por pregunta.
+     */
     public function store(Request $request)
     {
+        // ✳️ Validación de datos de entrada
         $request->validate([
             'profesor_id' => 'required|integer|exists:profesores,id_profesor',
             'tipo' => 'required|in:PA,PTC',
@@ -48,14 +58,20 @@ class EvaluacionProfesorController extends Controller
             'calif_ii' => 'nullable|numeric|min:0|max:10',
             'calificacion_final' => 'nullable|numeric|min:0|max:10',
             'comentario' => 'nullable|string',
+
+            // ✅ Validación de las respuestas: 
+            //    Cada respuesta debe incluir:
+            //    - ID de la pregunta
+            //    - Calificación entre 1 y 5 (máximo)
             'respuestas' => 'required|array',
             'respuestas.*.pregunta_id' => 'required|integer|exists:preguntas_profesores,id',
             'respuestas.*.calificacion' => 'required|integer|min:1|max:5'
         ]);
 
+        // ✅ Crear una nueva evaluación general
         $evaluacion = EvaluacionProfesor::create([
             'profesor_id' => $request->profesor_id,
-            'evaluador_id' => null, // puedes capturar el usuario autenticado si aplica
+            'evaluador_id' => null, // Si tienes autenticación, puedes capturar aquí el evaluador
             'tipo' => $request->tipo,
             'periodo' => $request->periodo,
             'calif_i' => $request->calif_i,
@@ -64,14 +80,16 @@ class EvaluacionProfesorController extends Controller
             'comentario' => $request->comentario,
         ]);
 
+        // ✅ Recorrer todas las respuestas para guardarlas una por una
         foreach ($request->respuestas as $respuesta) {
             RespuestaEvaluacion::create([
                 'evaluacion_id' => $evaluacion->id,
                 'pregunta_id' => $respuesta['pregunta_id'],
-                'calificacion' => $respuesta['calificacion']
+                'calificacion' => $respuesta['calificacion']  // 👈 Aquí se valida que sea de 1 a 5
             ]);
         }
 
+        // ✅ Devolver mensaje de éxito al frontend
         return response()->json(['message' => 'Evaluación guardada correctamente'], 201);
     }
 }
