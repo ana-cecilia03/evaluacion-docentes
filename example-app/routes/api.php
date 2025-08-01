@@ -12,6 +12,7 @@ use App\Http\Controllers\Admin\MateriaController;
 use App\Http\Controllers\Admin\CuatrimestreController;
 use App\Http\Controllers\Admin\MatCuatriCarController;
 use App\Http\Controllers\Admin\RelacionController;
+use App\Http\Controllers\Admin\EvaluacionProfesorController;
 
 use App\Models\MatCuatriCar;
 use App\Models\Profesor;
@@ -128,4 +129,11 @@ Route::prefix('selects')->group(function () {
     Route::get('/periodos', fn() => Periodo::all());
     Route::get('/materias', fn() => Materia::all());
     Route::get('/grupos', fn() => Grupo::all());
+});
+
+#Evaluaciones PRofesor
+Route::prefix('evaluaciones')->group(function () {
+    Route::get('/preguntas-pa', [EvaluacionProfesorController::class, 'preguntasPA']);
+        Route::get('/profesor/{id}', [EvaluacionProfesorController::class, 'getProfesor']);
+    Route::post('/', [EvaluacionProfesorController::class, 'store']);
 });

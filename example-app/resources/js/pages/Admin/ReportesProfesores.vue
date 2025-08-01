@@ -56,17 +56,20 @@ import { router } from '@inertiajs/vue3'
 import axios from 'axios'
 import Menu from '@/layouts/Menu.vue'
 
+// Lista de profesores activos
 const profesores = ref([])
+
+// Campos para filtrar
 const busqueda = ref('')
 const filtroCargo = ref('')
 
-// Obtener profesores activos
+// 🔁 Al montar el componente, se solicita la lista de profesores activos al backend
 onMounted(async () => {
   const res = await axios.get('/api/profesores/activos')
   profesores.value = res.data
 })
 
-// Filtros de búsqueda y cargo
+// 🎯 Computed que filtra por texto de búsqueda o por cargo
 const profesoresFiltrados = computed(() => {
   return profesores.value.filter((prof) => {
     const matchBusqueda =
@@ -81,15 +84,15 @@ const profesoresFiltrados = computed(() => {
   })
 })
 
-// Redirección limpia con props
+// 🧭 Función que redirige a la vista de evaluación correspondiente
+// Usa router.visit() de Inertia para enviar el ID del profesor como prop
 function evaluarProfesor(profesor) {
   const ruta = profesor.cargo === 'PA'
-    ? '/evaluacionProfesorPA'
-    : '/evaluacionProfesorPTC'
+    ? `/evaluacionProfesorPA/${profesor.id_profesor}`
+    : `/evaluacionProfesorPTC/${profesor.id_profesor}`
 
   router.visit(ruta, {
     method: 'get',
-    data: { id: profesor.id_profesor },
     preserveState: false
   })
 }

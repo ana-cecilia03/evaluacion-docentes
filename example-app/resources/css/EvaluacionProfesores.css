@@ -148,7 +148,8 @@ body {
 
 /* TABLA */
 .table-wrapper {
-  overflow-x: auto;
+  overflow-x: hidden; 
+  table-layout: fixed;
   background: #fff;
 }
 

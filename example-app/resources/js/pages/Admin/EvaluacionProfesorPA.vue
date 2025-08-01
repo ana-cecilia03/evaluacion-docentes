@@ -21,17 +21,17 @@
           <div class="col-izq">
             <div
               class="campo"
-              v-for="(item, index) in ['Nombre', 'Puesto', 'Evaluador', 'Periodo']"
-              :key="index"
+              v-for="(label, key) in camposFormulario"
+              :key="key"
             >
-              <label>{{ item }}:</label>
-              <input :value="form[item.toLowerCase()]" type="text" disabled />
+              <label>{{ label }}:</label>
+              <input :value="form[key]" type="text" disabled />
             </div>
           </div>
 
           <div class="col-mid">
             <div class="box-calif">
-              <span class="titulo-box">Calificación I <br />Resp. PE </span>
+              <span class="titulo-box">Calificación I <br />Resp. PE</span>
               <input
                 v-model.number="califI"
                 type="number"
@@ -72,19 +72,18 @@
               <th>Calificación</th>
             </tr>
           </thead>
-
           <tbody>
-            <tr v-for="(item, index) in tablaDatos" :key="index">
-              <td>{{ item.factor }}</td>
-              <td>{{ item.definicion }}</td>
+            <tr v-for="pregunta in preguntas" :key="pregunta.id">
+              <td>{{ pregunta.factor }}</td>
+              <td>{{ pregunta.definicion }}</td>
               <td>
                 <input
                   type="number"
-                  v-model.number="item.calificacion"
-                  class="input-calif"
-                  step="0.1"
-                  min="0"
+                  v-model.number="pregunta.calificacion"
+                  min="1"
                   max="10"
+                  step="0.1"
+                  class="input-calif"
                 />
               </td>
             </tr>
@@ -103,21 +102,15 @@
                 <table class="tabla-resumen">
                   <tbody>
                     <tr>
-                      <td rowspan="2" class="sub-total-titulo">
-                        Sub.<br />total
-                      </td>
-                      <td>{{ promedioTabla.toFixed(1) }}</td>
-                      <td>{{ (promedioTabla / 2).toFixed(1) }}</td>
+                      <td rowspan="2" class="sub-total-titulo">Sub.<br />total</td>
+                      <td>{{ promedio.toFixed(1) }}</td>
+                      <td>{{ (promedio / 2).toFixed(1) }}</td>
                     </tr>
                     <tr>
-                      <td colspan="2" class="calif-final-titulo">
-                        Calificación:
-                      </td>
+                      <td colspan="2" class="calif-final-titulo">Calificación:</td>
                     </tr>
                     <tr>
-                      <td colspan="3" class="calif-final">
-                        {{ calificacionFinal.toFixed(1) }}
-                      </td>
+                      <td colspan="3" class="calif-final">{{ calificacionFinal.toFixed(1) }}</td>
                     </tr>
                   </tbody>
                 </table>
@@ -139,35 +132,56 @@
 
 <script setup>
 import { ref, reactive, computed, onMounted } from 'vue'
-import { usePage } from '@inertiajs/vue3'
 import axios from 'axios'
 import Menu from '@/layouts/Menu.vue'
 
-const showDownload = ref(false)
-const comentario = ref('')
-const califI = ref(0.0)
-const califII = ref(0.0)
+const props = defineProps({
+  id: { type: Number, required: true }
+})
 
-// Usamos reactive para evitar problemas en el template
+const showDownload = ref(false)
+const califI = ref(0)
+const califII = ref(0)
+const comentario = ref('')
+
 const form = reactive({
   nombre: '',
   puesto: '',
-  evaluador: 'Carlos López', // puedes usar el usuario logueado real aquí
+  evaluador: 'Carlos López',
   periodo: '2023'
 })
 
-const tablaDatos = ref([
-  { factor: 'Trabajo en equipo', definicion: 'Capacidad de colaborar con otros', calificacion: 0.0 },
-  { factor: 'Creatividad', definicion: 'Generación de ideas nuevas', calificacion: 0.0 }
-])
+const camposFormulario = {
+  nombre: 'Nombre',
+  puesto: 'Puesto',
+  evaluador: 'Evaluador',
+  periodo: 'Periodo'
+}
 
-const promedioTabla = computed(() => {
-  const total = tablaDatos.value.reduce((sum, item) => sum + item.calificacion, 0)
-  return total / tablaDatos.value.length || 0
+// Preguntas dinámicas del backend
+const preguntas = ref([])
+
+const obtenerPreguntas = async () => {
+  try {
+    const res = await axios.get('/api/evaluaciones/preguntas-pa')
+    preguntas.value = res.data.map(p => ({
+      ...p,
+      calificacion: 0
+    }))
+  } catch (error) {
+    console.error('Error al obtener preguntas:', error)
+  }
+}
+
+// Promedios
+const promedio = computed(() => {
+  const total = preguntas.value.reduce((sum, p) => sum + p.calificacion, 0)
+  return preguntas.value.length ? total / preguntas.value.length : 0
 })
 
-const calificacionFinal = computed(() => promedioTabla.value)
+const calificacionFinal = computed(() => promedio.value)
 
+// Acciones
 function toggleDropdown() {
   showDownload.value = !showDownload.value
 }
@@ -176,23 +190,20 @@ function download(format) {
   console.log(`Descargar en formato: ${format}`)
 }
 
-// Obtener ID desde props y cargar datos del profesor
-const page = usePage()
-const id = page.props.id
-
-onMounted(async () => {
-  if (!id) {
-    console.error('ID no recibido')
-    return
-  }
-
+// Cargar datos del profesor
+const cargarDatosProfesor = async () => {
   try {
-    const res = await axios.get(`/api/profesores/${id}`)
+    const res = await axios.get(`/api/profesores/${props.id}`)
     form.nombre = res.data.nombre_completo
     form.puesto = res.data.cargo
   } catch (error) {
     console.error('Error al cargar profesor:', error)
   }
+}
+
+onMounted(() => {
+  obtenerPreguntas()
+  cargarDatosProfesor()
 })
 </script>
 
