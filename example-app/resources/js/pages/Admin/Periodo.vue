@@ -75,6 +75,27 @@ const cambiarEstado = async (periodo) => {
   }
 }
 
+const crearPeriodo = async () => {
+  try {
+    const response = await axios.post('/api/periodos', {
+      num_periodo: form.value.num_periodo,
+      nombre_periodo: form.value.nombre,
+      fecha_inicio: form.value.inicio,
+      fecha_fin: form.value.fin,
+      estado: 'activo', // ✅ necesario para pasar la validación
+    })
+
+    mensaje.value = response.data.message
+    error.value = ''
+    cancelar()
+  } catch (err) {
+    mensaje.value = ''
+    error.value = err.response?.data?.message || 'Error al guardar el período.'
+    console.error(err.response?.data)
+  }
+}
+
+
 onMounted(() => {
   cargarPeriodos()
 })

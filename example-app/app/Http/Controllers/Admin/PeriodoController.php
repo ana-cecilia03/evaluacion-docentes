@@ -60,6 +60,7 @@ class PeriodoController extends Controller
             'data'    => $periodo
         ], 201);
     }
+    
 
     /**
      * PUT /api/periodos/{id}/estado
