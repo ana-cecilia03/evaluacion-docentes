@@ -5,17 +5,21 @@
       <header class="encabezado-evaluacion">
         <h1 class="titulo">Evaluación de Profesores PTC</h1>
 
-        <div class="acciones">
-          <div class="download-wrapper">
-            <button class="boton-verde" @click="toggleDropdown">
-              Descargar
-            </button>
-            <ul v-if="showDownload" class="dropdown">
-              <li @click="download('pdf')">PDF</li>
-              <li @click="download('xlsx')">Excel</li>
-            </ul>
-          </div>
-        </div>
+      <!-- Botones de acciones (Descargar + Evaluar) con separación -->
+      <div class="acciones acciones-botones">
+      <!-- Botón Descargar con su dropdown -->
+        <div class="download-wrapper">
+          <button class="boton-verde" @click="toggleDropdown">Descargar</button>
+          <ul v-if="showDownload" class="dropdown">
+            <li @click="download('pdf')">PDF</li>
+            <li @click="download('xlsx')">Excel</li>
+          </ul>
+      </div>
+
+      <!-- Botón Evaluar -->
+      <button class="boton-verde" @click="guardarEvaluacion">Evaluar</button>
+    </div>
+
 
         <div class="datos-grid">
           <div class="col-izq">
@@ -210,6 +214,29 @@ function limitarCalificacion(pregunta) {
   else if (pregunta.calificacion < 1) pregunta.calificacion = 1
 }
 
+const guardarEvaluacion = async () => {
+  try {
+    const payload = {
+      profesor_id: props.id,
+      tipo: 'PTC', // Cambia a 'PA' si estás en la vista de PA
+      periodo: form.periodo,
+      calif_i: promedio.value.toFixed(1),
+      calif_ii: califII.value,
+      calificacion_final: calificacionFinal.value.toFixed(1),
+      comentario: comentario.value,
+      respuestas: preguntas.value.map(p => ({
+        pregunta_id: p.id,
+        calificacion: p.calificacion
+      }))
+    }
+
+    await axios.post('/api/evaluaciones', payload)
+    alert('✅ Evaluación enviada correctamente')
+  } catch (error) {
+    console.error('❌ Error al guardar evaluación:', error)
+    alert('Ocurrió un error al guardar la evaluación')
+  }
+}
 // 🔸 MONTAJE INICIAL
 onMounted(() => {
   obtenerPreguntas()
