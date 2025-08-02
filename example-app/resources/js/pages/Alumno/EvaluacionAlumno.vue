@@ -10,149 +10,46 @@
 
       <!-- FORMULARIOS -->
       <form @submit.prevent="handleSubmit">
-        <!-- 1. Evaluación del Facilitador -->
         <div v-if="step === 1">
-          <h3>1.- Evaluación del Facilitador</h3>
-          <table>
-            <thead>
-              <tr>
-                <th>No.</th>
-                <th>Factor</th>
-                <th>Excelente</th>
-                <th>Muy bueno</th>
-                <th>Bueno</th>
-                <th>Nunca</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr v-for="(item, index) in facilitador" :key="index">
-                <td>{{ item.no }}</td>
-                <td>{{ item.texto }}</td>
-                <td><input type="radio" :name="'fac-'+index" value="Excelente" v-model="respuestas1[index]" /></td>
-                <td><input type="radio" :name="'fac-'+index" value="Muy bueno" v-model="respuestas1[index]" /></td>
-                <td><input type="radio" :name="'fac-'+index" value="Bueno" v-model="respuestas1[index]" /></td>
-                <td><input type="radio" :name="'fac-'+index" value="Nunca" v-model="respuestas1[index]" /></td>
-              </tr>
-            </tbody>
-          </table>
+          <section v-for="(bloque, idx) in preguntasPorClasificacion" :key="idx">
+            <h3>{{ idx + 1 }}.- {{ bloque.clasificacion }}</h3>
 
-          <h3>2.- Habilidades del Facilitador</h3>
-          <table>
-            <thead>
-              <tr>
-                <th>No.</th>
-                <th>Concepto</th>
-                <th>Excelente</th>
-                <th>Muy bueno</th>
-                <th>Bueno</th>
-                <th>Nunca</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr v-for="(item, index) in habilidades" :key="index">
-                <td>{{ item.no }}</td>
-                <td>{{ item.texto }}</td>
-                <td><input type="radio" :name="'hab-'+index" value="Excelente" v-model="respuestas2[index]" /></td>
-                <td><input type="radio" :name="'hab-'+index" value="Muy bueno" v-model="respuestas2[index]" /></td>
-                <td><input type="radio" :name="'hab-'+index" value="Bueno" v-model="respuestas2[index]" /></td>
-                <td><input type="radio" :name="'hab-'+index" value="Nunca" v-model="respuestas2[index]" /></td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
+            <div v-if="bloque.tipo !== 'comentario'" class="table-wrapper">
+              <table>
+                <thead>
+                  <tr>
+                    <th v-if="bloque.tipo !== 'curso'">No.</th>
+                    <th>Concepto</th>
+                    <th v-for="opcion in obtenerOpciones(bloque.tipo_opciones)" :key="opcion">{{ opcion }}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-for="(preg, i) in bloque.preguntas" :key="preg.id">
+                    <td v-if="bloque.tipo !== 'curso'">{{ i + 1 }}</td>
+                    <td>{{ preg.texto }}</td>
+                    <td v-for="opcion in obtenerOpciones(bloque.tipo_opciones)" :key="opcion">
+                      <label class="opcion-responsive">
+                        <input
+                          type="radio"
+                          :name="`preg-${preg.id}`"
+                          :value="opcion"
+                          v-model="respuestas[preg.id]"
+                        />
+                        <span class="etiqueta-opcion">{{ opcion }}</span>
+                      </label>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
 
-        <!-- 2. Utilización de Medios Didácticos -->
-        <div v-if="step === 2">
-          <h3>3.- Utilización de los Medios Didácticos</h3>
-          <table>
-            <thead>
-              <tr>
-                <th>No.</th>
-                <th>Concepto</th>
-                <th>Siempre</th>
-                <th>Semana</th>
-                <th>Mes</th>
-                <th>Cuatrimestre</th>
-                <th>Nunca</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr v-for="(item, index) in medios" :key="index">
-                <td>{{ item.no }}</td>
-                <td>{{ item.texto }}</td>
-                <td><input type="radio" :name="'med-'+index" value="Siempre" v-model="respuestas3[index]" /></td>
-                <td><input type="radio" :name="'med-'+index" value="Semana" v-model="respuestas3[index]" /></td>
-                <td><input type="radio" :name="'med-'+index" value="Mes" v-model="respuestas3[index]" /></td>
-                <td><input type="radio" :name="'med-'+index" value="Cuatrimestre" v-model="respuestas3[index]" /></td>
-                <td><input type="radio" :name="'med-'+index" value="Nunca" v-model="respuestas3[index]" /></td>
-              </tr>
-            </tbody>
-          </table>
-
-          <h3>4.- Marca con una "X" la respuesta que consideres adecuada</h3>
-          <table>
-            <thead>
-              <tr>
-                <th>Descripción</th>
-                <th>Buena combinación</th>
-                <th>Demasiada teoría</th>
-                <th>Mucho práctico</th>
-                <th>Ni teoría ni práctica</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td>El curso estuvo:</td>
-                <td><input type="radio" name="teo" value="combinado" v-model="respuesta4" /></td>
-                <td><input type="radio" name="teo" value="teoria" v-model="respuesta4" /></td>
-                <td><input type="radio" name="teo" value="practico" v-model="respuesta4" /></td>
-                <td><input type="radio" name="teo" value="ni" v-model="respuesta4" /></td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-
-        <!-- 3. Autoevaluación del Alumno -->
-        <div v-if="step === 3">
-          <h3>5.- Autoevaluación del Alumno</h3>
-          <table>
-            <thead>
-              <tr>
-                <th>No.</th>
-                <th>Concepto</th>
-                <th>Siempre</th>
-                <th>Semana</th>
-                <th>Mes</th>
-                <th>Cuatrimestre</th>
-                <th>Nunca</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr v-for="(item, index) in autoevaluacion" :key="index">
-                <td>{{ index + 1 }}</td>
-                <td>{{ item }}</td>
-                <td><input type="radio" :name="'auto-'+index" value="Siempre" v-model="respuestas5[index]" /></td>
-                <td><input type="radio" :name="'auto-'+index" value="Semana" v-model="respuestas5[index]" /></td>
-                <td><input type="radio" :name="'auto-'+index" value="Mes" v-model="respuestas5[index]" /></td>
-                <td><input type="radio" :name="'auto-'+index" value="Cuatrimestre" v-model="respuestas5[index]" /></td>
-                <td><input type="radio" :name="'auto-'+index" value="Nunca" v-model="respuestas5[index]" /></td>
-              </tr>
-            </tbody>
-          </table>
-
-          <h3>6.- Comentarios</h3>
-          <label>Fortalezas del docente y sugerencias para mejorar las clases:</label>
-          <textarea v-model="comentario1" rows="4"></textarea>
-
-          <label>¿Consideras necesario realizar algún otro comentario respecto a tu docente?</label>
-          <textarea v-model="comentario2" rows="3"></textarea>
-        </div>
-
-        <!-- BOTÓN -->
-        <div class="boton-container">
-          <button type="submit" class="boton-azul">
-            {{ step < 3 ? 'Siguiente' : 'Enviar' }}
-          </button>
+            <div v-if="bloque.tipo === 'comentario'" class="comentario-wrapper">
+              <div v-for="preg in bloque.preguntas" :key="preg.id" class="comentario-item">
+                <label>{{ preg.texto }}</label>
+                <textarea v-model="comentariosRespuesta[preg.id]" rows="4"></textarea>
+              </div>
+            </div>
+          </section>
         </div>
       </form>
     </main>
@@ -165,39 +62,74 @@ import MenuAlumno from '@/layouts/MenuAlumno.vue'
 
 const step = ref(1)
 
-const facilitador = [
-  { no: 1, texto: "Orientó sobre unidades de aprendizaje." }, { no: 2, texto: "Objetivos claros." },
-  { no: 3, texto: "Domina contenidos." }, { no: 4, texto: "Resumió temas." }
-]
-const habilidades = [
-  { no: 1, texto: "Lenguaje apropiado" }, { no: 2, texto: "Desarrollo profesional" },
-  { no: 3, texto: "Capta atención" }, { no: 4, texto: "Relación con competencias" }
-]
-const medios = [
-  { no: 1, texto: "Pizarrón" }, { no: 2, texto: "Cañón" },
-  { no: 3, texto: "Webquest" }, { no: 4, texto: "Otro medio" }, { no: 5, texto: "Otro más" }
-]
-const autoevaluacion = [
-  "¿Participé en clase?", "¿Falté a alguna clase?", "¿Realicé todos los trabajos?",
-  "¿Solicité asesoría?", "¿Apliqué técnicas de autoestudio?", "¿Investigación?",
-  "¿Material necesario?", "¿Me preparé para exámenes?", "¿Puse en práctica?",
-  "¿Atención y disposición?", "Competencias"
-]
+// Datos simulados para preguntas
+const preguntasPorClasificacion = ref([
+  {
+    clasificacion: 'Satisfacción General',
+    tipo_opciones: 'puntuacion',
+    tipo: 'puntuacion',
+    preguntas: [
+      { id: 1, texto: '¿Cómo calificarías la calidad general del servicio?' },
+      { id: 2, texto: '¿Recomendarías nuestro servicio a otros?' }
+    ]
+  },
+  {
+    clasificacion: 'Tiempo de Respuesta',
+    tipo_opciones: 'fecha',
+    tipo: 'fecha',
+    preguntas: [
+      { id: 3, texto: '¿Con qué frecuencia recibes respuestas dentro del plazo prometido?' }
+    ]
+  },
+  {
+    clasificacion: 'Comentarios',
+    tipo_opciones: 'comentario',
+    tipo: 'comentario',
+    preguntas: [
+      { id: 4, texto: '¿Qué sugerencias o comentarios tienes para mejorar el servicio?' }
+    ]
+  }
+])
 
-// Respuestas
-const respuestas1 = ref(Array(facilitador.length).fill(null))
-const respuestas2 = ref(Array(habilidades.length).fill(null))
-const respuestas3 = ref(Array(medios.length).fill(null))
-const respuestas5 = ref(Array(autoevaluacion.length).fill(null))
-const comentario1 = ref('')
-const comentario2 = ref('')
+const respuestas = ref({})
+const comentariosRespuesta = ref({})
+
+const opcionesPorTipo = {
+  puntuacion: ['Excelente', 'Muy bien', 'Bien', 'Malo'],
+  fecha: [
+    'Siempre',
+    'De 1 a 3 veces por semana',
+    'De 1 a 3 veces por mes',
+    'De 1 a 3 veces por Cuatrimestre',
+    'Nunca'
+  ],
+  curso: [
+    'Buena combinacion de teoria y practica',
+    'Demasiada teoria y poca practica',
+    'Poca teoria y mucha practica',
+    'Poca teoria y poca practica'
+  ],
+  detalle: ['Excelente', 'Muy bien', 'Bien', 'Regular', 'Malo']
+}
+
+function obtenerOpciones(tipo_opciones) {
+  return opcionesPorTipo[ mapTipo(tipo_opciones) ] || []
+}
+
+function mapTipo(tipo_opciones) {
+  if (!tipo_opciones) return 'puntuacion'
+  const opt = tipo_opciones.toLowerCase().split(',').map(s => s.trim())
+  if (tipo_opciones === 'comentario' || opt.includes('comentario')) return 'comentario'
+  if (opt.includes('buena combinacion de teoria y practica')) return 'curso'
+  if (opt.includes('siempre') && opt.some(s => s.includes('por semana'))) return 'fecha'
+  if (opt.includes('regular') && opt.includes('muy bien')) return 'detalle'
+  if (opt.includes('muy bien')) return 'puntuacion'
+  return 'puntuacion'
+}
 
 function handleSubmit() {
-  if (step.value < 3) {
-    step.value++
-  } else {
-    console.log("Evaluación enviada")
-  }
+  console.log('Respuestas:', respuestas.value)
+  console.log('Comentarios:', comentariosRespuesta.value)
 }
 </script>
 

@@ -110,6 +110,12 @@ th {
   font-weight: bold;
 }
 
+table tr:hover {
+  background-color: #dfdddd; /* Color gris claro */
+}
+
+
+
 /* Botones dentro de la tabla */
 .btn-edit,
 .btn-delete {
