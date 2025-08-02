@@ -3,18 +3,21 @@
     <main class="contenido-principal evaluacion-page">
       <!-- CABECERA -->
       <header class="encabezado-evaluacion">
-        <h1 class="titulo">Evaluación de Desempeño</h1>
+        <h1 class="titulo">Evaluación de Profesores PA</h1>
 
-        <div class="acciones">
+        <!-- Botones de acciones (Descargar + Evaluar) con separación -->
+        <div class="acciones acciones-botones">
+          <!-- Botón Descargar con su dropdown -->
           <div class="download-wrapper">
-            <button class="boton-verde" @click="toggleDropdown">
-              Descargar
-            </button>
+            <button class="boton-verde" @click="toggleDropdown">Descargar</button>
             <ul v-if="showDownload" class="dropdown">
-              <li @click="download('pdf')">PDF</li>
-              <li @click="download('xlsx')">Excel</li>
+              <li @click="downloadPDF">PDF</li>
+              <li @click="downloadExcel">Excel</li>
             </ul>
           </div>
+
+          <!-- Botón Evaluar -->
+          <button class="boton-verde" @click="guardarEvaluacion">Evaluar</button>
         </div>
 
         <div class="datos-grid">
@@ -33,13 +36,12 @@
             <div class="box-calif">
               <span class="titulo-box">Calificación I <br />Resp. PE</span>
               <input
-                :value="promedio.toFixed(1)"  
+                :value="promedio.toFixed(1)"
                 type="text"
                 readonly
                 class="input-calif"
                 style="background-color: white; border: none; font-weight: bold; font-size: 1.2rem; text-align: center; pointer-events: none;"
               />
-
             </div>
             <div class="box-calif">
               <span class="titulo-box">Calificación II <br />ESTUDIANTE</span>
@@ -74,7 +76,7 @@
           </thead>
           <tbody>
             <tr v-for="pregunta in preguntas" :key="pregunta.id">
-               <!-- Campo de calificación por factor (de 1 a 5) -->
+              <!-- Campo de calificación por factor (de 1 a 5) -->
               <td>{{ pregunta.factor }}</td>
               <td>{{ pregunta.definicion }}</td>
               <td>
@@ -85,8 +87,7 @@
                   max="5"
                   step="0.1"
                   class="input-calif"
-                  
-                  @input="limitarCalificacion(pregunta)"  
+                  @input="limitarCalificacion(pregunta)"
                 />
               </td>
             </tr>
@@ -113,7 +114,9 @@
                       <td colspan="2" class="calif-final-titulo">Calificación:</td>
                     </tr>
                     <tr>
-                      <td colspan="3" class="calif-final">{{ calificacionFinal.toFixed(1) }}</td>
+                      <td colspan="3" class="calif-final">
+                        {{ calificacionFinal.toFixed(1) }}
+                      </td>
                     </tr>
                   </tbody>
                 </table>
@@ -125,9 +128,9 @@
 
       <!-- FIRMA -->
       <section class="firma">
-      <strong>Elaborado por: </strong>
-      <span class="linea-firma"></span>
-      <div class="nombre-firma">{{ form.evaluador }}</div>
+        <strong>Elaborado por: </strong>
+        <span class="linea-firma"></span>
+        <div class="nombre-firma">{{ form.evaluador }}</div>
       </section>
     </main>
   </Menu>
@@ -137,6 +140,11 @@
 import { ref, reactive, computed, onMounted } from 'vue'
 import axios from 'axios'
 import Menu from '@/layouts/Menu.vue'
+//para descargar pdf y excel
+import html2canvas from 'html2canvas'
+import jsPDF from 'jspdf'
+import * as XLSX from 'xlsx'
+import { saveAs } from 'file-saver'
 
 const props = defineProps({
   id: { type: Number, required: true }
@@ -218,6 +226,55 @@ const cargarDatosProfesor = async () => {
     console.error('Error al cargar profesor:', error)
   }
 }
+const guardarEvaluacion = async () => {
+  try {
+    const payload = {
+      profesor_id: props.id,
+      tipo: 'PA', // Cambiado a PA
+      periodo: form.periodo,
+      calif_i: promedio.value.toFixed(1),
+      calif_ii: califII.value,
+      calificacion_final: calificacionFinal.value.toFixed(1),
+      comentario: comentario.value,
+      respuestas: preguntas.value.map(p => ({
+        pregunta_id: p.id,
+        calificacion: p.calificacion
+      }))
+    }
+
+    await axios.post('/api/evaluaciones', payload)
+    alert('✅ Evaluación enviada correctamente')
+  } catch (error) {
+    console.error('❌ Error al guardar evaluación:', error)
+    alert('Ocurrió un error al guardar la evaluación')
+  }
+}
+
+// 📄 Descargar vista como PDF
+function downloadPDF() {
+  const element = document.querySelector('.contenido-principal')
+
+  html2canvas(element).then(canvas => {
+    const imgData = canvas.toDataURL('image/png')
+    const pdf = new jsPDF('p', 'mm', 'a4')
+    const imgProps = pdf.getImageProperties(imgData)
+    const pdfWidth = pdf.internal.pageSize.getWidth()
+    const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width
+
+    pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight)
+    pdf.save(`evaluacion-profesor-${props.id}.pdf`)
+  })
+}
+
+// 📊 Descargar tabla como Excel
+function downloadExcel() {
+  const table = document.querySelector('.tabla-evaluacion')
+  const wb = XLSX.utils.book_new()
+  const ws = XLSX.utils.table_to_sheet(table)
+  XLSX.utils.book_append_sheet(wb, ws, 'Evaluacion')
+  XLSX.writeFile(wb, `evaluacion-profesor-${props.id}.xlsx`)
+}
+
 
 onMounted(() => {
   obtenerPreguntas()

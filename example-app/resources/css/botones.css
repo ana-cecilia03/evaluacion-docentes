@@ -35,6 +35,27 @@
   cursor: pointer;
 }
 
+.boton-guardar {
+  background-color: #1e90ff;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  margin-left: 1rem;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+.acciones-botones {
+  display: flex;
+  gap: 0.75rem; /* Espacio entre botones */
+  align-items: center;
+}
+
+.boton-guardar:hover {
+  background-color: #1c7ed6;
+}
+
+
 /* Botones al pasar el cursor */
 .boton-verde:hover {
   background-color: #3dbe59;
