@@ -5,25 +5,28 @@
       <header class="encabezado-evaluacion">
         <h1 class="titulo">Evaluación de Profesores PTC</h1>
 
-      <!-- Botones de acciones (Descargar + Evaluar) con separación -->
-      <div class="acciones acciones-botones">
-      <!-- Botón Descargar con su dropdown -->
-        <div class="download-wrapper">
-          <button class="boton-verde" @click="toggleDropdown">Descargar</button>
-          <ul v-if="showDownload" class="dropdown">
-            <li @click="download('pdf')">PDF</li>
-            <li @click="download('xlsx')">Excel</li>
-          </ul>
-      </div>
+        <!-- Botones de acciones (Descargar + Evaluar) con separación -->
+        <div class="acciones acciones-botones">
+          <!-- Botón Descargar con su dropdown -->
+          <div class="download-wrapper">
+            <button class="boton-verde" @click="toggleDropdown">Descargar</button>
+            <ul v-if="showDownload" class="dropdown">
+              <li @click="downloadPDF">PDF</li>
+              <li @click="downloadExcel">Excel</li>
+            </ul>
+          </div>
 
-      <!-- Botón Evaluar -->
-      <button class="boton-verde" @click="guardarEvaluacion">Evaluar</button>
-    </div>
-
+          <!-- Botón Evaluar -->
+          <button class="boton-verde" @click="guardarEvaluacion">Evaluar</button>
+        </div>
 
         <div class="datos-grid">
           <div class="col-izq">
-            <div class="campo" v-for="(label, key) in camposFormulario" :key="key">
+            <div
+              class="campo"
+              v-for="(label, key) in camposFormulario"
+              :key="key"
+            >
               <label>{{ label }}:</label>
               <input :value="form[key]" type="text" disabled />
             </div>
@@ -110,7 +113,9 @@
                       <td colspan="2" class="calif-final-titulo">Calificación:</td>
                     </tr>
                     <tr>
-                      <td colspan="3" class="calif-final">{{ calificacionFinal.toFixed(1) }}</td>
+                      <td colspan="3" class="calif-final">
+                        {{ calificacionFinal.toFixed(1) }}
+                      </td>
                     </tr>
                   </tbody>
                 </table>
@@ -130,10 +135,16 @@
   </Menu>
 </template>
 
+
 <script setup>
 import { ref, reactive, computed, onMounted } from 'vue'
 import axios from 'axios'
 import Menu from '@/layouts/Menu.vue'
+//para descargar pdf y excel
+import html2canvas from 'html2canvas'
+import jsPDF from 'jspdf'
+import * as XLSX from 'xlsx'
+import { saveAs } from 'file-saver'
 
 // 🟢 RECIBE ID DEL PROFESOR A EVALUAR
 const props = defineProps({
@@ -212,6 +223,31 @@ function download(format) {
 function limitarCalificacion(pregunta) {
   if (pregunta.calificacion > 5) pregunta.calificacion = 5
   else if (pregunta.calificacion < 1) pregunta.calificacion = 1
+}
+
+// 📄 Descargar vista como PDF
+function downloadPDF() {
+  const element = document.querySelector('.contenido-principal')
+
+  html2canvas(element).then(canvas => {
+    const imgData = canvas.toDataURL('image/png')
+    const pdf = new jsPDF('p', 'mm', 'a4')
+    const imgProps = pdf.getImageProperties(imgData)
+    const pdfWidth = pdf.internal.pageSize.getWidth()
+    const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width
+
+    pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight)
+    pdf.save(`evaluacion-profesor-${props.id}.pdf`)
+  })
+}
+
+// 📊 Descargar tabla como Excel
+function downloadExcel() {
+  const table = document.querySelector('.tabla-evaluacion')
+  const wb = XLSX.utils.book_new()
+  const ws = XLSX.utils.table_to_sheet(table)
+  XLSX.utils.book_append_sheet(wb, ws, 'Evaluacion')
+  XLSX.writeFile(wb, `evaluacion-profesor-${props.id}.xlsx`)
 }
 
 const guardarEvaluacion = async () => {
