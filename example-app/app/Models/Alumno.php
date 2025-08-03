@@ -33,6 +33,6 @@ class Alumno extends Authenticatable
     // 🔗 Relación con el modelo Grupo
     public function grupo()
     {
-        return $this->belongsTo(Grupo::class, 'grupo'); // 'grupo' es la FK en la tabla alumnos
+        return $this->belongsTo(Grupo::class, 'grupo', 'id_grupo'); // 'grupo' es la FK en la tabla alumnos
     }
 }
