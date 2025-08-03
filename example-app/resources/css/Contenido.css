@@ -14,7 +14,7 @@ body {
   font-family: Arial, sans-serif;
   padding: 0 20px; /* Agrega espacio en los laterales */
   box-sizing: border-box; /* Incluye el padding en el ancho total */
-  box-shadow: 0 5px 20px rgba(98, 142, 203, 0.8);
+   /*box-shadow: 0 5px 20px rgba(98, 142, 203, 0.8); */
 }
 
 .table-wrapper {
@@ -23,14 +23,14 @@ body {
 }
 
 .tabla-periodos th {
-  background-color: #efefef;
+  background-color:  #dddbdb;
   padding: 10px;
   font-weight: bold;
 }
 
 .tabla-periodos td {
   padding: 10px;
-  border-bottom: 1px solid #ddd;
+  border-bottom: 1px solid #eee;
 }
 
 .titulo {
@@ -92,6 +92,11 @@ body {
 .boton-actualizar:hover {
   background-color: rgba(98, 142, 203, 0.8);
   transform: scale(1.10); /* Aumenta el tamaño en un 5% */
+}
+
+
+table tr:hover {
+  background-color: #dfdddd; /* Color gris claro */
 }
 
 

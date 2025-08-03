@@ -23,6 +23,17 @@
   width: 100%;
 }
 
+.titulo {
+  margin-top: 0; /* Asegúrate de que el título no tenga margen superior adicional */
+  text-align: center;
+}
+
+.titulo {
+  font-size: 2rem;
+  font-weight: bold;
+  margin-bottom: 1rem;
+}
+
 /* Responsive */
 @media (max-width: 768px) {
   .contenido-principal {
@@ -103,10 +114,11 @@ td {
   border-bottom: 1px solid #eee;
   text-align: left;
   white-space: nowrap;
+  
 }
 
 th {
-  background-color: #ecf0f1;
+  background-color: #dddbdb;
   font-weight: bold;
 }
 
@@ -180,6 +192,22 @@ table tr:hover {
 
   .actions button {
     width: 100%;
+  }
+  
+  table {
+  width: 100%;
+  table-layout: fixed; /* Establece un ancho fijo para las celdas */
+  }
+
+  td {
+    word-wrap: break-word; /* Permite que las palabras largas se dividan en palabras enteras */
+    overflow-wrap: break-word; /* Alternativa moderna */
+    word-break: break-word; /* Asegura que las palabras largas no se corten a la mitad */
+    white-space: normal; /* Permite que el texto fluya normalmente */
+  }
+
+  .titulo {
+    font-size: 1.5rem;
   }
 }
 

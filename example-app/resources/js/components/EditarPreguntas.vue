@@ -9,12 +9,7 @@
           <label>Clasificación:</label>
           <select v-model="clasificacionSeleccionada">
             <option value="">Seleccionar clasificación</option>
-            <option>Evaluación del facilitador.</option>
-            <option>Habilidades del facilitador.</option>
-            <option>Utilización de lo medios didácticos.</option>
-            <option>Marca la respuesta que consideres adecuada.</option>
-            <option>Autoevaluación de alumno.</option>
-            <option>Comentarios</option>
+            <option v-for="c in Array.from(clasificacionesDisponibles)" :key="c" :value="c">{{ c }}</option>
             <option value="otro">Otro</option>
           </select>
 
@@ -38,7 +33,7 @@
             <option>Excelente, Muy bien, Bien, Malo</option>
             <option>Excelente, Muy bien, Bien, Regular, Malo</option>
             <option>Siempre, De 1 a 3 veces por semana, De 1 a 3 veces por mes, De 1 a 3 veces por Cuatrimestre, Nunca</option>
-            <option>Buena combinacion de teoria y practica, Demasiada teoria y poca practica, Poca teoria y mucha practica, Poca teoria y poca practica</option>
+            <option>Buena combinación de teoría y práctica, Demasiada teoría y poca práctica, Poca teoría y mucha práctica, Poca teoría y poca práctica</option>
             <option>Comentario</option>
           </select>
         </div>
@@ -54,7 +49,7 @@
 </template>
 
 <script setup>
-import { reactive, ref, watch } from 'vue'
+import { reactive, ref, watch, onMounted } from 'vue'
 import axios from 'axios'
 
 const props = defineProps({ pregunta: Object })
@@ -68,6 +63,14 @@ const form = reactive({
 
 const clasificacionSeleccionada = ref('')
 const otraClasificacion = ref('')
+const clasificacionesDisponibles = ref(new Set([
+  'Evaluación del facilitador.',
+  'Habilidades del facilitador.',
+  'Utilización de los medios didácticos.',
+  'Marca la respuesta que consideres adecuada.',
+  'Autoevaluación de alumno.',
+  'Comentarios'
+]))
 
 watch(() => props.pregunta, (nuevo) => {
   if (nuevo) {
@@ -75,17 +78,12 @@ watch(() => props.pregunta, (nuevo) => {
     form.texto = nuevo.texto
     form.tipo_opciones = nuevo.tipo_opciones
 
-    // Determinar si la clasificación es personalizada
-    if (
-      [
-        'Evaluación del facilitador.',
-        'Habilidades del facilitador.',
-        'Utilización de lo medios didácticos.',
-        'Marca la respuesta que consideres adecuada.',
-        'Autoevaluación de alumno.',
-        'Comentarios'
-      ].includes(nuevo.clasificacion)
-    ) {
+    // Verificar si ya existe en el set, si no agregarla
+    if (!clasificacionesDisponibles.value.has(nuevo.clasificacion)) {
+      clasificacionesDisponibles.value.add(nuevo.clasificacion)
+    }
+
+    if (clasificacionesDisponibles.value.has(nuevo.clasificacion)) {
       clasificacionSeleccionada.value = nuevo.clasificacion
       otraClasificacion.value = ''
     } else {
@@ -95,20 +93,33 @@ watch(() => props.pregunta, (nuevo) => {
   }
 }, { immediate: true })
 
+onMounted(async () => {
+  const { data } = await axios.get('/api/preguntas-alumno')
+  data.preguntas.forEach(p => {
+    clasificacionesDisponibles.value.add(p.clasificacion)
+  })
+})
+
 const cerrar = () => emit('cerrar')
 
 const actualizar = async () => {
   form.clasificacion =
-    clasificacionSeleccionada.value === 'otro' ? otraClasificacion.value : clasificacionSeleccionada.value
+    clasificacionSeleccionada.value === 'otro'
+      ? otraClasificacion.value.trim()
+      : clasificacionSeleccionada.value
 
+  // Actualizar la pregunta en la base de datos
   await axios.put(`/api/preguntas-alumno/${props.pregunta.id}`, {
     clasificacion: form.clasificacion,
     texto: form.texto,
     tipo_opciones: form.tipo_opciones
   })
 
-  alert('Pregunta actualizada')
+  // Emitir evento de actualización
   emit('actualizado')
+
+  // Cerrar el modal después de la actualización
+  cerrar()
 }
 </script>
 

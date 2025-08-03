@@ -13,6 +13,7 @@ use App\Http\Controllers\Admin\CuatrimestreController;
 use App\Http\Controllers\Admin\MatCuatriCarController;
 use App\Http\Controllers\Admin\RelacionController;
 use App\Http\Controllers\Admin\EvaluacionProfesorController;
+use App\Http\Controllers\Admin\EvaluacionAlumnoController;
 
 use App\Models\MatCuatriCar;
 use App\Models\Profesor;
@@ -20,6 +21,7 @@ use App\Models\Periodo;
 use App\Models\Materia;
 use App\Models\Grupo;
 use App\Models\Carrera;
+use App\Models\EvaluacionAlumno;
 
 use App\Http\Controllers\Admin\PreguntasController;
 
@@ -165,3 +167,7 @@ Route::post('/preguntas-alumno', [PreguntasController::class, 'store']);
 Route::put('/preguntas-alumno/{id}', [PreguntasController::class, 'update']);
 Route::delete('/preguntas-alumno/{id}', [PreguntasController::class, 'destroy']);
 Route::post('/enviar-evaluacion', [PreguntasController::class, 'guardarEvaluacion']);
+
+
+#Evaluacion del vista de alumnos
+Route::get('/alumno/materias-por-evaluar',[EvaluacionAlumnoController::class,'listaMateriasEval']);

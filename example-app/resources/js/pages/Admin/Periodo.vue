@@ -101,5 +101,5 @@ onMounted(() => {
 })
 </script>
 
-<style src="@/../css/Contenido.css"></style>
+<style src="@/../css/Registros.css"></style>
 <style src="@/../css/botones.css"></style>

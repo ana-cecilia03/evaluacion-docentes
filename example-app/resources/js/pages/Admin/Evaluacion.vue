@@ -5,9 +5,7 @@
         <button type="submit" class="boton-azul">Publicar</button>
       </div>
 
-      <form @submit.prevent="handleSubmit">
-        <div v-if="step === 1">
-          <section v-for="(bloque, idx) in preguntasPorClasificacion" :key="idx">
+      <section v-for="(bloque, idx) in preguntasPorClasificacion" :key="idx">
             <h3>{{ idx + 1 }}.- {{ bloque.clasificacion }}</h3>
 
             <div v-if="bloque.tipo !== 'comentario'" class="table-wrapper">
@@ -46,8 +44,6 @@
               </div>
             </div>
           </section>
-        </div>
-      </form>
     </main>
   </Menu>
 </template>
@@ -117,12 +113,6 @@ function obtenerOpciones(tipo_opciones) {
   return opcionesPorTipo[ mapTipo(tipo_opciones) ] || []
 }
 
-function handleSubmit() {
-  axios.post('/api/enviar-evaluacion', {
-    respuestas: respuestas.value,
-    comentarios: comentariosRespuesta.value
-  })
-}
 </script>
 
 

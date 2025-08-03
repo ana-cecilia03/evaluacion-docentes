@@ -1,17 +1,16 @@
 <template>
   <MenuAlumno>
     <main class="contenido-principal">
+      
       <!-- Barra superior -->
       <div class="barra-superior">
-        <div class="rectangulo">Profesor</div>
-        <div class="rectangulo">Materia</div>
-        <div class="rectangulo">Grupo</div>
+        <div class="rectangulo"> Profesor</div>
+        <div class="rectangulo"> Materia</div>
+        <div class="rectangulo"> Grupo</div>
+        <div class="rectangulo"> Fecha</div>
       </div>
 
-      <!-- FORMULARIOS -->
-      <form @submit.prevent="handleSubmit">
-        <div v-if="step === 1">
-          <section v-for="(bloque, idx) in preguntasPorClasificacion" :key="idx">
+      <section v-for="(bloque, idx) in preguntasPorClasificacion" :key="idx">
             <h3>{{ idx + 1 }}.- {{ bloque.clasificacion }}</h3>
 
             <div v-if="bloque.tipo !== 'comentario'" class="table-wrapper">
@@ -50,47 +49,22 @@
               </div>
             </div>
           </section>
-        </div>
-      </form>
+          
+          <!-- BOTÓN -->
+           <div class="boton-container">
+            <button type="submit" class="boton-azul">Enviar</button>
+          </div>
     </main>
   </MenuAlumno>
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import MenuAlumno from '@/layouts/MenuAlumno.vue'
+import axios from 'axios'
 
 const step = ref(1)
-
-// Datos simulados para preguntas
-const preguntasPorClasificacion = ref([
-  {
-    clasificacion: 'Satisfacción General',
-    tipo_opciones: 'puntuacion',
-    tipo: 'puntuacion',
-    preguntas: [
-      { id: 1, texto: '¿Cómo calificarías la calidad general del servicio?' },
-      { id: 2, texto: '¿Recomendarías nuestro servicio a otros?' }
-    ]
-  },
-  {
-    clasificacion: 'Tiempo de Respuesta',
-    tipo_opciones: 'fecha',
-    tipo: 'fecha',
-    preguntas: [
-      { id: 3, texto: '¿Con qué frecuencia recibes respuestas dentro del plazo prometido?' }
-    ]
-  },
-  {
-    clasificacion: 'Comentarios',
-    tipo_opciones: 'comentario',
-    tipo: 'comentario',
-    preguntas: [
-      { id: 4, texto: '¿Qué sugerencias o comentarios tienes para mejorar el servicio?' }
-    ]
-  }
-])
-
+const preguntasPorClasificacion = ref([])
 const respuestas = ref({})
 const comentariosRespuesta = ref({})
 
@@ -112,8 +86,26 @@ const opcionesPorTipo = {
   detalle: ['Excelente', 'Muy bien', 'Bien', 'Regular', 'Malo']
 }
 
-function obtenerOpciones(tipo_opciones) {
-  return opcionesPorTipo[ mapTipo(tipo_opciones) ] || []
+onMounted(async () => {
+  const { data } = await axios.get('/api/preguntas-alumno')
+  agruparPorClasificacion(data.preguntas)
+})
+
+function agruparPorClasificacion(preguntas) {
+  const aux = {}
+  preguntas.forEach(p => {
+    const tipo = mapTipo(p.tipo_opciones)
+    if (!aux[p.clasificacion]) {
+      aux[p.clasificacion] = {
+        clasificacion: p.clasificacion,
+        tipo_opciones: p.tipo_opciones,
+        tipo,
+        preguntas: []
+      }
+    }
+    aux[p.clasificacion].preguntas.push(p)
+  })
+  preguntasPorClasificacion.value = Object.values(aux)
 }
 
 function mapTipo(tipo_opciones) {
@@ -127,11 +119,12 @@ function mapTipo(tipo_opciones) {
   return 'puntuacion'
 }
 
-function handleSubmit() {
-  console.log('Respuestas:', respuestas.value)
-  console.log('Comentarios:', comentariosRespuesta.value)
+function obtenerOpciones(tipo_opciones) {
+  return opcionesPorTipo[ mapTipo(tipo_opciones) ] || []
 }
+
 </script>
+
 
 <style src="@/../css/Registros.css"></style>
 <style src="@/../css/botones.css"></style>

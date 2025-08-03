@@ -6,12 +6,7 @@
           <label>Clasificación:</label>
           <select v-model="clasificacionSeleccionada">
             <option value="">Seleccionar clasificación</option>
-            <option>Evaluación del facilitador.</option>
-            <option>Habilidades del facilitador.</option>
-            <option>Utilización de lo medios didácticos.</option>
-            <option>Marca la respuesta que consideres adecuada.</option>
-            <option>Autoevaluación de alumno.</option>
-            <option>Comentarios</option>
+            <option v-for="c in Array.from(clasificacionesDisponibles)" :key="c" :value="c">{{ c }}</option>
             <option value="otro">Otro</option>
           </select>
           <div v-if="clasificacionSeleccionada === 'otro'" class="campo-extra">
@@ -44,7 +39,11 @@
 
       <div class="modal-overlay" v-if="editarDatos">
         <div class="modal-content">
-          <EditarPreguntas :pregunta="preguntaSeleccionada" @cerrar="editarDatos = false" @actualizado="cargarPreguntas" />
+          <EditarPreguntas
+            :pregunta="preguntaSeleccionada"
+            @cerrar="editarDatos = false"
+            @actualizado="cargarPreguntas"
+          />
         </div>
       </div>
 
@@ -91,23 +90,50 @@ const preguntaTexto = ref('')
 const tipoOpciones = ref('')
 const editarDatos = ref(false)
 const preguntaSeleccionada = ref({})
+const clasificacionesDisponibles = ref(new Set([
+  'Evaluación del facilitador.',
+  'Habilidades del facilitador.',
+  'Utilización de lo medios didácticos.',
+  'Marca la respuesta que consideres adecuada.',
+  'Autoevaluación de alumno.',
+  'Comentarios'
+]))
 
 const obtenerClasificacionFinal = () =>
-  clasificacionSeleccionada.value === 'otro' ? otraClasificacion.value : clasificacionSeleccionada.value
+  clasificacionSeleccionada.value === 'otro'
+    ? otraClasificacion.value.trim()
+    : clasificacionSeleccionada.value
 
 const cargarPreguntas = async () => {
   const { data } = await axios.get('/api/preguntas-alumno')
   preguntas.value = data.preguntas
+
+  data.preguntas.forEach(p => {
+    clasificacionesDisponibles.value.add(p.clasificacion)
+  })
 }
 
 const agregarPregunta = async () => {
-  if (!preguntaTexto.value || !tipoOpciones.value || !obtenerClasificacionFinal()) return
+  const clasif = obtenerClasificacionFinal()
+  if (!preguntaTexto.value || !tipoOpciones.value || !clasif) return
+
+  const yaExiste = preguntas.value.some(p =>
+    p.clasificacion.trim().toLowerCase() === clasif.toLowerCase() &&
+    p.texto.trim().toLowerCase() === preguntaTexto.value.trim().toLowerCase()
+  )
+
+  if (yaExiste) {
+    alert('Ya existe una pregunta con esa clasificación y texto.')
+    return
+  }
 
   await axios.post('/api/preguntas-alumno', {
-    texto: preguntaTexto.value,
-    tipo_opciones: tipoOpciones.value,
-    clasificacion: obtenerClasificacionFinal()
+    texto: preguntaTexto.value.trim(),
+    tipo_opciones: tipoOpciones.value.trim(),
+    clasificacion: clasif
   })
+
+  clasificacionesDisponibles.value.add(clasif)
 
   preguntaTexto.value = ''
   tipoOpciones.value = ''
