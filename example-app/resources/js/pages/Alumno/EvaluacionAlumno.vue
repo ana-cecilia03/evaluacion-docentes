@@ -21,14 +21,15 @@
               <tr>
                 <th v-if="bloque.tipo !== 'curso'">No.</th>
                 <th>Concepto</th>
-                <th v-for="opcion in obtenerOpciones(bloque.tipo_opciones)" :key="opcion">{{ opcion }}</th>
+                <th v-for="opcion in obtenerOpciones(bloque.tipo_opciones)" :key="opcion">
+                  {{ opcion }}
+                </th>
               </tr>
             </thead>
             <tbody>
               <tr v-for="(preg, i) in bloque.preguntas" :key="preg.id">
                 <td v-if="bloque.tipo !== 'curso'">{{ i + 1 }}</td>
                 <td>{{ preg.texto }}</td>
-                <!-- Opciones tipo radio para seleccionar la respuesta -->
                 <td v-for="opcion in obtenerOpciones(bloque.tipo_opciones)" :key="opcion">
                   <label class="opcion-responsive">
                     <input
@@ -68,7 +69,7 @@ import { usePage, router } from '@inertiajs/vue3'
 import MenuAlumno from '@/layouts/MenuAlumno.vue'
 import axios from 'axios'
 
-// Obtener el ID de relación desde props (pasado por Inertia desde la ruta)
+// Obtener el ID de relación desde props (pasado por Inertia desde Inertia.visit)
 const page = usePage()
 const idRelacion = page.props.id_relacion
 
@@ -78,7 +79,7 @@ const preguntasPorClasificacion = ref([])
 const respuestas = ref({})
 const comentariosRespuesta = ref({})
 
-// Diccionario de tipos de opciones posibles
+// Diccionario de opciones visuales por tipo de pregunta
 const opcionesPorTipo = {
   puntuacion: ['Excelente', 'Muy bien', 'Bien', 'Malo'],
   fecha: [
@@ -97,7 +98,25 @@ const opcionesPorTipo = {
   detalle: ['Excelente', 'Muy bien', 'Bien', 'Regular', 'Malo']
 }
 
-// Al montar el componente, cargar datos de relación y preguntas
+// Diccionario para convertir opciones a calificaciones numéricas
+const valoresNumericos = {
+  'Excelente': 10,
+  'Muy bien': 8,
+  'Bien': 6,
+  'Regular': 5,
+  'Malo': 3,
+  'Siempre': 10,
+  'De 1 a 3 veces por semana': 8,
+  'De 1 a 3 veces por mes': 6,
+  'De 1 a 3 veces por Cuatrimestre': 4,
+  'Nunca': 0,
+  'Buena combinacion de teoria y practica': 10,
+  'Demasiada teoria y poca practica': 7,
+  'Poca teoria y mucha practica': 7,
+  'Poca teoria y poca practica': 3
+}
+
+// Al cargar la vista, traer datos desde el backend
 onMounted(async () => {
   try {
     const resRelacion = await axios.get(`/api/alumno/evaluacion-datos/${idRelacion}`)
@@ -110,7 +129,7 @@ onMounted(async () => {
   }
 })
 
-// Agrupa preguntas por su clasificación (tema o bloque)
+// Agrupar preguntas por clasificación para mostrarlas por bloques
 function agruparPorClasificacion(preguntas) {
   const aux = {}
   preguntas.forEach(p => {
@@ -128,7 +147,7 @@ function agruparPorClasificacion(preguntas) {
   preguntasPorClasificacion.value = Object.values(aux)
 }
 
-// Mapea el tipo de pregunta para identificar la lógica de opciones
+// Detectar tipo lógico de pregunta
 function mapTipo(tipo_opciones) {
   if (!tipo_opciones) return 'puntuacion'
   const opt = tipo_opciones.toLowerCase().split(',').map(s => s.trim())
@@ -140,46 +159,48 @@ function mapTipo(tipo_opciones) {
   return 'puntuacion'
 }
 
-// Devuelve las opciones que se deben mostrar para un tipo de pregunta
+// Obtener lista de opciones según tipo
 function obtenerOpciones(tipo_opciones) {
   return opcionesPorTipo[mapTipo(tipo_opciones)] || []
 }
 
-// Enviar respuestas de evaluación al backend
+// Enviar respuestas al backend
 async function enviarEvaluacion() {
   const payload = {
     relacion_id: idRelacion,
-    respuestas: []
+    respuestas: [],
+    comentarios: []
   }
 
-  // Agregar respuestas seleccionadas
+  // Respuestas numéricas (radio buttons)
   for (const id in respuestas.value) {
     payload.respuestas.push({
       id_pregunta: parseInt(id),
-      calificacion: respuestas.value[id]
+      calificacion: valoresNumericos[respuestas.value[id]] ?? 0
     })
   }
 
-  // Agregar comentarios
+  // Comentarios abiertos (texto)
   for (const id in comentariosRespuesta.value) {
-    payload.respuestas.push({
+    payload.comentarios.push({
       id_pregunta: parseInt(id),
-      calificacion: comentariosRespuesta.value[id]
+      texto: comentariosRespuesta.value[id]
     })
   }
 
   try {
     await axios.post('/api/alumno/evaluar', payload)
-    alert('✅ Evaluación enviada correctamente.')
+    alert('Evaluación enviada correctamente.')
     router.visit('/alumno/materias')
   } catch (error) {
     console.error('Error al enviar evaluación:', error)
-    alert('❌ Error al enviar evaluación.')
+    console.log('Detalles del error 422:', error.response?.data)
+    alert('Error al enviar evaluación.')
   }
 }
 </script>
 
-<!-- Estilos CSS importados para esta vista -->
+<!-- Estilos externos específicos de esta vista -->
 <style src="@/../css/Registros.css"></style>
 <style src="@/../css/botones.css"></style>
 <style src="@/../css/Evaluacion.css"></style>

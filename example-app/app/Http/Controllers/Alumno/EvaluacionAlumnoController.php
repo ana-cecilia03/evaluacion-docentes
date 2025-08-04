@@ -5,9 +5,12 @@ namespace App\Http\Controllers\Alumno;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use App\Models\EvaluacionAlumno;
-use App\Models\PreguntaAlumno;
 use Illuminate\Support\Facades\DB;
+
+// Modelos
+use App\Models\EvaluacionAlumno1;
+use App\Models\RespuestaEvaluacionalum;
+use App\Models\PreguntaAlumno;
 
 class EvaluacionAlumnoController extends Controller
 {
@@ -22,7 +25,7 @@ class EvaluacionAlumnoController extends Controller
     }
 
     /**
-     * Registra las respuestas del alumno a las preguntas de evaluación.
+     * Registra la evaluación de un alumno, incluyendo respuestas numéricas y comentarios.
      */
     public function store(Request $request)
     {
@@ -32,28 +35,53 @@ class EvaluacionAlumnoController extends Controller
             'respuestas' => 'required|array|min:1',
             'respuestas.*.id_pregunta' => 'required|exists:preguntas_alumno,id',
             'respuestas.*.calificacion' => 'required|numeric|min:0|max:10',
+            'comentarios' => 'nullable|array',
+            'comentarios.*.id_pregunta' => 'required|exists:preguntas_alumno,id',
+            'comentarios.*.texto' => 'nullable|string|max:1000'
         ]);
 
-        $alumnoId = Auth::id();     // ID del alumno autenticado
-        $fecha = now();             // Fecha actual
+        // 🔒 Obtener ID del alumno autenticado (ajusta si ya tienes autenticación activa)
+        // $alumnoId = Auth::id();
+        $alumnoId = 16; // 🔧 Temporal mientras no hay login real
 
-        // Guarda cada respuesta en la base de datos
+        if (!$alumnoId) {
+            return response()->json(['error' => 'Alumno no autenticado.'], 401);
+        }
+
+        // 📝 Crear la evaluación general (una por conjunto de respuestas)
+        $evaluacion = EvaluacionAlumno1::create([
+            'id_alumno'   => $alumnoId,
+            'relacion_id' => $request->relacion_id,
+            'fecha'       => now(),
+        ]);
+
+        // ✅ Guardar respuestas numéricas (opciones cerradas)
         foreach ($request->respuestas as $respuesta) {
-            EvaluacionAlumno::create([
-                'id_alumno' => $alumnoId,
-                'relacion_id' => $request->relacion_id,
-                'id_pregunta' => $respuesta['id_pregunta'],
-                'fecha' => $fecha,
-                'calificacion' => $respuesta['calificacion'],
+            RespuestaEvaluacionalum::create([
+                'id_evaluacion' => $evaluacion->id_evaluacion,
+                'id_pregunta'   => $respuesta['id_pregunta'],
+                'calificacion'  => $respuesta['calificacion']
             ]);
         }
 
-        return response()->json(['message' => 'Evaluación registrada correctamente.']);
+        // 🗨️ Guardar comentarios abiertos (opcional)
+        if (!empty($request->comentarios)) {
+            foreach ($request->comentarios as $comentario) {
+                if (!empty($comentario['texto'])) {
+                    RespuestaEvaluacionalum::create([
+                        'id_evaluacion' => $evaluacion->id_evaluacion,
+                        'id_pregunta'   => $comentario['id_pregunta'],
+                        'calificacion'  => $comentario['texto'] // 👈 Puede ser texto si se usa campo TEXT
+                    ]);
+                }
+            }
+        }
+
+        return response()->json(['message' => '✅ Evaluación registrada correctamente.']);
     }
 
     /**
-     * Devuelve los datos informativos de una relación:
-     * profesor, materia, grupo y la fecha actual formateada.
+     * Devuelve los datos informativos de una relación para mostrar al alumno.
      */
     public function datosRelacion($id_relacion)
     {
@@ -66,13 +94,13 @@ class EvaluacionAlumnoController extends Controller
             ->select(
                 'p.nombre_completo as profesor',
                 'mcc.materia_nombre as materia',
-                'g.nombre as grupo', // Corrige campo del grupo mostrado
+                'g.nombre as grupo',
                 DB::raw('DATE_FORMAT(NOW(), "%d/%m/%Y") as fecha')
             )
             ->first();
 
         if (!$datos) {
-            return response()->json(['error' => 'Relación no encontrada'], 404);
+            return response()->json(['error' => 'Relación no encontrada.'], 404);
         }
 
         return response()->json($datos);
