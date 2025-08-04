@@ -71,13 +71,13 @@ class EvaluacionAlumnoController extends Controller
                     RespuestaEvaluacionalum::create([
                         'id_evaluacion' => $evaluacion->id_evaluacion,
                         'id_pregunta'   => $comentario['id_pregunta'],
-                        'calificacion'  => $comentario['texto'] // 👈 Puede ser texto si se usa campo TEXT
+                        'calificacion'  => $comentario['texto'] //  texto 
                     ]);
                 }
             }
         }
 
-        return response()->json(['message' => '✅ Evaluación registrada correctamente.']);
+        return response()->json(['message' => ' Evaluación registrada correctamente.']);
     }
 
     /**
