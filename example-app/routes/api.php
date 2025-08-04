@@ -1,20 +1,32 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Auth;
+
+// Importación de controladores
+
+// Autenticación
 use App\Http\Controllers\Auth\LoginAlumno;
 use App\Http\Controllers\Auth\LoginProfesor;
-use App\Http\Controllers\Admin\PeriodoController;
-use App\Http\Controllers\Admin\CarreraController;
+
+// Controladores del administrador
 use App\Http\Controllers\Admin\AlumnoController;
 use App\Http\Controllers\Admin\ProfesorController;
+use App\Http\Controllers\Admin\CarreraController;
 use App\Http\Controllers\Admin\GrupoController;
 use App\Http\Controllers\Admin\MateriaController;
+use App\Http\Controllers\Admin\PeriodoController;
 use App\Http\Controllers\Admin\CuatrimestreController;
 use App\Http\Controllers\Admin\MatCuatriCarController;
 use App\Http\Controllers\Admin\RelacionController;
 use App\Http\Controllers\Admin\EvaluacionProfesorController;
-use App\Http\Controllers\Admin\EvaluacionAlumnoController;
+use App\Http\Controllers\Admin\PreguntasController;
 
+// Controladores del alumno
+use App\Http\Controllers\Alumno\EvaluacionAlumnoController;
+use App\Http\Controllers\Alumno\AlumnoMateriaController;
+
+// Modelos utilizados en rutas anónimas
 use App\Models\MatCuatriCar;
 use App\Models\Profesor;
 use App\Models\Periodo;
@@ -23,22 +35,22 @@ use App\Models\Grupo;
 use App\Models\Carrera;
 use App\Models\EvaluacionAlumno;
 
-use App\Http\Controllers\Admin\PreguntasController;
-
-
-use Illuminate\Support\Facades\Auth;
 
 /*
 |--------------------------------------------------------------------------
 | API Routes
 |--------------------------------------------------------------------------
+| Definición de rutas para el consumo vía HTTP desde frontend o apps.
+| Muchas rutas están agrupadas por prefijos para mantener organización.
 */
 
-// 🔐 Autenticación
+
+// Autenticación de alumno y administrador
 Route::post('/login/alumno', [LoginAlumno::class, 'login']);
 Route::post('/admin/login', [LoginProfesor::class, 'login']);
 
-// 📆 Periodos
+
+// Gestión de periodos académicos
 Route::prefix('periodos')->group(function () {
     Route::post('/', [PeriodoController::class, 'store']);
     Route::get('/', [PeriodoController::class, 'index']);
@@ -46,22 +58,28 @@ Route::prefix('periodos')->group(function () {
     Route::get('/activos', [PeriodoController::class, 'activos']);
 });
 
-// 🎓 Carreras
+
+// Gestión de carreras
 Route::prefix('carreras')->group(function () {
     Route::get('/', [CarreraController::class, 'index']);
     Route::post('/', [CarreraController::class, 'store']);
     Route::put('/{id}', [CarreraController::class, 'update']);
     Route::get('/nombres', [CarreraController::class, 'nombres']);
+
+    // Carreras únicas desde mat_cuatri_carr
     Route::get('/unicas', function () {
         return MatCuatriCar::selectRaw('MIN(id_mat_cuatri_car) as id_mat_cuatri_car, carrera_nombre')
             ->groupBy('carrera_nombre')
             ->orderBy('carrera_nombre')
             ->get();
     });
+
+    // Carreras filtradas por periodo
     Route::get('/por-periodo/{num}', [MatCuatriCarController::class, 'carrerasPorPeriodo']);
 });
 
-// 📘 Materias por carrera
+
+// Obtener materias según carrera
 Route::get('/materias/por-carrera/{nombre}', function ($nombre) {
     return MatCuatriCar::where('carrera_nombre', $nombre)
         ->select('id_mat_cuatri_car', 'materia_nombre', 'cuatri_num')
@@ -69,7 +87,8 @@ Route::get('/materias/por-carrera/{nombre}', function ($nombre) {
         ->get();
 });
 
-// 👨‍🎓 Alumnos
+
+// CRUD de alumnos (administrador)
 Route::prefix('alumnos')->group(function () {
     Route::get('/', [AlumnoController::class, 'index']);
     Route::post('/', [AlumnoController::class, 'store']);
@@ -79,7 +98,17 @@ Route::prefix('alumnos')->group(function () {
     Route::post('/desactivar', [AlumnoController::class, 'desactivarVarios']);
 });
 
-// 👨‍🏫 Profesores
+
+// Evaluación de profesores por alumnos
+Route::prefix('alumno')->group(function () {
+    Route::get('/materias-por-evaluar', [AlumnoMateriaController::class, 'listaMateriasEval']);
+    Route::get('/preguntas', [EvaluacionAlumnoController::class, 'preguntas']);
+    Route::post('/evaluar', [EvaluacionAlumnoController::class, 'store']);
+    Route::get('/evaluacion-datos/{id_relacion}', [EvaluacionAlumnoController::class, 'datosRelacion']);
+});
+
+
+// CRUD de profesores
 Route::prefix('profesores')->group(function () {
     Route::get('/', [ProfesorController::class, 'index']);
     Route::post('/', [ProfesorController::class, 'store']);
@@ -87,10 +116,10 @@ Route::prefix('profesores')->group(function () {
     Route::post('/csv', [ProfesorController::class, 'importarDesdeCSV']);
     Route::get('/activos', fn() => Profesor::where('status', 'activo')->get());
     Route::get('/{id}', [ProfesorController::class, 'show']);
-
 });
 
-// 🏫 Grupos
+
+// CRUD de grupos
 Route::prefix('grupos')->group(function () {
     Route::get('/', [GrupoController::class, 'index']);
     Route::post('/', [GrupoController::class, 'store']);
@@ -98,7 +127,8 @@ Route::prefix('grupos')->group(function () {
     Route::post('/csv', [GrupoController::class, 'importarDesdeCSV']);
 });
 
-// 📚 Materias
+
+// CRUD de materias
 Route::prefix('materias')->group(function () {
     Route::get('/', [MateriaController::class, 'index']);
     Route::post('/', [MateriaController::class, 'store']);
@@ -108,7 +138,8 @@ Route::prefix('materias')->group(function () {
     Route::get('/por-periodo/{num}', [MatCuatriCarController::class, 'materiasPorPeriodo']);
 });
 
-// 📘 Cuatrimestres
+
+// Gestión de cuatrimestres
 Route::prefix('cuatrimestres')->group(function () {
     Route::get('/', [CuatrimestreController::class, 'index']);
     Route::post('/', [CuatrimestreController::class, 'store']);
@@ -116,21 +147,24 @@ Route::prefix('cuatrimestres')->group(function () {
     Route::get('/numeros', [CuatrimestreController::class, 'numeros']);
 });
 
-// 🔁 MatCuatriCar
+
+// CRUD de MatCuatriCar (materia-cuatrimestre-carrera)
 Route::prefix('mat-cuatri-car')->group(function () {
     Route::get('/', [MatCuatriCarController::class, 'index']);
     Route::post('/', [MatCuatriCarController::class, 'store']);
     Route::put('/{id}', [MatCuatriCarController::class, 'update']);
 });
 
-// 🔗 Relaciones prof-mat-grupo
+
+// Relaciones entre profesor, materia y grupo
 Route::prefix('relaciones')->group(function () {
     Route::get('/', [RelacionController::class, 'index']);
     Route::post('/', [RelacionController::class, 'store']);
     Route::put('/{id}', [RelacionController::class, 'update']);
 });
 
-// 📥 Selects genéricos
+
+// Selects reutilizables para formularios
 Route::prefix('selects')->group(function () {
     Route::get('/profesores', fn() => Profesor::all());
     Route::get('/periodos', fn() => Periodo::all());
@@ -138,7 +172,8 @@ Route::prefix('selects')->group(function () {
     Route::get('/grupos', fn() => Grupo::all());
 });
 
-#Evaluaciones PRofesorPA
+
+// Evaluación de profesores por administrador
 Route::prefix('evaluaciones')->group(function () {
     Route::get('/preguntas-pa', [EvaluacionProfesorController::class, 'preguntasPA']);
     Route::get('/preguntas-ptc', [EvaluacionProfesorController::class, 'preguntasPTC']);
@@ -147,8 +182,7 @@ Route::prefix('evaluaciones')->group(function () {
 });
 
 
-
-#APi protegida con Middleware
+// Verificar autenticación del evaluador (protegido con Sanctum)
 Route::middleware('auth:sanctum')->get('/evaluador', function () {
     $user = Auth::user();
 
@@ -161,13 +195,12 @@ Route::middleware('auth:sanctum')->get('/evaluador', function () {
     ]);
 });
 
-#Api para gestion de preguntas
-Route::get('/preguntas-alumno', [PreguntasController::class, 'index']);
-Route::post('/preguntas-alumno', [PreguntasController::class, 'store']);
-Route::put('/preguntas-alumno/{id}', [PreguntasController::class, 'update']);
-Route::delete('/preguntas-alumno/{id}', [PreguntasController::class, 'destroy']);
-Route::post('/enviar-evaluacion', [PreguntasController::class, 'guardarEvaluacion']);
 
-
-#Evaluacion del vista de alumnos
-Route::get('/alumno/materias-por-evaluar',[EvaluacionAlumnoController::class,'listaMateriasEval']);
+// Gestión de preguntas para evaluaciones de alumnos
+Route::prefix('preguntas-alumno')->group(function () {
+    Route::get('/', [PreguntasController::class, 'index']);
+    Route::post('/', [PreguntasController::class, 'store']);
+    Route::put('/{id}', [PreguntasController::class, 'update']);
+    Route::delete('/{id}', [PreguntasController::class, 'destroy']);
+    Route::post('/enviar-evaluacion', [PreguntasController::class, 'guardarEvaluacion']);
+});
