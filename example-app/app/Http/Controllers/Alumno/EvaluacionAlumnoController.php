@@ -29,55 +29,59 @@ class EvaluacionAlumnoController extends Controller
      */
     public function store(Request $request)
     {
-        // Validación de entrada
-        $request->validate([
-            'relacion_id' => 'required|exists:relacions,id_relacion',
-            'respuestas' => 'required|array|min:1',
-            'respuestas.*.id_pregunta' => 'required|exists:preguntas_alumno,id',
-            'respuestas.*.calificacion' => 'required|numeric|min:0|max:10',
-            'comentarios' => 'nullable|array',
-            'comentarios.*.id_pregunta' => 'required|exists:preguntas_alumno,id',
-            'comentarios.*.texto' => 'nullable|string|max:1000'
-        ]);
+    $request->validate([
+        'relacion_id' => 'required|exists:relacions,id_relacion',
+        'respuestas'  => 'required|array|min:1',
+        'respuestas.*.id_pregunta'  => 'required|exists:preguntas_alumno,id',
+        'respuestas.*.calificacion' => 'required|numeric|min:0|max:10',
+        'comentarios' => 'nullable|array',
+        'comentarios.*.id_pregunta' => 'required|exists:preguntas_alumno,id',
+        'comentarios.*.texto'       => 'nullable|string|max:1000'
+    ]);
 
-        // 🔒 Obtener ID del alumno autenticado (ajusta si ya tienes autenticación activa)
-        // $alumnoId = Auth::id();
-        $alumnoId = 16; // 🔧 Temporal mientras no hay login real
+    // Alumno simulado por ahora
+    $alumnoId = 16;
 
-        if (!$alumnoId) {
-            return response()->json(['error' => 'Alumno no autenticado.'], 401);
-        }
+    // 1) Bloquear duplicados
+    $yaEvaluo = EvaluacionAlumno1::where('id_alumno', $alumnoId)
+        ->where('relacion_id', $request->relacion_id)
+        ->exists();
 
-        // 📝 Crear la evaluación general (una por conjunto de respuestas)
+    if ($yaEvaluo) {
+        return response()->json(['message' => 'Ya evaluaste a este profesor.'], 409);
+    }
+
+    // 2) Guardar evaluación y respuestas
+    DB::transaction(function () use ($request, $alumnoId) {
         $evaluacion = EvaluacionAlumno1::create([
             'id_alumno'   => $alumnoId,
             'relacion_id' => $request->relacion_id,
             'fecha'       => now(),
         ]);
 
-        // ✅ Guardar respuestas numéricas (opciones cerradas)
-        foreach ($request->respuestas as $respuesta) {
+        foreach ($request->respuestas as $r) {
             RespuestaEvaluacionalum::create([
                 'id_evaluacion' => $evaluacion->id_evaluacion,
-                'id_pregunta'   => $respuesta['id_pregunta'],
-                'calificacion'  => $respuesta['calificacion']
+                'id_pregunta'   => $r['id_pregunta'],
+                'calificacion'  => $r['calificacion'],
             ]);
         }
 
-        // 🗨️ Guardar comentarios abiertos (opcional)
         if (!empty($request->comentarios)) {
-            foreach ($request->comentarios as $comentario) {
-                if (!empty($comentario['texto'])) {
+            foreach ($request->comentarios as $c) {
+                if (!empty($c['texto'])) {
+                    // IDEAL: guardar en una columna 'comentario' (no en 'calificacion')
                     RespuestaEvaluacionalum::create([
                         'id_evaluacion' => $evaluacion->id_evaluacion,
-                        'id_pregunta'   => $comentario['id_pregunta'],
-                        'calificacion'  => $comentario['texto'] //  texto 
+                        'id_pregunta'   => $c['id_pregunta'],
+                        'calificacion'  => $c['texto'], // ajustar cuando tengas columna 'comentario'
                     ]);
                 }
             }
         }
+    });
 
-        return response()->json(['message' => ' Evaluación registrada correctamente.']);
+    return response()->json(['message' => 'Evaluación registrada correctamente.']);
     }
 
     /**

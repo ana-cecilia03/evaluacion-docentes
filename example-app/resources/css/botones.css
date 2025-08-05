@@ -26,6 +26,15 @@
   cursor: pointer;
 }
 
+.boton-gris {
+  background-color: #ccc;
+  color: #666;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 5px;
+  cursor: not-allowed;
+}
+
 .boton-azulClaro {
   background-color: #628ECB;
   color: white;

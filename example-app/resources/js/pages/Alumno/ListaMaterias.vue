@@ -1,39 +1,59 @@
 <template>
   <MenuAlumno>
     <main class="contenido-principal">
-      <!-- Campo de búsqueda para filtrar materias -->
+      <!-- Acciones -->
       <div class="actions">
         <input v-model="busqueda" placeholder="Buscar por nombre o materia" />
       </div>
 
-      <!-- Tabla que muestra la lista de materias con su respectivo profesor -->
+      <!-- Tabla -->
       <table>
         <thead>
           <tr>
             <th>Materia</th>
             <th>Profesor</th>
-            <th></th>
+            <th style="width: 1%"></th>
           </tr>
         </thead>
+
         <tbody>
-          <!-- Itera sobre materias filtradas -->
-          <tr v-for="m in materiasFiltradas" :key="m.relacion_id">
+          <!-- Estado: cargando -->
+          <tr v-if="cargando">
+            <td colspan="3">Cargando materias…</td>
+          </tr>
+
+          <!-- Estado: error -->
+          <tr v-else-if="error">
+            <td colspan="3">{{ error }}</td>
+          </tr>
+
+          <!-- Sin resultados -->
+          <tr v-else-if="materiasFiltradas.length === 0">
+            <td colspan="3">Sin profesores por evaluar</td>
+          </tr>
+
+          <!-- Lista -->
+          <tr v-else v-for="m in materiasFiltradas" :key="m.relacion_id">
             <td>{{ m.materia_nombre }}</td>
             <td>{{ m.profesor_nombre }}</td>
             <td>
-              <button class="boton-azul" @click="evaluarMateria(m)">Evaluar</button>
+              <button
+                :class="m.evaluado ? 'boton-gris' : 'boton-azul'"
+                :disabled="m.evaluado || enviandoId === m.relacion_id"
+                @click="evaluarMateria(m)"
+                :aria-disabled="m.evaluado || enviandoId === m.relacion_id"
+                :title="m.evaluado ? 'Ya evaluado' : 'Evaluar'"
+              >
+                <span v-if="enviandoId === m.relacion_id">Enviando…</span>
+                <span v-else>{{ m.evaluado ? 'Evaluado' : 'Evaluar' }}</span>
+              </button>
             </td>
-          </tr>
-          <!-- Mensaje cuando no hay resultados -->
-          <tr v-if="materiasFiltradas.length === 0">
-            <td colspan="3">Sin profesores por evaluar</td>
           </tr>
         </tbody>
       </table>
     </main>
   </MenuAlumno>
 </template>
-
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import MenuAlumno from '@/layouts/MenuAlumno.vue'
