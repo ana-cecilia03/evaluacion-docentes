@@ -15,33 +15,39 @@ class AlumnoMateriaController extends Controller
      */
     public function listaMateriasEval()
     {
-    // Alumno simulado por ahora
-    $alumno = Alumno::find(16);
+    // Alumno simulado (ajusta cuando tengas login)
+    $alumno = \App\Models\Alumno::find(16);
     if (!$alumno) {
         return response()->json(['error' => 'Alumno no encontrado'], 404);
     }
 
+    // Asegúrate de que este campo sea el ID del grupo del alumno
     $grupoId = $alumno->grupo;
 
-    // Subconsulta: relaciones ya evaluadas por este alumno
-    $sub = EvaluacionAlumno1::select('relacion_id')
+    // Subquery: relaciones ya evaluadas por este alumno
+    $sub = \App\Models\EvaluacionAlumno1::select('relacion_id')
         ->where('id_alumno', $alumno->id_alumno);
 
-    $materias = DB::table('relacions as r')
+    $materias = \DB::table('relacions as r')
         ->join('profesores as p', 'r.profesor_id', '=', 'p.id_profesor')
         ->join('mat_cuatri_carr as mcc', 'r.id_mat_cuatri_car', '=', 'mcc.id_mat_cuatri_car')
         ->join('periodos as pe', 'r.periodo_id', '=', 'pe.id_periodo')
+        // FILTRAR por el grupo del alumno
+        ->where('r.grupo_id', $grupoId)
+        // (opcional) solo periodo activo
+        ->where('pe.estado', 'activo')
+        // marcar evaluadas
         ->leftJoinSub($sub, 'ea', function ($join) {
             $join->on('ea.relacion_id', '=', 'r.id_relacion');
         })
-        ->where('r.grupo_id', $grupoId)
-        ->where('pe.estado', 'activo')
         ->select(
             'r.id_relacion as relacion_id',
+            'r.grupo_id', // útil para depurar
             'mcc.materia_nombre',
             'p.nombre_completo as profesor_nombre',
-            DB::raw('CASE WHEN ea.relacion_id IS NULL THEN 0 ELSE 1 END AS evaluado')
+            \DB::raw('CASE WHEN ea.relacion_id IS NULL THEN 0 ELSE 1 END AS evaluado')
         )
+        ->orderBy('mcc.materia_nombre')
         ->get();
 
     return response()->json(['materias' => $materias]);
