@@ -100,17 +100,18 @@ Route::prefix('alumnos')->group(function () {
 
 
 // Evaluación de profesores por alumnos
-Route::prefix('alumno')->group(function () {
-    // ✅ Ruta actualizada: lista de materias con ID dinámico
+// ✅ PROTEGE todo este bloque con tokens usando Sanctum
+Route::middleware('auth:sanctum')->prefix('alumno')->group(function () {
+    // Lista de materias que el alumno debe evaluar
     Route::get('/materias', [AlumnoMateriaController::class, 'listaMateriasEval']);
 
-    // Preguntas de evaluación (por tipo de profesor, por ejemplo)
+    // Preguntas de evaluación por tipo de profesor
     Route::get('/preguntas', [EvaluacionAlumnoController::class, 'preguntas']);
 
-    // Guardar evaluación enviada por el alumno
+    // Guardar evaluación
     Route::post('/evaluar', [EvaluacionAlumnoController::class, 'store']);
 
-    // Datos de relación para vista de evaluación individual (por profesor)
+    // Datos para evaluación individual por profesor
     Route::get('/evaluacion-datos/{id_relacion}', [EvaluacionAlumnoController::class, 'datosRelacion']);
 });
 

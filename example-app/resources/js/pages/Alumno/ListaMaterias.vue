@@ -108,7 +108,16 @@ const cargar = async () => {
 }
 
 // Ejecuta la carga al montar el componente
-onMounted(cargar)
+// Protección de ruta al montar componente
+onMounted(() => {
+  const alumno = localStorage.getItem('alumno')
+  if (!alumno) {
+    router.visit('/bienvenida')
+    return
+  }
+
+  cargar()
+})
 </script>
 
 

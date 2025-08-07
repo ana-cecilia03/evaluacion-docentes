@@ -68,20 +68,16 @@ async function login() {
       password: password.value
     })
 
-    // Guarda el alumno y el token en localStorage
+    //  Login exitoso: guarda el alumno en localStorage (opcional)
     localStorage.setItem('alumno', JSON.stringify(response.data.alumno))
-    localStorage.setItem('alumnoToken', JSON.stringify(response.data.token))
 
-    // Configura el token para todas las peticiones axios
-    axios.defaults.headers.common['Authorization'] = `Bearer ${response.data.token}`
-
-    // Redirige a la vista protegida
+    // Redirige a la vista protegida del alumno
     router.visit('/alumno/materias')
   } catch (err) {
+    // Si falla el login, muestra el mensaje de error
     error.value = err.response?.data?.message || 'Error al iniciar sesión'
   }
 }
-
 </script>
 
 <style src="@/../css/bienvenida.css"></style>
