@@ -23,7 +23,7 @@ class LoginAlumno extends Controller
         // Si no existe o la contraseña no coincide
         if (!$alumno || !Hash::check($request->password, $alumno->password)) {
             return response()->json([
-                'message' => 'Credenciales incorrectas'
+                'message' => 'Correo o contraseña incorrectos.'
             ], 401);
         }
 
