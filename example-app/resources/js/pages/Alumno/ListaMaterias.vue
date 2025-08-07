@@ -62,6 +62,9 @@ import axios from 'axios'
 
 const materias = ref([])       // Lista de materias asignadas al alumno
 const busqueda = ref('')       // Texto para búsqueda por nombre o profesor
+const error = ref(null)
+const cargando = ref(true)
+const enviandoId = ref(null)   // Para mostrar "Enviando..." en botón
 
 // Lista reactiva filtrada según el texto ingresado
 const materiasFiltradas = computed(() =>
@@ -77,22 +80,37 @@ function evaluarMateria(m) {
     console.error('relacion_id no definido en la materia:', m)
     return
   }
+  enviandoId.value = m.relacion_id
   router.visit(`/alumno/evaluar/${m.relacion_id}`)
 }
 
 // Carga las materias disponibles para evaluación desde el backend
 const cargar = async () => {
   try {
-    const { data } = await axios.get('/api/alumno/materias-por-evaluar')
+    const alumno = JSON.parse(localStorage.getItem('alumno'))
+    if (!alumno || !alumno.id_alumno) {
+      error.value = 'No se encontró información del alumno'
+      cargando.value = false
+      return
+    }
+
+    const { data } = await axios.get('/api/alumno/materias', {
+      params: { id: alumno.id_alumno }
+    })
+
     materias.value = data.materias
-  } catch (error) {
-    console.error('Error al cargar materias:', error)
+  } catch (err) {
+    console.error('Error al cargar materias:', err)
+    error.value = 'Ocurrió un error al cargar las materias'
+  } finally {
+    cargando.value = false
   }
 }
 
 // Ejecuta la carga al montar el componente
 onMounted(cargar)
 </script>
+
 
 <style src="@/../css/materias.css"></style>
 <style src="@/../css/botones.css"></style>

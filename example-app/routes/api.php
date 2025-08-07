@@ -101,12 +101,18 @@ Route::prefix('alumnos')->group(function () {
 
 // Evaluación de profesores por alumnos
 Route::prefix('alumno')->group(function () {
-    Route::get('/materias-por-evaluar', [AlumnoMateriaController::class, 'listaMateriasEval']);
+    // ✅ Ruta actualizada: lista de materias con ID dinámico
+    Route::get('/materias', [AlumnoMateriaController::class, 'listaMateriasEval']);
+
+    // Preguntas de evaluación (por tipo de profesor, por ejemplo)
     Route::get('/preguntas', [EvaluacionAlumnoController::class, 'preguntas']);
+
+    // Guardar evaluación enviada por el alumno
     Route::post('/evaluar', [EvaluacionAlumnoController::class, 'store']);
+
+    // Datos de relación para vista de evaluación individual (por profesor)
     Route::get('/evaluacion-datos/{id_relacion}', [EvaluacionAlumnoController::class, 'datosRelacion']);
 });
-
 
 // CRUD de profesores
 Route::prefix('profesores')->group(function () {

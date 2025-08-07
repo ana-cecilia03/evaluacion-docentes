@@ -4,13 +4,13 @@ namespace App\Http\Controllers\Alumno;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
 // Modelos
 use App\Models\EvaluacionAlumno1;
 use App\Models\RespuestaEvaluacionalum;
 use App\Models\PreguntaAlumno;
+use App\Models\Alumno;
 
 class EvaluacionAlumnoController extends Controller
 {
@@ -29,59 +29,65 @@ class EvaluacionAlumnoController extends Controller
      */
     public function store(Request $request)
     {
-    $request->validate([
-        'relacion_id' => 'required|exists:relacions,id_relacion',
-        'respuestas'  => 'required|array|min:1',
-        'respuestas.*.id_pregunta'  => 'required|exists:preguntas_alumno,id',
-        'respuestas.*.calificacion' => 'required|numeric|min:0|max:10',
-        'comentarios' => 'nullable|array',
-        'comentarios.*.id_pregunta' => 'required|exists:preguntas_alumno,id',
-        'comentarios.*.texto'       => 'nullable|string|max:1000'
-    ]);
-
-    // Alumno simulado por ahora
-    $alumnoId = 16;
-
-    // 1) Bloquear duplicados
-    $yaEvaluo = EvaluacionAlumno1::where('id_alumno', $alumnoId)
-        ->where('relacion_id', $request->relacion_id)
-        ->exists();
-
-    if ($yaEvaluo) {
-        return response()->json(['message' => 'Ya evaluaste a este profesor.'], 409);
-    }
-
-    // 2) Guardar evaluación y respuestas
-    DB::transaction(function () use ($request, $alumnoId) {
-        $evaluacion = EvaluacionAlumno1::create([
-            'id_alumno'   => $alumnoId,
-            'relacion_id' => $request->relacion_id,
-            'fecha'       => now(),
+        $request->validate([
+            'id_alumno'   => 'required|exists:alumnos,id_alumno',
+            'relacion_id' => 'required|exists:relacions,id_relacion',
+            'respuestas'  => 'required|array|min:1',
+            'respuestas.*.id_pregunta'  => 'required|exists:preguntas_alumno,id',
+            'respuestas.*.calificacion' => 'required|numeric|min:0|max:10',
+            'comentarios' => 'nullable|array',
+            'comentarios.*.id_pregunta' => 'required|exists:preguntas_alumno,id',
+            'comentarios.*.texto'       => 'nullable|string|max:1000'
         ]);
 
-        foreach ($request->respuestas as $r) {
-            RespuestaEvaluacionalum::create([
-                'id_evaluacion' => $evaluacion->id_evaluacion,
-                'id_pregunta'   => $r['id_pregunta'],
-                'calificacion'  => $r['calificacion'],
-            ]);
+        // Obtener el alumno desde la base de datos
+        $alumno = Alumno::find($request->input('id_alumno'));
+
+        if (!$alumno) {
+            return response()->json(['message' => 'Alumno no encontrado.'], 404);
         }
 
-        if (!empty($request->comentarios)) {
-            foreach ($request->comentarios as $c) {
-                if (!empty($c['texto'])) {
-                    // IDEAL: guardar en una columna 'comentario' (no en 'calificacion')
-                    RespuestaEvaluacionalum::create([
-                        'id_evaluacion' => $evaluacion->id_evaluacion,
-                        'id_pregunta'   => $c['id_pregunta'],
-                        'calificacion'  => $c['texto'], // ajustar cuando tengas columna 'comentario'
-                    ]);
+        // 1) Bloquear duplicados
+        $yaEvaluo = EvaluacionAlumno1::where('id_alumno', $alumno->id_alumno)
+            ->where('relacion_id', $request->relacion_id)
+            ->exists();
+
+        if ($yaEvaluo) {
+            return response()->json(['message' => 'Ya evaluaste a este profesor.'], 409);
+        }
+
+        // 2) Guardar evaluación y respuestas
+        DB::transaction(function () use ($request, $alumno) {
+            $evaluacion = EvaluacionAlumno1::create([
+                'id_alumno'   => $alumno->id_alumno,
+                'relacion_id' => $request->relacion_id,
+                'fecha'       => now(),
+            ]);
+
+            // Guardar respuestas numéricas
+            foreach ($request->respuestas as $r) {
+                RespuestaEvaluacionalum::create([
+                    'id_evaluacion' => $evaluacion->id_evaluacion,
+                    'id_pregunta'   => $r['id_pregunta'],
+                    'calificacion'  => $r['calificacion'],
+                ]);
+            }
+
+            // Guardar comentarios (si tienes columna 'comentario', úsala)
+            if (!empty($request->comentarios)) {
+                foreach ($request->comentarios as $c) {
+                    if (!empty($c['texto'])) {
+                        RespuestaEvaluacionalum::create([
+                            'id_evaluacion' => $evaluacion->id_evaluacion,
+                            'id_pregunta'   => $c['id_pregunta'],
+                            'comentario'    => $c['texto'], // ← Usa esta si tu tabla tiene esa columna
+                        ]);
+                    }
                 }
             }
-        }
-    });
+        });
 
-    return response()->json(['message' => 'Evaluación registrada correctamente.']);
+        return response()->json(['message' => 'Evaluación registrada correctamente.']);
     }
 
     /**
