@@ -76,18 +76,27 @@ const cambiarEstado = async (periodo) => {
 }
 
 const crearPeriodo = async () => {
+  // Validar que no exista otro periodo activo
+  const periodoActivo = periodos.value.find(p => p.estado === 'activo')
+  if (periodoActivo) {
+    error.value = 'Ya existe un período activo. Debes cerrarlo antes de crear uno nuevo.'
+    mensaje.value = ''
+    return
+  }
+
   try {
     const response = await axios.post('/api/periodos', {
       num_periodo: form.value.num_periodo,
       nombre_periodo: form.value.nombre,
       fecha_inicio: form.value.inicio,
       fecha_fin: form.value.fin,
-      estado: 'activo', // ✅ necesario para pasar la validación
+      estado: 'activo', // Se crea como activo
     })
 
     mensaje.value = response.data.message
     error.value = ''
     cancelar()
+    await cargarPeriodos() // Recargar la lista
   } catch (err) {
     mensaje.value = ''
     error.value = err.response?.data?.message || 'Error al guardar el período.'
