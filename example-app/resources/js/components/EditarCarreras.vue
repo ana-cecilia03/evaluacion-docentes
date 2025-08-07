@@ -101,7 +101,7 @@ const actualizarCarrera = async () => {
         error.value = 'Error al actualizar la carrera.'
       }
     } else {
-      error.value = 'Ocurrió un error inesperado.'
+      error.value = 'No se puede EDITAR esta carrera porque está relacionada con otros registros.'
     }
     console.error('Error al actualizar carrera:', err)
   }

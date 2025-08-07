@@ -3,18 +3,28 @@
     <main class="contenido-principal">
       <!-- Barra de acciones: búsqueda, filtro y botones -->
       <div class="actions">
+        <!-- Búsqueda por texto -->
         <input type="text" placeholder="Buscar carrera..." v-model="busqueda" />
-        <select>
+
+        <!-- Filtro por clave de carrera -->
+        <select v-model="filtroCarrera">
           <option value="">Filtrar por carrera</option>
-          <option v-for="carrera in carreras" :key="carrera.id_carrera">{{ carrera.clave }}</option>
+          <option 
+            v-for="carrera in carreras" 
+            :key="carrera.id_carrera" 
+            :value="carrera.clave"
+          >
+            {{ carrera.clave }} - {{ carrera.nombre_carrera }}
+          </option>
         </select>
+
+        <!-- Botón para mostrar formulario -->
         <button class="btn-register" @click="mostrarFormulario = true">Registrar Carrera</button>
       </div>
 
       <!-- Modal para registrar carrera -->
       <div v-if="mostrarFormulario" class="modal-overlay">
         <div class="modal-content">
-          <!-- Escuchamos eventos del modal -->
           <CarrerasManual 
             @cerrar="mostrarFormulario = false" 
             @guardado="cargarCarreras" 
@@ -57,7 +67,6 @@
     </main>
   </Menu>
 </template>
-
 <script setup>
 import { ref, onMounted, computed } from 'vue'
 import axios from 'axios'
@@ -71,6 +80,7 @@ const editarCarreras = ref(false)
 const carreraSeleccionada = ref(null)
 const carreras = ref([])
 const busqueda = ref('')
+const filtroCarrera = ref('') // Filtro del <select>
 
 // Cargar carreras desde el backend (GET /api/carreras)
 const cargarCarreras = async () => {
@@ -82,13 +92,18 @@ const cargarCarreras = async () => {
   }
 }
 
-// Computed para aplicar filtro de búsqueda
+// Computed para aplicar filtros combinados
 const carrerasFiltradas = computed(() => {
-  if (!busqueda.value.trim()) return carreras.value
-  return carreras.value.filter(c =>
-    c.nombre.toLowerCase().includes(busqueda.value.toLowerCase()) ||
-    c.clave.toLowerCase().includes(busqueda.value.toLowerCase())
-  )
+  return carreras.value.filter(carrera => {
+    const coincideBusqueda =
+      carrera.nombre_carrera.toLowerCase().includes(busqueda.value.toLowerCase()) ||
+      carrera.clave.toLowerCase().includes(busqueda.value.toLowerCase())
+
+    const coincideFiltro =
+      filtroCarrera.value === '' || carrera.clave === filtroCarrera.value
+
+    return coincideBusqueda && coincideFiltro
+  })
 })
 
 // Función para abrir el modal con carrera seleccionada
@@ -102,6 +117,5 @@ onMounted(() => {
   cargarCarreras()
 })
 </script>
-
 <style src="@/../css/Registros.css"></style>
 <style src="@/../css/botones.css"></style>
