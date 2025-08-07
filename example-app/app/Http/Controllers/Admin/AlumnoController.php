@@ -172,7 +172,7 @@ class AlumnoController extends Controller
             'correo' => 'required|email|unique:alumnos,correo',
             'grupo' => 'nullable|exists:grupos,id_grupo',
             'status' => 'in:activo,inactivo',
-            'password' => 'nullable|string|min:6|max:50' // ✅ Nueva validación
+            'password' => 'nullable|string|min:6|max:50' //Nueva validación
         ]);
 
         if ($validator->fails()) {
@@ -187,7 +187,7 @@ class AlumnoController extends Controller
             'matricula' => $fila['matricula'],
             'nombre_completo' => $fila['nombre_completo'],
             'correo' => $fila['correo'],
-            'password' => Hash::make($fila['password'] ?? $fila['matricula']), // ✅ Si no trae password, usa matrícula
+            'password' => Hash::make($fila['password'] ?? $fila['matricula']), // Si no trae password, usa matrícula
             'rol' => 'alumno',
             'grupo' => $fila['grupo'] ?? null,
             'status' => $fila['status'] ?? 'activo',

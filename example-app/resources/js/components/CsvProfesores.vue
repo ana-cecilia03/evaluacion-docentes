@@ -10,7 +10,8 @@
           <input type="file" accept=".csv" @change="handleFileUpload" />
           <p>
             Formato esperado:
-            <strong>matricula,nombre_completo,correo,password,curp,cargo,status</strong>
+            <strong>matricula,nombre_completo,correo,password,cargo,status</strong><br>
+            (La columna <code>password</code> es opcional. Si no se incluye, se usará la matrícula).
           </p>
         </div>
 
@@ -38,12 +39,12 @@ const emit = defineEmits(['cerrar', 'guardado'])
 const file = ref(null)
 const error = ref(null)
 
-// Captura el archivo
+// Captura el archivo seleccionado
 const handleFileUpload = (event) => {
   file.value = event.target.files[0]
 }
 
-// Enviar CSV al backend
+// Enviar el archivo CSV al backend
 const cargarCSV = async () => {
   error.value = null
 
@@ -67,7 +68,9 @@ const cargarCSV = async () => {
     emit('cerrar')
   } catch (err) {
     console.error('Error al cargar CSV:', err)
+
     if (err.response?.data?.errores) {
+      // Mostrar errores detallados por línea
       error.value = err.response.data.errores
         .map(e => `Línea ${e.linea}: ${e.errores.join(', ')}`)
         .join('\n')

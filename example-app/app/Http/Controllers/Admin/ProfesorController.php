@@ -11,13 +11,17 @@ use Illuminate\Validation\Rule;
 
 class ProfesorController extends Controller
 {
-    // Listar profesores
+    /**
+     * Obtener todos los profesores (ordenados por ID descendente).
+     */
     public function index()
     {
         return Profesor::orderBy('id_profesor', 'desc')->get();
     }
 
-    // Registrar nuevo profesor
+    /**
+     * Registrar un nuevo profesor con validación y cifrado de contraseña.
+     */
     public function store(Request $request)
     {
         $request->validate([
@@ -29,6 +33,7 @@ class ProfesorController extends Controller
             'status' => 'required|in:activo,inactivo',
         ]);
 
+        // Crear nuevo profesor
         $profesor = Profesor::create([
             'matricula' => $request->matricula,
             'nombre_completo' => $request->nombre_completo,
@@ -47,24 +52,36 @@ class ProfesorController extends Controller
         ], 201);
     }
 
-    // Actualizar profesor
+    /**
+     * Actualizar un profesor existente (con validación y cambio de contraseña opcional).
+     */
     public function update(Request $request, $id)
     {
         $profesor = Profesor::findOrFail($id);
 
         $request->validate([
-            'matricula' => ['required', 'size:11', Rule::unique('profesores')->ignore($profesor->id_profesor, 'id_profesor')],
+            'matricula' => [
+                'required',
+                'size:11',
+                Rule::unique('profesores')->ignore($profesor->id_profesor, 'id_profesor')
+            ],
             'nombre_completo' => 'required|string|max:100',
-            'correo' => ['required', 'email', Rule::unique('profesores')->ignore($profesor->id_profesor, 'id_profesor')],
+            'correo' => [
+                'required',
+                'email',
+                Rule::unique('profesores')->ignore($profesor->id_profesor, 'id_profesor')
+            ],
             'password' => 'nullable|string|min:6',
             'cargo' => 'required|in:PTC,PA',
             'status' => 'required|in:activo,inactivo',
         ]);
 
+        // Solo cambia la contraseña si fue enviada
         $profesor->password = $request->filled('password')
             ? Hash::make($request->password)
             : $profesor->password;
 
+        // Actualizar campos
         $profesor->update([
             'matricula' => $request->matricula,
             'nombre_completo' => $request->nombre_completo,
@@ -81,89 +98,106 @@ class ProfesorController extends Controller
         ]);
     }
 
-    // Importar desde CSV
+    /**
+     * Importar varios profesores desde un archivo CSV (validación por fila).
+     */
     public function importarDesdeCSV(Request $request)
     {
-        $request->validate([
-            'archivo' => 'required|file|mimes:csv,txt'
+    $request->validate([
+        'archivo' => 'required|file|mimes:csv,txt'
+    ]);
+
+    $file = $request->file('archivo');
+    $data = array_map('str_getcsv', file($file));
+    $header = array_map('trim', $data[0]);
+    unset($data[0]); // Eliminar cabecera
+
+    $errores = [];
+    $importados = 0;
+
+    foreach ($data as $index => $fila) {
+        // Saltar filas vacías
+        if (count(array_filter($fila)) === 0) {
+            continue;
+        }
+
+        // Validar cantidad de columnas
+        if (count($fila) !== count($header)) {
+            $errores[] = [
+                'linea' => $index + 2,
+                'errores' => ['Cantidad de columnas inválida.']
+            ];
+            continue;
+        }
+
+        // Asociar valores con sus claves
+        $fila = array_combine($header, array_map('trim', $fila));
+
+        // Validaciones por fila
+        $validator = Validator::make($fila, [
+            'matricula' => 'required|unique:profesores,matricula|size:11',
+            'nombre_completo' => 'required|string|max:100',
+            'correo' => 'required|email|unique:profesores,correo',
+            'cargo' => 'required|in:PTC,PA',
+            'status' => 'nullable|in:activo,inactivo',
+            'password' => 'nullable|string|min:6|max:50', // password opcional
         ]);
 
-        $file = $request->file('archivo');
-        $data = array_map('str_getcsv', file($file));
-        $header = array_map('trim', $data[0]);
-        unset($data[0]);
-
-        $errores = [];
-        $importados = 0;
-
-        foreach ($data as $index => $fila) {
-            if (count($fila) !== count($header)) {
-                $errores[] = [
-                    'linea' => $index + 2,
-                    'errores' => ['Cantidad de columnas inválida.']
-                ];
-                continue;
-            }
-
-            $fila = array_combine($header, array_map('trim', $fila));
-
-            $validator = Validator::make($fila, [
-                'matricula' => 'required|unique:profesores,matricula|size:11',
-                'nombre_completo' => 'required|string|max:100',
-                'correo' => 'required|email|unique:profesores,correo',
-                'password' => 'required|string|min:6',
-                'cargo' => 'required|in:PTC,PA',
-                'status' => 'nullable|in:activo,inactivo',
-            ]);
-
-            if ($validator->fails()) {
-                $errores[] = [
-                    'linea' => $index + 2,
-                    'errores' => $validator->errors()->all()
-                ];
-                continue;
-            }
-
-            Profesor::create([
-                'matricula' => $fila['matricula'],
-                'nombre_completo' => $fila['nombre_completo'],
-                'correo' => $fila['correo'],
-                'password' => Hash::make($fila['password']),
-                'rol' => 'profesor',
-                'cargo' => $fila['cargo'],
-                'status' => $fila['status'] ?? 'activo',
-                'created_by' => 'frontend',
-                'modified_by' => 'frontend',
-            ]);
-
-            $importados++;
+        if ($validator->fails()) {
+            $errores[] = [
+                'linea' => $index + 2,
+                'errores' => $validator->errors()->all()
+            ];
+            continue;
         }
 
-        if (count($errores)) {
-            return response()->json([
-                'message' => 'Carga completada con errores',
-                'insertados' => $importados,
-                'errores' => $errores
-            ], 422);
-        }
+        // Crear profesor (usa matrícula como contraseña si no viene)
+        Profesor::create([
+            'matricula' => $fila['matricula'],
+            'nombre_completo' => $fila['nombre_completo'],
+            'correo' => $fila['correo'],
+            'password' => Hash::make($fila['password'] ?? $fila['matricula']),
+            'rol' => 'profesor',
+            'cargo' => $fila['cargo'],
+            'status' => $fila['status'] ?? 'activo',
+            'created_by' => 'frontend',
+            'modified_by' => 'frontend',
+        ]);
 
-        return response()->json([
-            'message' => 'Todos los profesores fueron importados correctamente.',
-            'insertados' => $importados
-        ], 201);
+        $importados++;
     }
-    
-    // Listar profesores activos (solo para historial o select)
+
+    // Devolver errores si existen
+    if (count($errores)) {
+        return response()->json([
+            'message' => 'Carga completada con errores',
+            'insertados' => $importados,
+            'errores' => $errores
+        ], 422);
+    }
+
+    return response()->json([
+        'message' => 'Todos los profesores fueron importados correctamente.',
+        'insertados' => $importados
+    ], 201);
+    }
+
+    /**
+     * Obtener profesores activos (usado en listas o historial).
+     */
     public function activos()
     {
-    return Profesor::where('status', 'activo')
-        ->select('id_profesor', 'matricula', 'nombre_completo', 'cargo')
-        ->orderBy('nombre_completo')
-        ->get();
+        return Profesor::where('status', 'activo')
+            ->select('id_profesor', 'matricula', 'nombre_completo', 'cargo')
+            ->orderBy('nombre_completo')
+            ->get();
     }
 
+    /**
+     * Mostrar un solo profesor por su ID.
+     */
     public function show($id)
     {
-    return Profesor::findOrFail($id);
+        return Profesor::findOrFail($id);
     }
 }
