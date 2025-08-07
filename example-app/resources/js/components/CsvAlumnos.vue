@@ -7,10 +7,14 @@
         <!-- Área de carga de archivo -->
         <div class="csv-upload">
           <input type="file" accept=".csv" @change="handleFileUpload" />
-          <p>Formato esperado: 
-            <strong>matricula,nombre_completo,correo,grupo,status</strong>
+          <p>
+            Formato esperado:<br />
+            <strong>
+              matricula,nombre_completo,correo,grupo,status,password
+            </strong>
             <br />
-            <em>* El campo <code>grupo</code> debe ser el ID del grupo (número), no su nombre.</em>
+            <em>* El campo <code>grupo</code> debe ser el ID del grupo (número), no su nombre.</em><br />
+            <em>* El campo <code>password</code> es opcional. Si se omite, se usará la matrícula como contraseña.</em>
           </p>
         </div>
 
@@ -38,7 +42,6 @@
     </div>
   </div>
 </template>
-
 <script setup>
 import { ref } from 'vue'
 import axios from 'axios'
