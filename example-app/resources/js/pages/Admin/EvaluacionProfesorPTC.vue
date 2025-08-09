@@ -22,11 +22,7 @@
 
         <div class="datos-grid">
           <div class="col-izq">
-            <div
-              class="campo"
-              v-for="(label, key) in camposFormulario"
-              :key="key"
-            >
+            <div class="campo" v-for="(label, key) in camposFormulario" :key="key">
               <label>{{ label }}:</label>
               <input :value="form[key]" type="text" disabled />
             </div>
@@ -135,12 +131,11 @@
   </Menu>
 </template>
 
-
 <script setup>
 import { ref, reactive, computed, onMounted } from 'vue'
-import axios from 'axios'
+import axios from '@/lib/axios'         // ⬅️ instancia con Bearer automático
 import Menu from '@/layouts/Menu.vue'
-//para descargar pdf y excel
+// Descargas
 import html2canvas from 'html2canvas'
 import jsPDF from 'jspdf'
 import * as XLSX from 'xlsx'
@@ -184,14 +179,20 @@ const obtenerPreguntas = async () => {
   }
 }
 
-// 🔹 DATOS DEL EVALUADOR (administrador)
+// 🔹 DATOS DEL EVALUADOR (admin autenticado)
 const obtenerEvaluador = async () => {
   try {
-    const res = await axios.get('/api/evaluador')
-    form.evaluador = res.data.evaluador || 'Sin permiso'
+    const { data } = await axios.get('/api/admin/me')
+    form.evaluador = data?.nombre || data?.correo || 'Admin'
   } catch (error) {
-    console.error('Error al obtener evaluador:', error)
-    form.evaluador = 'Error'
+    console.error('Error al obtener evaluador (me):', error)
+    // Fallback desde localStorage por si algo falla
+    try {
+      const admin = JSON.parse(localStorage.getItem('admin') || '{}')
+      form.evaluador = admin?.nombre_completo || admin?.correo || 'No identificado'
+    } catch {
+      form.evaluador = 'No identificado'
+    }
   }
 }
 
@@ -208,7 +209,7 @@ const cargarDatosProfesor = async () => {
 
 // 🔸 PROMEDIOS
 const promedio = computed(() => {
-  const total = preguntas.value.reduce((sum, p) => sum + p.calificacion, 0)
+  const total = preguntas.value.reduce((sum, p) => sum + Number(p.calificacion || 0), 0)
   return preguntas.value.length ? total / preguntas.value.length : 0
 })
 const calificacionFinal = computed(() => promedio.value)
@@ -216,9 +217,6 @@ const calificacionFinal = computed(() => promedio.value)
 // 🔸 ACCIONES
 function toggleDropdown() {
   showDownload.value = !showDownload.value
-}
-function download(format) {
-  console.log(`Descargar en formato: ${format}`)
 }
 function limitarCalificacion(pregunta) {
   if (pregunta.calificacion > 5) pregunta.calificacion = 5
@@ -228,14 +226,12 @@ function limitarCalificacion(pregunta) {
 // 📄 Descargar vista como PDF
 function downloadPDF() {
   const element = document.querySelector('.contenido-principal')
-
   html2canvas(element).then(canvas => {
     const imgData = canvas.toDataURL('image/png')
     const pdf = new jsPDF('p', 'mm', 'a4')
     const imgProps = pdf.getImageProperties(imgData)
     const pdfWidth = pdf.internal.pageSize.getWidth()
     const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width
-
     pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight)
     pdf.save(`evaluacion-profesor-${props.id}.pdf`)
   })
@@ -250,19 +246,20 @@ function downloadExcel() {
   XLSX.writeFile(wb, `evaluacion-profesor-${props.id}.xlsx`)
 }
 
+// 💾 Guardar evaluación
 const guardarEvaluacion = async () => {
   try {
     const payload = {
       profesor_id: props.id,
-      tipo: 'PTC', // Cambia a 'PA' si estás en la vista de PA
+      tipo: 'PTC', // Cambia a 'PA' en la otra vista
       periodo: form.periodo,
-      calif_i: promedio.value.toFixed(1),
-      calif_ii: califII.value,
-      calificacion_final: calificacionFinal.value.toFixed(1),
+      calif_i: Number(promedio.value.toFixed(1)),
+      calif_ii: Number(califII.value || 0),
+      calificacion_final: Number(calificacionFinal.value.toFixed(1)),
       comentario: comentario.value,
       respuestas: preguntas.value.map(p => ({
         pregunta_id: p.id,
-        calificacion: p.calificacion
+        calificacion: Number(p.calificacion)
       }))
     }
 
@@ -273,6 +270,7 @@ const guardarEvaluacion = async () => {
     alert('Ocurrió un error al guardar la evaluación')
   }
 }
+
 // 🔸 MONTAJE INICIAL
 onMounted(() => {
   obtenerPreguntas()

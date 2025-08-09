@@ -5,9 +5,8 @@
       <header class="encabezado-evaluacion">
         <h1 class="titulo">Evaluación de Profesores PA</h1>
 
-        <!-- Botones de acciones (Descargar + Evaluar) con separación -->
+        <!-- Botones de acciones (Descargar + Evaluar) -->
         <div class="acciones acciones-botones">
-          <!-- Botón Descargar con su dropdown -->
           <div class="download-wrapper">
             <button class="boton-verde" @click="toggleDropdown">Descargar</button>
             <ul v-if="showDownload" class="dropdown">
@@ -16,17 +15,12 @@
             </ul>
           </div>
 
-          <!-- Botón Evaluar -->
           <button class="boton-verde" @click="guardarEvaluacion">Evaluar</button>
         </div>
 
         <div class="datos-grid">
           <div class="col-izq">
-            <div
-              class="campo"
-              v-for="(label, key) in camposFormulario"
-              :key="key"
-            >
+            <div class="campo" v-for="(label, key) in camposFormulario" :key="key">
               <label>{{ label }}:</label>
               <input :value="form[key]" type="text" disabled />
             </div>
@@ -76,7 +70,6 @@
           </thead>
           <tbody>
             <tr v-for="pregunta in preguntas" :key="pregunta.id">
-              <!-- Campo de calificación por factor (de 1 a 5) -->
               <td>{{ pregunta.factor }}</td>
               <td>{{ pregunta.definicion }}</td>
               <td>
@@ -138,27 +131,25 @@
 
 <script setup>
 import { ref, reactive, computed, onMounted } from 'vue'
-import axios from 'axios'
+import axios from '@/lib/axios'            // ⬅️ instancia con Bearer automático
 import Menu from '@/layouts/Menu.vue'
-//para descargar pdf y excel
 import html2canvas from 'html2canvas'
 import jsPDF from 'jspdf'
 import * as XLSX from 'xlsx'
 import { saveAs } from 'file-saver'
 
 const props = defineProps({
-  id: { type: Number, required: true }
+  id: { type: Number, required: true } // ID del profesor a evaluar
 })
 
 const showDownload = ref(false)
-const califI = ref(0)
 const califII = ref(0)
 const comentario = ref('')
 
 const form = reactive({
   nombre: '',
   puesto: '',
-  evaluador: '', // ← ya no 'Carlos López'
+  evaluador: '',
   periodo: '2023'
 })
 
@@ -169,9 +160,9 @@ const camposFormulario = {
   periodo: 'Periodo'
 }
 
-// Preguntas dinámicas del backend
 const preguntas = ref([])
 
+// 🔹 PREGUNTAS TIPO PA
 const obtenerPreguntas = async () => {
   try {
     const res = await axios.get('/api/evaluaciones/preguntas-pa')
@@ -184,39 +175,24 @@ const obtenerPreguntas = async () => {
   }
 }
 
-// Cargar datos del profesor evaluador desde API protegida
+// 🔹 DATOS DEL EVALUADOR (admin autenticado)
 const obtenerEvaluador = async () => {
   try {
-    const res = await axios.get('/api/evaluador') // Asegúrate que esta ruta exista en web.php o api.php
-    if (res.data.evaluador) {
-      form.evaluador = res.data.evaluador
-    } else {
-      form.evaluador = 'Sin permiso'
-    }   
+    const { data } = await axios.get('/api/admin/me')
+    form.evaluador = data?.nombre || data?.correo || 'Admin'
   } catch (error) {
-    console.error('Error al obtener evaluador:', error)
-    form.evaluador = 'Error'
+    console.error('Error al obtener evaluador (me):', error)
+    // Fallback desde localStorage por si algo falla
+    try {
+      const admin = JSON.parse(localStorage.getItem('admin') || '{}')
+      form.evaluador = admin?.nombre_completo || admin?.correo || 'No identificado'
+    } catch {
+      form.evaluador = 'No identificado'
+    }
   }
 }
 
-// Promedios
-const promedio = computed(() => {
-  const total = preguntas.value.reduce((sum, p) => sum + p.calificacion, 0)
-  return preguntas.value.length ? total / preguntas.value.length : 0
-})
-
-const calificacionFinal = computed(() => promedio.value)
-
-// Acciones
-function toggleDropdown() {
-  showDownload.value = !showDownload.value
-}
-
-function download(format) {
-  console.log(`Descargar en formato: ${format}`)
-}
-
-// Cargar datos del profesor
+// 🔹 DATOS DEL PROFESOR EVALUADO
 const cargarDatosProfesor = async () => {
   try {
     const res = await axios.get(`/api/profesores/${props.id}`)
@@ -226,41 +202,32 @@ const cargarDatosProfesor = async () => {
     console.error('Error al cargar profesor:', error)
   }
 }
-const guardarEvaluacion = async () => {
-  try {
-    const payload = {
-      profesor_id: props.id,
-      tipo: 'PA', // Cambiado a PA
-      periodo: form.periodo,
-      calif_i: promedio.value.toFixed(1),
-      calif_ii: califII.value,
-      calificacion_final: calificacionFinal.value.toFixed(1),
-      comentario: comentario.value,
-      respuestas: preguntas.value.map(p => ({
-        pregunta_id: p.id,
-        calificacion: p.calificacion
-      }))
-    }
 
-    await axios.post('/api/evaluaciones', payload)
-    alert('✅ Evaluación enviada correctamente')
-  } catch (error) {
-    console.error('❌ Error al guardar evaluación:', error)
-    alert('Ocurrió un error al guardar la evaluación')
-  }
+// 🔸 PROMEDIOS
+const promedio = computed(() => {
+  const total = preguntas.value.reduce((sum, p) => sum + Number(p.calificacion || 0), 0)
+  return preguntas.value.length ? total / preguntas.value.length : 0
+})
+const calificacionFinal = computed(() => promedio.value)
+
+// 🔸 ACCIONES
+function toggleDropdown() {
+  showDownload.value = !showDownload.value
+}
+function limitarCalificacion(pregunta) {
+  if (pregunta.calificacion > 5) pregunta.calificacion = 5
+  else if (pregunta.calificacion < 1) pregunta.calificacion = 1
 }
 
 // 📄 Descargar vista como PDF
 function downloadPDF() {
   const element = document.querySelector('.contenido-principal')
-
   html2canvas(element).then(canvas => {
     const imgData = canvas.toDataURL('image/png')
     const pdf = new jsPDF('p', 'mm', 'a4')
     const imgProps = pdf.getImageProperties(imgData)
     const pdfWidth = pdf.internal.pageSize.getWidth()
     const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width
-
     pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight)
     pdf.save(`evaluacion-profesor-${props.id}.pdf`)
   })
@@ -275,20 +242,37 @@ function downloadExcel() {
   XLSX.writeFile(wb, `evaluacion-profesor-${props.id}.xlsx`)
 }
 
+// 💾 Guardar evaluación
+const guardarEvaluacion = async () => {
+  try {
+    const payload = {
+      profesor_id: props.id,
+      tipo: 'PA',
+      periodo: form.periodo,
+      calif_i: Number(promedio.value.toFixed(1)),
+      calif_ii: Number(califII.value || 0),
+      calificacion_final: Number(calificacionFinal.value.toFixed(1)),
+      comentario: comentario.value,
+      respuestas: preguntas.value.map(p => ({
+        pregunta_id: p.id,
+        calificacion: Number(p.calificacion)
+      }))
+    }
 
+    await axios.post('/api/evaluaciones', payload)
+    alert('✅ Evaluación enviada correctamente')
+  } catch (error) {
+    console.error('❌ Error al guardar evaluación:', error)
+    alert('Ocurrió un error al guardar la evaluación')
+  }
+}
+
+// 🔸 MONTAJE INICIAL
 onMounted(() => {
   obtenerPreguntas()
   cargarDatosProfesor()
   obtenerEvaluador()
 })
-// Función que ajusta la calificación al máximo si se excede
-function limitarCalificacion(pregunta) {
-  if (pregunta.calificacion > 5) {
-    pregunta.calificacion = 5
-  } else if (pregunta.calificacion < 1) {
-    pregunta.calificacion = 1
-  }
-}
 </script>
 
 <style src="@/../css/botones.css"></style>

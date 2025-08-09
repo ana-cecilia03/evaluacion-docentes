@@ -3,17 +3,17 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\EvaluacionProfesor;       // Modelo de la tabla evaluaciones_profesores
-use App\Models\RespuestaEvaluacion;      // Modelo de la tabla respuestas_evaluacion
-use App\Models\PreguntaProfesor;         // Modelo de la tabla preguntas_profesores
-use App\Models\Profesor;                 // Modelo de la tabla profesores
+use App\Models\EvaluacionProfesor;   // tabla: evaluaciones_profesores (ajusta si tu nombre difiere)
+use App\Models\RespuestaEvaluacion;  // tabla: respuestas_evaluacion
+use App\Models\PreguntaProfesor;     // tabla: preguntas_profesores
+use App\Models\Profesor;             // tabla: profesores
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class EvaluacionProfesorController extends Controller
 {
     /**
-     * ✅ Obtener preguntas tipo PA o generales ("ambos").
-     * Se usa para cargar la tabla de evaluación desde el frontend (Vue).
+     * Obtener preguntas tipo PA (y las marcadas como "ambos").
      */
     public function preguntasPA()
     {
@@ -23,17 +23,19 @@ class EvaluacionProfesorController extends Controller
             ->get();
     }
 
+    /**
+     * Obtener preguntas tipo PTC (y las marcadas como "ambos").
+     */
     public function preguntasPTC()
     {
-    return PreguntaProfesor::whereIn('tipo', ['PTC', 'ambos'])
-        ->where('activo', true)
-        ->orderBy('orden')
-        ->get();
+        return PreguntaProfesor::whereIn('tipo', ['PTC', 'ambos'])
+            ->where('activo', true)
+            ->orderBy('orden')
+            ->get();
     }
 
     /**
-     * ✅ Obtener datos del profesor a evaluar (por su ID).
-     * Este método se llama desde Vue cuando se entra a la evaluación.
+     * Obtener datos del profesor a evaluar por ID.
      */
     public function getProfesor($id)
     {
@@ -44,61 +46,57 @@ class EvaluacionProfesorController extends Controller
         }
 
         return response()->json([
-            'id' => $profesor->id_profesor,
+            'id'              => $profesor->id_profesor,
             'nombre_completo' => $profesor->nombre_completo,
-            'cargo' => $profesor->cargo,
-            'correo' => $profesor->correo
+            'cargo'           => $profesor->cargo,
+            'correo'          => $profesor->correo,
         ]);
     }
 
     /**
-     * ✅ Guardar evaluación completa en la base de datos.
-     * Esta función guarda tanto la evaluación general como las respuestas por pregunta.
+     * Guardar evaluación y sus respuestas.
+     * Ruta recomendada (protegida): POST /api/evaluaciones  (auth:sanctum)
      */
     public function store(Request $request)
     {
-        // ✳️ Validación de datos de entrada
-        $request->validate([
-            'profesor_id' => 'required|integer|exists:profesores,id_profesor',
-            'tipo' => 'required|in:PA,PTC',
-            'periodo' => 'nullable|string|max:100',
-            'calif_i' => 'nullable|numeric|min:0|max:10',
-            'calif_ii' => 'nullable|numeric|min:0|max:10',
-            'calificacion_final' => 'nullable|numeric|min:0|max:10',
-            'comentario' => 'nullable|string',
-
-            // ✅ Validación de las respuestas: 
-            //    Cada respuesta debe incluir:
-            //    - ID de la pregunta
-            //    - Calificación entre 1 y 5 (máximo)
-            'respuestas' => 'required|array',
-            'respuestas.*.pregunta_id' => 'required|integer|exists:preguntas_profesores,id',
-            'respuestas.*.calificacion' => 'required|integer|min:1|max:5'
+        // Validación
+        $validated = $request->validate([
+            'profesor_id'         => 'required|integer|exists:profesores,id_profesor',
+            'tipo'                => 'required|in:PA,PTC',
+            'periodo'             => 'nullable|string|max:100',
+            'calif_i'             => 'nullable|numeric|min:0|max:10',
+            'calif_ii'            => 'nullable|numeric|min:0|max:10',
+            'calificacion_final'  => 'nullable|numeric|min:0|max:10',
+            'comentario'          => 'nullable|string',
+            'respuestas'                  => 'required|array|min:1',
+            'respuestas.*.pregunta_id'    => 'required|integer|exists:preguntas_profesores,id',
+            'respuestas.*.calificacion'   => 'required|numeric|min:1|max:5',
         ]);
 
-        // ✅ Crear una nueva evaluación general
+        // Crear evaluación (el evaluador se toma del usuario autenticado por token)
         $evaluacion = EvaluacionProfesor::create([
-            'profesor_id' => $request->profesor_id,
-            'evaluador_id' => null, // Si tienes autenticación, puedes capturar aquí el evaluador
-            'tipo' => $request->tipo,
-            'periodo' => $request->periodo,
-            'calif_i' => $request->calif_i,
-            'calif_ii' => $request->calif_ii,
-            'calificacion_final' => $request->calificacion_final,
-            'comentario' => $request->comentario,
+            'profesor_id'        => $validated['profesor_id'],
+            'tipo'               => $validated['tipo'],
+            'periodo'            => $validated['periodo'] ?? null,
+            'calif_i'            => $validated['calif_i'] ?? null,
+            'calif_ii'           => $validated['calif_ii'] ?? null,
+            'calificacion_final' => $validated['calificacion_final'] ?? null,
+            'comentario'         => $validated['comentario'] ?? null,
+            'evaluador_id'       => Auth::id(), // <-- clave: evaluador autenticado
         ]);
 
-        // ✅ Recorrer todas las respuestas para guardarlas una por una
-        foreach ($request->respuestas as $respuesta) {
+        // Guardar respuestas
+        foreach ($validated['respuestas'] as $r) {
             RespuestaEvaluacion::create([
-                'evaluacion_id' => $evaluacion->id,
-                'pregunta_id' => $respuesta['pregunta_id'],
-                'calificacion' => $respuesta['calificacion']  // 👈 Aquí se valida que sea de 1 a 5
+                'evaluacion_id' => $evaluacion->id,       // ajusta si tu PK no es "id"
+                'pregunta_id'   => $r['pregunta_id'],
+                'calificacion'  => $r['calificacion'],
             ]);
         }
 
-        // ✅ Devolver mensaje de éxito al frontend
-        return response()->json(['message' => 'Evaluación guardada correctamente'], 201);
+        return response()->json([
+            'message'       => 'Evaluación guardada correctamente',
+            'evaluacion_id' => $evaluacion->id,
+        ], 201);
     }
-
 }
