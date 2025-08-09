@@ -16,8 +16,14 @@
             </ul>
           </div>
 
-          <!-- Botón Evaluar -->
-          <button class="boton-verde" @click="guardarEvaluacion">Evaluar</button>
+          <!-- Botón Evaluar / Evaluado -->
+          <button
+            :class="evaluado ? 'boton-gris' : 'boton-verde'"
+            :disabled="evaluado"
+            @click="guardarEvaluacion"
+          >
+            {{ evaluado ? 'Evaluado' : 'Evaluar' }}
+          </button>
         </div>
 
         <div class="datos-grid">
@@ -133,9 +139,8 @@
 
 <script setup>
 import { ref, reactive, computed, onMounted } from 'vue'
-import axios from '@/lib/axios'         // ⬅️ instancia con Bearer automático
+import axios from '@/lib/axios'
 import Menu from '@/layouts/Menu.vue'
-// Descargas
 import html2canvas from 'html2canvas'
 import jsPDF from 'jspdf'
 import * as XLSX from 'xlsx'
@@ -149,6 +154,7 @@ const props = defineProps({
 const showDownload = ref(false)
 const califII = ref(0)
 const comentario = ref('')
+const evaluado = ref(false) // ← estado para bloquear botón y cambiar estilo/texto
 
 const form = reactive({
   nombre: '',
@@ -169,7 +175,8 @@ const preguntas = ref([])
 // 🔹 PREGUNTAS TIPO PTC
 const obtenerPreguntas = async () => {
   try {
-    const res = await axios.get('/api/evaluaciones/preguntas-ptc')
+    // axios tiene baseURL '/api' → NO anteponer '/api'
+    const res = await axios.get('/evaluaciones/preguntas-ptc')
     preguntas.value = res.data.map(p => ({
       ...p,
       calificacion: 0
@@ -179,14 +186,13 @@ const obtenerPreguntas = async () => {
   }
 }
 
-// 🔹 DATOS DEL EVALUADOR (admin autenticado)
+// 🔹 DATOS DEL EVALUADOR (admin/profesor autenticado)
 const obtenerEvaluador = async () => {
   try {
-    const { data } = await axios.get('/api/admin/me')
+    const { data } = await axios.get('/admin/me')
     form.evaluador = data?.nombre || data?.correo || 'Admin'
   } catch (error) {
     console.error('Error al obtener evaluador (me):', error)
-    // Fallback desde localStorage por si algo falla
     try {
       const admin = JSON.parse(localStorage.getItem('admin') || '{}')
       form.evaluador = admin?.nombre_completo || admin?.correo || 'No identificado'
@@ -196,10 +202,10 @@ const obtenerEvaluador = async () => {
   }
 }
 
-// 🔹 DATOS DEL PROFESOR EVALUADO
+// 🔹 DATOS DEL PROFESOR EVALUADO (según tus rutas)
 const cargarDatosProfesor = async () => {
   try {
-    const res = await axios.get(`/api/profesores/${props.id}`)
+    const res = await axios.get(`/evaluaciones/profesor/${props.id}`)
     form.nombre = res.data.nombre_completo
     form.puesto = res.data.cargo
   } catch (error) {
@@ -251,7 +257,7 @@ const guardarEvaluacion = async () => {
   try {
     const payload = {
       profesor_id: props.id,
-      tipo: 'PTC', // Cambia a 'PA' en la otra vista
+      tipo: 'PTC',
       periodo: form.periodo,
       calif_i: Number(promedio.value.toFixed(1)),
       calif_ii: Number(califII.value || 0),
@@ -263,8 +269,14 @@ const guardarEvaluacion = async () => {
       }))
     }
 
-    await axios.post('/api/evaluaciones', payload)
+    await axios.post('/evaluaciones', payload)
+    evaluado.value = true
     alert('✅ Evaluación enviada correctamente')
+
+    // Intentar cerrar la pestaña (funciona si fue abierta por window.open)
+    window.close()
+    // Fallback opcional: si no se cierra, puedes navegar atrás o a otra ruta
+    // setTimeout(() => history.back(), 300)
   } catch (error) {
     console.error('❌ Error al guardar evaluación:', error)
     alert('Ocurrió un error al guardar la evaluación')
@@ -281,3 +293,12 @@ onMounted(() => {
 
 <style src="@/../css/botones.css"></style>
 <style src="@/../css/EvaluacionProfesores.css"></style>
+
+<style>
+.boton-gris {
+  background-color: gray !important;
+  color: #fff !important;
+  cursor: not-allowed !important;
+  opacity: 0.8;
+}
+</style>
