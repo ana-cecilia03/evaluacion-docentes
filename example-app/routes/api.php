@@ -190,7 +190,7 @@ Route::prefix('selects')->group(function () {
 
 
 // Evaluación de profesores por administrador
-Route::prefix('evaluaciones')->group(function () {
+Route::middleware('auth:sanctum')->prefix('evaluaciones')->group(function () {
     Route::get('/preguntas-pa', [EvaluacionProfesorController::class, 'preguntasPA']);
     Route::get('/preguntas-ptc', [EvaluacionProfesorController::class, 'preguntasPTC']);
     Route::get('/profesor/{id}', [EvaluacionProfesorController::class, 'getProfesor']);
