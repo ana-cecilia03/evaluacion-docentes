@@ -187,10 +187,20 @@ class ProfesorController extends Controller
      */
     public function activos()
     {
-        return Profesor::where('status', 'activo')
-            ->select('id_profesor', 'matricula', 'nombre_completo', 'cargo')
-            ->orderBy('nombre_completo')
-            ->get();
+    $evaluadorId = auth()->id(); // ID del usuario logueado
+
+    return Profesor::where('status', 'activo')
+        ->select('id_profesor', 'matricula', 'nombre_completo', 'cargo', 'status')
+        ->selectRaw('
+            EXISTS (
+                SELECT 1 
+                FROM evaluaciones_profesores ep
+                WHERE ep.profesor_id = profesores.id_profesor
+                  AND ep.evaluador_id = ?
+            ) AS evaluado
+        ', [$evaluadorId])
+        ->orderBy('nombre_completo')
+        ->get();
     }
 
     /**

@@ -125,12 +125,16 @@ Route::middleware('auth:sanctum')->prefix('alumno')->group(function () {
 });
 
 // CRUD de profesores
+// CRUD de profesores
 Route::prefix('profesores')->group(function () {
     Route::get('/', [ProfesorController::class, 'index']);
     Route::post('/', [ProfesorController::class, 'store']);
     Route::put('/{id}', [ProfesorController::class, 'update']);
     Route::post('/csv', [ProfesorController::class, 'importarDesdeCSV']);
-    Route::get('/activos', fn() => Profesor::where('status', 'activo')->get());
+
+    // ⬇️ Reemplaza la ruta de activos por esta (protegida)
+    Route::middleware('auth:sanctum')->get('/activos', [ProfesorController::class, 'activos']);
+
     Route::get('/{id}', [ProfesorController::class, 'show']);
 });
 
