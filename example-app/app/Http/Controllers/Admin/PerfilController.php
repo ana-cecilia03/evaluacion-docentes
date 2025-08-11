@@ -1,50 +1,44 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Admin;
 
+use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use App\Models\Profesor;
+use Illuminate\Support\Facades\Hash;
 
 class PerfilController extends Controller
 {
-    public function mostrar()
+    public function update(Request $request)
     {
-        $profesor = Auth::user(); // Asegúrate de que el profesor esté autenticado vía Sanctum
-
-        if (!$profesor) {
-            return response()->json(['message' => 'No autenticado'], 401);
-        }
-
-        return response()->json([
-            'nombre_completo' => $profesor->nombre_completo,
-            'correo' => $profesor->correo,
-        ]);
-    }
-
-    public function actualizar(Request $request)
-    {
-        $profesor = Auth::user();
-
-        if (!$profesor) {
-            return response()->json(['message' => 'No autenticado'], 401);
+        $user = Auth::user(); // modelo Profesor autenticado
+        if (!$user) {
+            return response()->json(['message' => 'Unauthenticated.'], 401);
         }
 
         $request->validate([
-            'nombre_completo' => 'required|string|max:100',
-            'correo' => 'required|email',
-            'password' => 'nullable|string|min:6',
+            'nombre'   => 'required|string|min:3|max:255',
+            'correo'   => 'required|email|max:255|unique:profesores,correo,' . $user->id_profesor . ',id_profesor',
+            'password' => 'nullable|string|min:8|confirmed',
         ]);
 
-        $profesor->nombre_completo = $request->nombre_completo;
-        $profesor->correo = $request->correo;
+        $user->nombre_completo = $request->input('nombre');
+        $user->correo          = $request->input('correo');
 
         if ($request->filled('password')) {
-            $profesor->password = bcrypt($request->password);
+            $user->password = Hash::make($request->input('password'));
         }
 
-        $profesor->save();
+        $user->save();
 
-        return response()->json(['message' => 'Perfil actualizado']);
+        return response()->json([
+            'message' => 'Perfil actualizado correctamente',
+            'user' => [
+                'id'     => $user->id_profesor,
+                'nombre' => $user->nombre_completo,
+                'correo' => $user->correo,
+                'rol'    => $user->rol,
+            ],
+        ]);
     }
 }

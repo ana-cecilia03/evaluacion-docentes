@@ -71,7 +71,7 @@ async function login() {
     const data = await response.json()
 
     if (!response.ok) {
-      error.value = data.message || 'Credenciales incorrectas'
+      error.value = data.message || 'correo o contraseña'
       return
     }
 

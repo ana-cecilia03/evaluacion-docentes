@@ -34,7 +34,7 @@ use App\Models\Materia;
 use App\Models\Grupo;
 use App\Models\Carrera;
 use App\Models\EvaluacionAlumno;
-
+use App\Http\Controllers\Admin\PerfilController;
 
 /*
 |--------------------------------------------------------------------------
@@ -48,15 +48,21 @@ use App\Models\EvaluacionAlumno;
 // Autenticación de alumno y administrador
 Route::post('/login/alumno', [LoginAlumno::class, 'login']);
 Route::post('/admin/login', [LoginProfesor::class, 'login']);
-Route::middleware('auth:sanctum')->get('/admin/me', function () {
-    $u = Auth::user(); // instancia de Profesor
-    return response()->json([
-        'id'     => $u->id_profesor ?? $u->id ?? null,
-        'nombre' => $u->nombre_completo ?? null,
-        'correo' => $u->correo ?? null,
-        'rol'    => $u->rol ?? null,
-    ]);
+Route::middleware('auth:sanctum')->group(function () {
+    Route::get('/admin/me', function () {
+        $u = Auth::user();
+        return response()->json([
+            'id'     => $u->id_profesor ?? $u->id ?? null,
+            'nombre' => $u->nombre_completo ?? null,
+            'correo' => $u->correo ?? null,
+            'rol'    => $u->rol ?? null,
+        ]);
+    });
+
+    Route::put('/admin/me', [PerfilController::class, 'update']); 
 });
+
+
 
 
 // Gestión de periodos académicos
