@@ -75,6 +75,13 @@
       <!-- TABLA -->
       <div class="table-wrapper">
         <table class="tabla-evaluacion">
+          <!-- Anchos fijos desde HTML para que se vea bien desde el primer render -->
+          <colgroup>
+            <col style="width:22%">
+            <col style="width:63%">
+            <col style="width:15%">
+          </colgroup>
+
           <thead>
             <tr>
               <th>Factor</th>
@@ -147,7 +154,7 @@
 
 <script setup>
 /**
- * PA actualizado para trabajar I y II en 0–5, y total en 0–10 (suma).
+ * PA: I y II en 0–5; TOTAL 0–10 = I + II
  */
 import { ref, reactive, computed, onMounted, watch } from 'vue'
 import axios from '@/lib/axios'
@@ -241,6 +248,23 @@ function limitarCalificacion(pregunta) {
   else if (pregunta.calificacion < 1) pregunta.calificacion = 1
 }
 
+/** Trae promedio alumnos (0–10) y lo convierte a 0–5 */
+async function cargarCalifEstudiante() {
+  try {
+    const { data } = await axios.get(`/admin/reportes/puntaje-final/${props.id}`)
+    if (data && data.promedio_alumnos !== null && data.promedio_alumnos !== undefined) {
+      const valor5 = Number(data.promedio_alumnos) / 2
+      califII.value = Number((isNaN(valor5) ? 0 : valor5).toFixed(1))
+      califIIBloqueada.value = true
+    } else {
+      califIIBloqueada.value = false
+    }
+  } catch (e) {
+    console.error('Error cargando promedio de alumnos:', e)
+    califIIBloqueada.value = false
+  }
+}
+
 // PDF
 function downloadPDF() {
   const element = document.querySelector('.contenido-principal')
@@ -275,23 +299,6 @@ async function cargarEstadoEvaluadoBackend() {
     else evaluado.value = localStorage.getItem(storageKey.value) === '1'
   } catch {
     evaluado.value = localStorage.getItem(storageKey.value) === '1'
-  }
-}
-
-/** Trae promedio alumnos (0–10) y lo convierte a 0–5 */
-async function cargarCalifEstudiante() {
-  try {
-    const { data } = await axios.get(`/admin/reportes/puntaje-final/${props.id}`)
-    if (data && data.promedio_alumnos !== null && data.promedio_alumnos !== undefined) {
-      const valor5 = Number(data.promedio_alumnos) / 2
-      califII.value = Number((isNaN(valor5) ? 0 : valor5).toFixed(1))
-      califIIBloqueada.value = true
-    } else {
-      califIIBloqueada.value = false
-    }
-  } catch (e) {
-    console.error('Error cargando promedio de alumnos:', e)
-    califIIBloqueada.value = false
   }
 }
 

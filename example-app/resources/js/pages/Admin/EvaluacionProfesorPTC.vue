@@ -69,6 +69,13 @@
       <!-- TABLA -->
       <div class="table-wrapper">
         <table class="tabla-evaluacion">
+          <!-- fija anchos desde el HTML para que se vea bien desde el primer render -->
+          <colgroup>
+            <col style="width:22%">
+            <col style="width:63%">
+            <col style="width:15%">
+          </colgroup>
+
           <thead>
             <tr>
               <th>Factor</th>
@@ -76,6 +83,7 @@
               <th>Calificación</th>
             </tr>
           </thead>
+
           <tbody>
             <tr v-for="pregunta in preguntas" :key="pregunta.id">
               <td>{{ pregunta.factor }}</td>
@@ -129,7 +137,7 @@
         </table>
       </div>
 
-      <!-- FIRMA -->
+      <!-- FIRMA2 -->
       <section class="firma">
         <strong>Elaborado por: </strong>
         <span class="linea-firma"></span>
@@ -138,6 +146,7 @@
     </main>
   </Menu>
 </template>
+
 
 <script setup>
 import { ref, reactive, computed, onMounted, watch } from 'vue'
@@ -333,5 +342,22 @@ watch(() => form.periodo, () => {
   color: #fff !important;
   cursor: not-allowed !important;
   opacity: 0.8;
+  .evaluacion-page .tabla-evaluacion {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.95rem;
+  table-layout: fixed;     /* respeta los widths del <colgroup> */
 }
+.evaluacion-page .tabla-evaluacion th,
+.evaluacion-page .tabla-evaluacion td {
+  word-break: break-word;
+  overflow-wrap: anywhere;
+}
+.evaluacion-page .tabla-evaluacion td:nth-child(3) .input-calif,
+.evaluacion-page .tabla-evaluacion td:nth-child(3) input[type="number"] {
+  width: 80px;
+  max-width: 100%;
+}
+}
+
 </style>
