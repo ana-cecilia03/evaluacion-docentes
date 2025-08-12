@@ -5,17 +5,19 @@
       <div class="register-container">
         <h1 class="titulo">Actualizar Profesor</h1>
 
-        <form @submit.prevent="actualizarProfesor" class="register-form">
+        <!-- Formulario de edición -->
+        <form @submit.prevent="actualizarProfesor" class="register-form" novalidate>
           <!-- Matrícula -->
           <div class="form-group">
             <label for="matricula">Matrícula</label>
             <input
               type="text"
               id="matricula"
-              v-model="form.matricula"
+              v-model.trim="form.matricula"
               placeholder="Ej. 13122593103"
               maxlength="11"
               required
+              autocomplete="off"
             />
           </div>
 
@@ -25,10 +27,11 @@
             <input
               type="text"
               id="nombre_completo"
-              v-model="form.nombre_completo"
+              v-model.trim="form.nombre_completo"
               placeholder="Ej. Laura Martínez"
               maxlength="100"
               required
+              autocomplete="off"
             />
           </div>
 
@@ -38,10 +41,11 @@
             <input
               type="email"
               id="correo"
-              v-model="form.correo"
+              v-model.trim="form.correo"
               placeholder="Ej. profesor@ejemplo.com"
               maxlength="50"
               required
+              autocomplete="off"
             />
           </div>
 
@@ -54,6 +58,7 @@
               v-model="form.password"
               placeholder="********"
               minlength="6"
+              autocomplete="new-password"
             />
           </div>
 
@@ -64,6 +69,16 @@
               <option value="">Seleccione</option>
               <option value="PA">PA</option>
               <option value="PTC">PTC</option>
+            </select>
+          </div>
+
+          <!-- Rol -->
+          <div class="form-group">
+            <label for="rol">Rol</label>
+            <select id="rol" v-model="form.rol" required>
+              <option value="">Seleccione</option>
+              <option value="profesor">Profesor</option>
+              <option value="administrador">Administrador</option>
             </select>
           </div>
 
@@ -79,13 +94,20 @@
 
           <!-- Botones -->
           <div class="button-group">
-            <button type="button" class="register-rojo" @click="$emit('cerrar')">Cancelar</button>
-            <button type="submit" class="register-verde">Actualizar</button>
+            <button type="button" class="register-rojo" @click="$emit('cerrar')" :disabled="cargando">
+              Cancelar
+            </button>
+            <button type="submit" class="register-verde" :disabled="cargando">
+              {{ cargando ? 'Actualizando...' : 'Actualizar' }}
+            </button>
           </div>
         </form>
 
+        <!-- Errores -->
         <div v-if="error" class="error-message">
-          {{ error }}
+          <ul>
+            <li v-for="(msg, i) in mensajesError" :key="i">{{ msg }}</li>
+          </ul>
         </div>
       </div>
     </div>
@@ -93,7 +115,10 @@
 </template>
 
 <script setup>
-import { ref, watch, defineProps, defineEmits } from 'vue'
+// Modal de edición de profesor.
+// Incluye campo "rol" y lo envía al backend junto con el resto de datos.
+
+import { ref, watch, defineProps, defineEmits, computed } from 'vue'
 import axios from 'axios'
 
 // Props
@@ -113,43 +138,56 @@ const form = ref({
   matricula: '',
   nombre_completo: '',
   correo: '',
-  password: '',
+  password: '', // opcional
   cargo: '',
-  status: ''
+  status: '',
+  rol: '' // se sincroniza desde props
 })
 
-// Log inicial del prop recibido
-console.log('Prop profesor recibido:', props.profesor)
-
-// Sincronizar props iniciales
-watch(() => props.profesor, (nuevo) => {
-  if (nuevo && typeof nuevo === 'object') {
-    form.value = {
-      id_profesor: nuevo.id_profesor ?? null,
-      matricula: nuevo.matricula ?? '',
-      nombre_completo: nuevo.nombre_completo ?? '',
-      correo: nuevo.correo ?? '',
-      password: '',
-      cargo: nuevo.cargo ?? '',
-      status: nuevo.status ?? ''
-    }
-    console.log('Formulario sincronizado con props:', form.value)
-  }
-}, { immediate: true })
-
 const error = ref(null)
+const cargando = ref(false)
+
+// Normaliza mensajes de error a una lista
+const mensajesError = computed(() => {
+  if (!error.value) return []
+  if (Array.isArray(error.value)) return error.value
+  if (typeof error.value === 'string') return [error.value]
+  return [JSON.stringify(error.value)]
+})
+
+// Sincroniza el formulario cuando cambia la prop "profesor"
+watch(
+  () => props.profesor,
+  (nuevo) => {
+    if (nuevo && typeof nuevo === 'object') {
+      form.value = {
+        id_profesor: nuevo.id_profesor ?? null,
+        matricula: nuevo.matricula ?? '',
+        nombre_completo: nuevo.nombre_completo ?? '',
+        correo: nuevo.correo ?? '',
+        password: '',
+        cargo: nuevo.cargo ?? '',
+        status: nuevo.status ?? '',
+        rol: nuevo.rol ?? 'profesor'
+      }
+    }
+  },
+  { immediate: true }
+)
 
 // Enviar actualización
 const actualizarProfesor = async () => {
   error.value = null
-  console.log('Iniciando actualización del profesor...')
+  cargando.value = true
 
+  // Construir payload; password solo si viene
   const payload = {
     matricula: form.value.matricula,
     nombre_completo: form.value.nombre_completo,
     correo: form.value.correo,
     cargo: form.value.cargo,
     status: form.value.status,
+    rol: form.value.rol || 'profesor',
     modified_by: 'frontend'
   }
 
@@ -157,27 +195,22 @@ const actualizarProfesor = async () => {
     payload.password = form.value.password
   }
 
-  console.log('Payload a enviar al backend:', payload)
-
   try {
-    const response = await axios.put(`/api/profesores/${form.value.id_profesor}`, payload)
-    console.log('Respuesta exitosa del backend:', response.data)
-
+    await axios.put(`/api/profesores/${form.value.id_profesor}`, payload)
     emit('actualizado')
     emit('cerrar')
   } catch (err) {
-    console.error('Error al actualizar profesor (catch):', err)
-
     if (err.response?.data?.errors) {
       const errores = Object.values(err.response.data.errors).flat()
-      error.value = errores.join(', ')
-      console.error('Errores de validación:', error.value)
+      error.value = errores.length ? errores : 'Error inesperado al actualizar profesor.'
     } else if (err.response?.data?.message) {
       error.value = err.response.data.message
-      console.error('Mensaje de error:', error.value)
     } else {
       error.value = 'Error inesperado al actualizar profesor.'
     }
+    console.error('Error al actualizar profesor:', err)
+  } finally {
+    cargando.value = false
   }
 }
 </script>
