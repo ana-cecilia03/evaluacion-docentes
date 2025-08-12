@@ -3,18 +3,17 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\EvaluacionProfesor;   // tabla: evaluaciones_profesores (ajusta si tu nombre difiere)
-use App\Models\RespuestaEvaluacion;  // tabla: respuestas_evaluacion
-use App\Models\PreguntaProfesor;     // tabla: preguntas_profesores
-use App\Models\Profesor;             // tabla: profesores
+use App\Models\EvaluacionProfesor;
+use App\Models\RespuestaEvaluacion;
+use App\Models\PreguntaProfesor;
+use App\Models\Profesor;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\DB;
 
 class EvaluacionProfesorController extends Controller
 {
-    /**
-     * Obtener preguntas tipo PA (y las marcadas como "ambos").
-     */
     public function preguntasPA()
     {
         return PreguntaProfesor::whereIn('tipo', ['PA', 'ambos'])
@@ -23,9 +22,6 @@ class EvaluacionProfesorController extends Controller
             ->get();
     }
 
-    /**
-     * Obtener preguntas tipo PTC (y las marcadas como "ambos").
-     */
     public function preguntasPTC()
     {
         return PreguntaProfesor::whereIn('tipo', ['PTC', 'ambos'])
@@ -34,9 +30,6 @@ class EvaluacionProfesorController extends Controller
             ->get();
     }
 
-    /**
-     * Obtener datos del profesor a evaluar por ID.
-     */
     public function getProfesor($id)
     {
         $profesor = Profesor::find($id);
@@ -53,50 +46,78 @@ class EvaluacionProfesorController extends Controller
         ]);
     }
 
-    /**
-     * Guardar evaluación y sus respuestas.
-     * Ruta recomendada (protegida): POST /api/evaluaciones  (auth:sanctum)
-     */
+    public function estado(Request $request)
+    {
+        $validated = $request->validate([
+            'profesor_id' => ['required', 'integer', 'exists:profesores,id_profesor'],
+            'tipo'        => ['required', Rule::in(['PA','PTC'])],
+            'periodo'     => ['required', 'string', 'max:100'],
+        ]);
+
+        $evaluacion = EvaluacionProfesor::where('profesor_id', $validated['profesor_id'])
+            ->where('tipo', $validated['tipo'])
+            ->where('periodo', $validated['periodo'])
+            ->first();
+
+        return response()->json([
+            'evaluado'           => (bool) $evaluacion,
+            'evaluacion_id'      => $evaluacion->id ?? null,
+            'calif_i'            => $evaluacion->calif_i ?? null,
+            'calif_ii'           => $evaluacion->calif_ii ?? null,
+            'calificacion_final' => $evaluacion->calificacion_final ?? null,
+        ]);
+    }
+
     public function store(Request $request)
     {
-        // Validación
         $validated = $request->validate([
-            'profesor_id'         => 'required|integer|exists:profesores,id_profesor',
-            'tipo'                => 'required|in:PA,PTC',
-            'periodo'             => 'nullable|string|max:100',
-            'calif_i'             => 'nullable|numeric|min:0|max:10',
-            'calif_ii'            => 'nullable|numeric|min:0|max:10',
-            'calificacion_final'  => 'nullable|numeric|min:0|max:10',
-            'comentario'          => 'nullable|string',
+            'profesor_id'        => 'required|integer|exists:profesores,id_profesor',
+            'tipo'               => 'required|in:PA,PTC',
+            'periodo'            => 'nullable|string|max:100',
+            'calif_i'            => 'nullable|numeric|min:0|max:10',
+            'calif_ii'           => 'nullable|numeric|min:0|max:10',
+            'calificacion_final' => 'nullable|numeric|min:0|max:10',
+            'comentario'         => 'nullable|string',
             'respuestas'                  => 'required|array|min:1',
             'respuestas.*.pregunta_id'    => 'required|integer|exists:preguntas_profesores,id',
             'respuestas.*.calificacion'   => 'required|numeric|min:1|max:5',
         ]);
 
-        // Crear evaluación (el evaluador se toma del usuario autenticado por token)
-        $evaluacion = EvaluacionProfesor::create([
-            'profesor_id'        => $validated['profesor_id'],
-            'tipo'               => $validated['tipo'],
-            'periodo'            => $validated['periodo'] ?? null,
-            'calif_i'            => $validated['calif_i'] ?? null,
-            'calif_ii'           => $validated['calif_ii'] ?? null,
-            'calificacion_final' => $validated['calificacion_final'] ?? null,
-            'comentario'         => $validated['comentario'] ?? null,
-            'evaluador_id'       => Auth::id(), // <-- clave: evaluador autenticado
-        ]);
+        $existe = EvaluacionProfesor::where('profesor_id', $validated['profesor_id'])
+            ->where('tipo', $validated['tipo'])
+            ->where('periodo', $validated['periodo'])
+            ->exists();
 
-        // Guardar respuestas
-        foreach ($validated['respuestas'] as $r) {
-            RespuestaEvaluacion::create([
-                'evaluacion_id' => $evaluacion->id,       // ajusta si tu PK no es "id"
-                'pregunta_id'   => $r['pregunta_id'],
-                'calificacion'  => $r['calificacion'],
-            ]);
+        if ($existe) {
+            return response()->json([
+                'message' => 'Ya existe una evaluación para este profesor, tipo y periodo.'
+            ], 409);
         }
 
-        return response()->json([
-            'message'       => 'Evaluación guardada correctamente',
-            'evaluacion_id' => $evaluacion->id,
-        ], 201);
+        return DB::transaction(function () use ($validated) {
+            $evaluacion = EvaluacionProfesor::create([
+                'profesor_id'        => $validated['profesor_id'],
+                'tipo'               => $validated['tipo'],
+                'periodo'            => $validated['periodo'] ?? null,
+                'calif_i'            => $validated['calif_i'] ?? null,
+                'calif_ii'           => $validated['calif_ii'] ?? null,
+                'calificacion_final' => $validated['calificacion_final'] ?? null,
+                'comentario'         => $validated['comentario'] ?? null,
+                'evaluador_id'       => Auth::id(),
+            ]);
+
+            foreach ($validated['respuestas'] as $r) {
+                RespuestaEvaluacion::create([
+                    'evaluacion_id' => $evaluacion->id,
+                    'pregunta_id'   => $r['pregunta_id'],
+                    'calificacion'  => $r['calificacion'],
+                ]);
+            }
+
+            return response()->json([
+                'message'       => 'Evaluación guardada correctamente',
+                'evaluacion_id' => $evaluacion->id,
+            ], 201);
+        });
     }
 }

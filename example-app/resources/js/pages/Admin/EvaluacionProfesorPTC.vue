@@ -138,7 +138,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed, onMounted } from 'vue'
+import { ref, reactive, computed, onMounted, watch } from 'vue'
 import axios from '@/lib/axios'
 import Menu from '@/layouts/Menu.vue'
 import html2canvas from 'html2canvas'
@@ -146,7 +146,6 @@ import jsPDF from 'jspdf'
 import * as XLSX from 'xlsx'
 import { saveAs } from 'file-saver'
 
-// 🟢 RECIBE ID DEL PROFESOR A EVALUAR
 const props = defineProps({
   id: { type: Number, required: true }
 })
@@ -154,13 +153,13 @@ const props = defineProps({
 const showDownload = ref(false)
 const califII = ref(0)
 const comentario = ref('')
-const evaluado = ref(false) // ← estado para bloquear botón y cambiar estilo/texto
+const evaluado = ref(false)
 
 const form = reactive({
   nombre: '',
   puesto: '',
   evaluador: '',
-  periodo: new Date().getFullYear().toString() // Año actual dinámico
+  periodo: new Date().getFullYear().toString()
 })
 
 const camposFormulario = {
@@ -172,10 +171,10 @@ const camposFormulario = {
 
 const preguntas = ref([])
 
-// 🔹 PREGUNTAS TIPO PTC
+const storageKey = computed(() => `evaluado:PTC:${props.id}:${form.periodo}`)
+
 const obtenerPreguntas = async () => {
   try {
-    // axios tiene baseURL '/api' → NO anteponer '/api'
     const res = await axios.get('/evaluaciones/preguntas-ptc')
     preguntas.value = res.data.map(p => ({
       ...p,
@@ -186,7 +185,6 @@ const obtenerPreguntas = async () => {
   }
 }
 
-// 🔹 DATOS DEL EVALUADOR (admin/profesor autenticado)
 const obtenerEvaluador = async () => {
   try {
     const { data } = await axios.get('/admin/me')
@@ -202,7 +200,6 @@ const obtenerEvaluador = async () => {
   }
 }
 
-// 🔹 DATOS DEL PROFESOR EVALUADO (según tus rutas)
 const cargarDatosProfesor = async () => {
   try {
     const res = await axios.get(`/evaluaciones/profesor/${props.id}`)
@@ -213,14 +210,17 @@ const cargarDatosProfesor = async () => {
   }
 }
 
-// 🔸 PROMEDIOS
 const promedio = computed(() => {
   const total = preguntas.value.reduce((sum, p) => sum + Number(p.calificacion || 0), 0)
   return preguntas.value.length ? total / preguntas.value.length : 0
 })
-const calificacionFinal = computed(() => promedio.value)
 
-// 🔸 ACCIONES
+const calificacionFinal = computed(() => {
+  const i = Number(promedio.value) || 0
+  const ii = Number(califII.value) || 0
+  return (i + ii) / 2
+})
+
 function toggleDropdown() {
   showDownload.value = !showDownload.value
 }
@@ -229,10 +229,9 @@ function limitarCalificacion(pregunta) {
   else if (pregunta.calificacion < 1) pregunta.calificacion = 1
 }
 
-// 📄 Descargar vista como PDF
 function downloadPDF() {
   const element = document.querySelector('.contenido-principal')
-  html2canvas(element).then(canvas => {
+  html2canvas(element, { scale: 2 }).then(canvas => {
     const imgData = canvas.toDataURL('image/png')
     const pdf = new jsPDF('p', 'mm', 'a4')
     const imgProps = pdf.getImageProperties(imgData)
@@ -243,7 +242,6 @@ function downloadPDF() {
   })
 }
 
-// 📊 Descargar tabla como Excel
 function downloadExcel() {
   const table = document.querySelector('.tabla-evaluacion')
   const wb = XLSX.utils.book_new()
@@ -252,7 +250,24 @@ function downloadExcel() {
   XLSX.writeFile(wb, `evaluacion-profesor-${props.id}.xlsx`)
 }
 
-// 💾 Guardar evaluación
+async function cargarEstadoEvaluadoBackend() {
+  try {
+    const { data } = await axios.get('/evaluaciones/estado', {
+      params: { profesor_id: props.id, tipo: 'PTC', periodo: form.periodo }
+    })
+    evaluado.value = !!data.evaluado
+    if (evaluado.value) {
+      localStorage.setItem(storageKey.value, '1')
+    } else {
+      const local = localStorage.getItem(storageKey.value) === '1'
+      evaluado.value = local
+    }
+  } catch (e) {
+    const local = localStorage.getItem(storageKey.value) === '1'
+    evaluado.value = local
+  }
+}
+
 const guardarEvaluacion = async () => {
   try {
     const payload = {
@@ -271,23 +286,25 @@ const guardarEvaluacion = async () => {
 
     await axios.post('/evaluaciones', payload)
     evaluado.value = true
+    localStorage.setItem(storageKey.value, '1')
     alert('✅ Evaluación enviada correctamente')
 
-    // Intentar cerrar la pestaña (funciona si fue abierta por window.open)
     window.close()
-    // Fallback opcional: si no se cierra, puedes navegar atrás o a otra ruta
-    // setTimeout(() => history.back(), 300)
   } catch (error) {
     console.error('❌ Error al guardar evaluación:', error)
     alert('Ocurrió un error al guardar la evaluación')
   }
 }
 
-// 🔸 MONTAJE INICIAL
 onMounted(() => {
   obtenerPreguntas()
   cargarDatosProfesor()
   obtenerEvaluador()
+  cargarEstadoEvaluadoBackend()
+})
+
+watch(() => form.periodo, () => {
+  cargarEstadoEvaluadoBackend()
 })
 </script>
 

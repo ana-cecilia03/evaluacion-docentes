@@ -201,10 +201,16 @@ Route::prefix('selects')->group(function () {
 
 // Evaluación de profesores por administrador
 Route::middleware('auth:sanctum')->prefix('evaluaciones')->group(function () {
-    Route::get('/preguntas-pa', [EvaluacionProfesorController::class, 'preguntasPA']);
+    // EXISTENTES
+    Route::get('/preguntas-pa',  [EvaluacionProfesorController::class, 'preguntasPA']);
     Route::get('/preguntas-ptc', [EvaluacionProfesorController::class, 'preguntasPTC']);
     Route::get('/profesor/{id}', [EvaluacionProfesorController::class, 'getProfesor']);
-    Route::post('/', [EvaluacionProfesorController::class, 'store']);
+    Route::post('/',             [EvaluacionProfesorController::class, 'store']);
+
+    // NUEVOS (mínimos y útiles)
+    Route::get('/estado',        [EvaluacionProfesorController::class, 'estado']); // ¿ya fue evaluado?
+    Route::get('/{tipo}/{profesor_id}', [EvaluacionProfesorController::class, 'show']) // opcional
+        ->where(['tipo' => 'PA|PTC', 'profesor_id' => '[0-9]+']);
 });
 
 
