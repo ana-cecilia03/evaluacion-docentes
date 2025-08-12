@@ -160,7 +160,7 @@ const form = reactive({
   nombre: '',
   puesto: '',
   evaluador: '',
-  periodo: '2023'
+  periodo: new Date().getFullYear().toString() // Año actual dinámico
 })
 
 const camposFormulario = {
