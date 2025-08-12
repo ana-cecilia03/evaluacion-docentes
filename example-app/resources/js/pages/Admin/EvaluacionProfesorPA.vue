@@ -25,6 +25,7 @@
         </div>
 
         <div class="datos-grid">
+          <!-- Columna izquierda: datos informativos -->
           <div class="col-izq">
             <div class="campo" v-for="(label, key) in camposFormulario" :key="key">
               <label>{{ label }}:</label>
@@ -32,6 +33,7 @@
             </div>
           </div>
 
+          <!-- Columna central: Calificaciones I y II -->
           <div class="col-mid">
             <div class="box-calif">
               <span class="titulo-box">Calificación I <br />Resp. PE</span>
@@ -43,8 +45,13 @@
                 style="background-color: white; border: none; font-weight: bold; font-size: 1.2rem; text-align: center; pointer-events: none;"
               />
             </div>
+
             <div class="box-calif">
               <span class="titulo-box">Calificación II <br />ESTUDIANTE</span>
+              <!--
+                Si califIIBloqueada es true, este campo se rellena desde la API con el promedio de alumnos
+                y queda en solo lectura. Si es false, el usuario puede capturarlo manualmente.
+              -->
               <input
                 v-model.number="califII"
                 type="number"
@@ -52,10 +59,14 @@
                 min="0"
                 max="10"
                 class="input-calif"
+                :readonly="califIIBloqueada"
+                :title="califIIBloqueada ? 'Valor desde API (promedio de alumnos)' : 'Ingresa manualmente'"
+                :style="califIIBloqueada ? 'background-color:white;border:none;font-weight:bold;font-size:1.2rem;text-align:center;pointer-events:none;' : ''"
               />
             </div>
           </div>
 
+          <!-- Columna derecha: total -->
           <div class="col-der">
             <div class="total-box">
               <span class="total">{{ calificacionFinal.toFixed(1) }}</span>
@@ -136,6 +147,13 @@
 </template>
 
 <script setup>
+/**
+ * Integración para Profesores PA:
+ * - Trae promedio de alumnos desde /admin/reportes/puntaje-final/:id
+ * - Si hay dato, fija califII y bloquea el input para evitar edición manual
+ * - Si no hay dato, deja califII editable como antes
+ */
+
 import { ref, reactive, computed, onMounted, watch } from 'vue'
 import axios from '@/lib/axios'
 import Menu from '@/layouts/Menu.vue'
@@ -144,15 +162,21 @@ import jsPDF from 'jspdf'
 import * as XLSX from 'xlsx'
 import { saveAs } from 'file-saver'
 
+// Recibe el ID del profesor a evaluar
 const props = defineProps({
-  id: { type: Number, required: true } // ID del profesor a evaluar
+  id: { type: Number, required: true }
 })
 
+// Estado UI
 const showDownload = ref(false)
-const califII = ref(0)
+const califII = ref(0)         // Calificación II (Estudiante). Se rellenará desde la API si existe promedio.
 const comentario = ref('')
 const evaluado = ref(false)
 
+// Bandera: true cuando califII viene de la API y debe estar en solo lectura
+const califIIBloqueada = ref(false)
+
+// Datos del encabezado
 const form = reactive({
   nombre: '',
   puesto: '',
@@ -160,6 +184,7 @@ const form = reactive({
   periodo: new Date().getFullYear().toString()
 })
 
+// Etiquetas para los campos del encabezado
 const camposFormulario = {
   nombre: 'Nombre',
   puesto: 'Puesto',
@@ -167,10 +192,13 @@ const camposFormulario = {
   periodo: 'Periodo'
 }
 
+// Preguntas a calificar (1–5)
 const preguntas = ref([])
 
+// Clave de almacenamiento local para marcar si ya se evaluó
 const storageKey = computed(() => `evaluado:PA:${props.id}:${form.periodo}`)
 
+// Obtiene preguntas específicas para PA
 const obtenerPreguntas = async () => {
   try {
     const res = await axios.get('/evaluaciones/preguntas-pa')
@@ -183,6 +211,7 @@ const obtenerPreguntas = async () => {
   }
 }
 
+// Obtiene nombre del evaluador desde el backend; si falla, intenta con localStorage
 const obtenerEvaluador = async () => {
   try {
     const { data } = await axios.get('/admin/me')
@@ -198,6 +227,7 @@ const obtenerEvaluador = async () => {
   }
 }
 
+// Carga datos del profesor seleccionado
 const cargarDatosProfesor = async () => {
   try {
     const res = await axios.get(`/evaluaciones/profesor/${props.id}`)
@@ -208,25 +238,34 @@ const cargarDatosProfesor = async () => {
   }
 }
 
+// Calcula el promedio de las preguntas (escala 1–5)
 const promedio = computed(() => {
   const total = preguntas.value.reduce((sum, p) => sum + Number(p.calificacion || 0), 0)
   return preguntas.value.length ? total / preguntas.value.length : 0
 })
 
+// Calcula la calificación final mostrada en la UI
+// Nota: aquí se promedian directamente I (1–5) e II (0–10).
+// Si prefieres normalizar I a 0–10 (multiplicando por 2) para un 50/50 justo,
+// cambia a: return ((promedio.value * 2) + (Number(califII.value) || 0)) / 2
 const calificacionFinal = computed(() => {
   const i = Number(promedio.value) || 0
   const ii = Number(califII.value) || 0
   return (i + ii) / 2
 })
 
+// Alterna el dropdown de descargas
 function toggleDropdown() {
   showDownload.value = !showDownload.value
 }
+
+// Limita cada calificación a rango 1–5
 function limitarCalificacion(pregunta) {
   if (pregunta.calificacion > 5) pregunta.calificacion = 5
   else if (pregunta.calificacion < 1) pregunta.calificacion = 1
 }
 
+// Exporta a PDF la vista principal
 function downloadPDF() {
   const element = document.querySelector('.contenido-principal')
   html2canvas(element, { scale: 2 }).then(canvas => {
@@ -240,6 +279,7 @@ function downloadPDF() {
   })
 }
 
+// Exporta la tabla a Excel
 function downloadExcel() {
   const table = document.querySelector('.tabla-evaluacion')
   const wb = XLSX.utils.book_new()
@@ -248,6 +288,7 @@ function downloadExcel() {
   XLSX.writeFile(wb, `evaluacion-profesor-${props.id}.xlsx`)
 }
 
+// Consulta si ya se evaluó desde backend; combina con estado local
 async function cargarEstadoEvaluadoBackend() {
   try {
     const { data } = await axios.get('/evaluaciones/estado', {
@@ -266,6 +307,25 @@ async function cargarEstadoEvaluadoBackend() {
   }
 }
 
+// Carga el promedio de alumnos desde tu endpoint de reportes
+// Si existe, fija califII y bloquea el input; si no, deja el input editable
+async function cargarCalifEstudiante() {
+  try {
+    const { data } = await axios.get(`/admin/reportes/puntaje-final/${props.id}`)
+    if (data && data.promedio_alumnos !== null && data.promedio_alumnos !== undefined) {
+      const valor = Number(parseFloat(data.promedio_alumnos).toFixed(1))
+      califII.value = isNaN(valor) ? 0 : valor
+      califIIBloqueada.value = true
+    } else {
+      califIIBloqueada.value = false
+    }
+  } catch (e) {
+    console.error('Error cargando promedio de alumnos:', e)
+    califIIBloqueada.value = false
+  }
+}
+
+// Guarda la evaluación PA en backend
 const guardarEvaluacion = async () => {
   try {
     const payload = {
@@ -289,22 +349,33 @@ const guardarEvaluacion = async () => {
 
     window.close()
   } catch (error) {
-    console.error('❌ Error al guardar evaluación:', error)
+    console.error('Error al guardar evaluación:', error)
     alert('Ocurrió un error al guardar la evaluación')
   }
 }
 
+// Montaje: carga datos base y el promedio de alumnos para califII
 onMounted(() => {
   obtenerPreguntas()
   cargarDatosProfesor()
   obtenerEvaluador()
   cargarEstadoEvaluadoBackend()
+  cargarCalifEstudiante() // integra la API de promedio de alumnos
+})
+
+// Si cambia el profesor o el periodo, recargar estados y promedio alumnos
+watch(() => props.id, () => {
+  cargarDatosProfesor()
+  cargarEstadoEvaluadoBackend()
+  cargarCalifEstudiante()
 })
 
 watch(() => form.periodo, () => {
   cargarEstadoEvaluadoBackend()
+  cargarCalifEstudiante()
 })
 </script>
+
 
 <style src="@/../css/botones.css"></style>
 <style src="@/../css/EvaluacionProfesores.css"></style>

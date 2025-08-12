@@ -21,6 +21,7 @@ use App\Http\Controllers\Admin\MatCuatriCarController;
 use App\Http\Controllers\Admin\RelacionController;
 use App\Http\Controllers\Admin\EvaluacionProfesorController;
 use App\Http\Controllers\Admin\PreguntasController;
+use App\Http\Controllers\Admin\PuntajeFinalController;
 
 // Controladores del alumno
 use App\Http\Controllers\Alumno\EvaluacionAlumnoController;
@@ -132,14 +133,25 @@ Route::middleware('auth:sanctum')->prefix('alumno')->group(function () {
 
 // CRUD de profesores
 // CRUD de profesores
+//Route::prefix('profesores')->group(function () {
+//    Route::get('/', [ProfesorController::class, 'index']);
+//    Route::post('/', [ProfesorController::class, 'store']);
+//    Route::put('/{id}', [ProfesorController::class, 'update']);
+//    Route::post('/csv', [ProfesorController::class, 'importarDesdeCSV']);
+//
+//    // ⬇️ Reemplaza la ruta de activos por esta (protegida)
+//    Route::middleware('auth:sanctum')->get('/activos', [ProfesorController::class, 'activos']);
+//
+//    Route::get('/{id}', [ProfesorController::class, 'show']);
+//});
 Route::prefix('profesores')->group(function () {
     Route::get('/', [ProfesorController::class, 'index']);
     Route::post('/', [ProfesorController::class, 'store']);
     Route::put('/{id}', [ProfesorController::class, 'update']);
     Route::post('/csv', [ProfesorController::class, 'importarDesdeCSV']);
 
-    // ⬇️ Reemplaza la ruta de activos por esta (protegida)
-    Route::middleware('auth:sanctum')->get('/activos', [ProfesorController::class, 'activos']);
+    // HAZLA PÚBLICA:
+    Route::get('/activos', [ProfesorController::class, 'activos']);
 
     Route::get('/{id}', [ProfesorController::class, 'show']);
 });
@@ -235,4 +247,10 @@ Route::prefix('preguntas-alumno')->group(function () {
     Route::put('/{id}', [PreguntasController::class, 'update']);
     Route::delete('/{id}', [PreguntasController::class, 'destroy']);
     Route::post('/enviar-evaluacion', [PreguntasController::class, 'guardarEvaluacion']);
+});
+
+
+// Sin auth (solo pruebas locales):
+Route::prefix('admin')->group(function () {
+    Route::get('/reportes/puntaje-final/{profesorId}', [PuntajeFinalController::class, 'show']);
 });

@@ -54,6 +54,10 @@
                 min="0"
                 max="10"
                 class="input-calif"
+                :readonly="califIIBloqueada" 
+                :title="califIIBloqueada ? 'Traída de la API / promedio de alumnos' : 'Ingresa manualmente'"
+                :style="califIIBloqueada ? 'background-color:white;border:none;font-weight:bold;text-align:center;pointer-events:none;' : ''"
+
               />
             </div>
           </div>
@@ -155,6 +159,27 @@ const califII = ref(0)
 const comentario = ref('')
 const evaluado = ref(false)
 
+// bandera para bloquear el input si la API trae dato
+const califIIBloqueada = ref(false)
+
+// carga el promedio de alumnos desde tu endpoint
+async function cargarCalifEstudiante() {
+  try {
+    const { data } = await axios.get(`/admin/reportes/puntaje-final/${props.id}`)
+    if (data && data.promedio_alumnos !== null && data.promedio_alumnos !== undefined) {
+      // Redondea a 1 decimal para mostrar parejo
+      const valor = Number(parseFloat(data.promedio_alumnos).toFixed(1))
+      califII.value = isNaN(valor) ? 0 : valor
+      califIIBloqueada.value = true     // bloquea el input (solo lectura)
+    } else {
+      califIIBloqueada.value = false    // sin dato => editable como antes
+    }
+  } catch (e) {
+    console.error('Error cargando promedio de alumnos:', e)
+    califIIBloqueada.value = false
+  }
+}
+
 const form = reactive({
   nombre: '',
   puesto: '',
@@ -216,9 +241,9 @@ const promedio = computed(() => {
 })
 
 const calificacionFinal = computed(() => {
-  const i = Number(promedio.value) || 0
-  const ii = Number(califII.value) || 0
-  return (i + ii) / 2
+  const i = Number(promedio.value) || 0      // Resp. PE (1–5)
+  const ii = Number(califII.value) || 0      // Estudiante (0–10 desde API o manual)
+  return (i + ii) / 2                        // Si prefieres normalizar I a escala 10: ((i*2) + ii) / 2
 })
 
 function toggleDropdown() {
@@ -287,11 +312,11 @@ const guardarEvaluacion = async () => {
     await axios.post('/evaluaciones', payload)
     evaluado.value = true
     localStorage.setItem(storageKey.value, '1')
-    alert('✅ Evaluación enviada correctamente')
+    alert(' Evaluación enviada correctamente')
 
     window.close()
   } catch (error) {
-    console.error('❌ Error al guardar evaluación:', error)
+    console.error(' Error al guardar evaluación:', error)
     alert('Ocurrió un error al guardar la evaluación')
   }
 }
@@ -301,12 +326,22 @@ onMounted(() => {
   cargarDatosProfesor()
   obtenerEvaluador()
   cargarEstadoEvaluadoBackend()
+  cargarCalifEstudiante() // ⬅Trae promedio de alumnos (API) y bloquea el input si aplica
+})
+
+// Si llega a cambiar el ID del profe en esta vista, recarga datos clave
+watch(() => props.id, () => {
+  cargarDatosProfesor()
+  cargarEstadoEvaluadoBackend()
+  cargarCalifEstudiante()
 })
 
 watch(() => form.periodo, () => {
   cargarEstadoEvaluadoBackend()
+  cargarCalifEstudiante()
 })
 </script>
+
 
 <style src="@/../css/botones.css"></style>
 <style src="@/../css/EvaluacionProfesores.css"></style>
