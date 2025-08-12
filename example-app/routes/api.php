@@ -252,5 +252,6 @@ Route::prefix('preguntas-alumno')->group(function () {
 
 // Sin auth (solo pruebas locales):
 Route::prefix('admin')->group(function () {
-    Route::get('/reportes/puntaje-final/{profesorId}', [PuntajeFinalController::class, 'show']);
+    Route::get('/reportes/puntaje-final', [PuntajeFinalController::class, 'index']);               // todos
+    Route::get('/reportes/puntaje-final/{profesorId}', [PuntajeFinalController::class, 'show']);   // uno
 });

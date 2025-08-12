@@ -1,13 +1,10 @@
 <template>
   <Menu>
     <main class="contenido-principal evaluacion-page">
-      <!-- CABECERA -->
       <header class="encabezado-evaluacion">
         <h1 class="titulo">Evaluación de Profesores PTC</h1>
 
-        <!-- Botones de acciones (Descargar + Evaluar) con separación -->
         <div class="acciones acciones-botones">
-          <!-- Botón Descargar con su dropdown -->
           <div class="download-wrapper">
             <button class="boton-verde" @click="toggleDropdown">Descargar</button>
             <ul v-if="showDownload" class="dropdown">
@@ -16,7 +13,6 @@
             </ul>
           </div>
 
-          <!-- Botón Evaluar / Evaluado -->
           <button
             :class="evaluado ? 'boton-gris' : 'boton-verde'"
             :disabled="evaluado"
@@ -36,7 +32,7 @@
 
           <div class="col-mid">
             <div class="box-calif">
-              <span class="titulo-box">Calificación I <br />Resp. PE</span>
+              <span class="titulo-box">Calificación I <br />Resp. PE (0–5)</span>
               <input
                 :value="promedio.toFixed(1)"
                 type="text"
@@ -46,25 +42,25 @@
               />
             </div>
             <div class="box-calif">
-              <span class="titulo-box">Calificación II <br />ESTUDIANTE</span>
+              <span class="titulo-box">Calificación II <br />ESTUDIANTE (0–5)</span>
               <input
                 v-model.number="califII"
                 type="number"
                 step="0.1"
                 min="0"
-                max="10"
+                max="5"
                 class="input-calif"
-                :readonly="califIIBloqueada" 
-                :title="califIIBloqueada ? 'Traída de la API / promedio de alumnos' : 'Ingresa manualmente'"
+                :readonly="califIIBloqueada"
+                :title="califIIBloqueada ? 'Traída de la API (promedio alumnos / 2)' : 'Ingresa manualmente'"
                 :style="califIIBloqueada ? 'background-color:white;border:none;font-weight:bold;text-align:center;pointer-events:none;' : ''"
-
               />
             </div>
           </div>
 
           <div class="col-der">
             <div class="total-box">
-              <span class="total">{{ calificacionFinal.toFixed(1) }}</span>
+              <!-- TOTAL EN ESCALA 0–10 (suma I + II) -->
+              <span class="total">{{ total10.toFixed(1) }}</span>
             </div>
           </div>
         </div>
@@ -112,15 +108,17 @@
                   <tbody>
                     <tr>
                       <td rowspan="2" class="sub-total-titulo">Sub.<br />total</td>
+                      <!-- I (0–5) -->
                       <td>{{ promedio.toFixed(1) }}</td>
-                      <td>{{ (promedio / 2).toFixed(1) }}</td>
+                      <!-- II (0–5) -->
+                      <td>{{ Number(califII || 0).toFixed(1) }}</td>
                     </tr>
                     <tr>
-                      <td colspan="2" class="calif-final-titulo">Calificación:</td>
+                      <td colspan="2" class="calif-final-titulo">Calificación (0–10):</td>
                     </tr>
                     <tr>
                       <td colspan="3" class="calif-final">
-                        {{ calificacionFinal.toFixed(1) }}
+                        {{ total10.toFixed(1) }}
                       </td>
                     </tr>
                   </tbody>
@@ -150,29 +148,24 @@ import jsPDF from 'jspdf'
 import * as XLSX from 'xlsx'
 import { saveAs } from 'file-saver'
 
-const props = defineProps({
-  id: { type: Number, required: true }
-})
+const props = defineProps({ id: { type: Number, required: true } })
 
 const showDownload = ref(false)
-const califII = ref(0)
+const califII = ref(0)           // (0–5)
 const comentario = ref('')
 const evaluado = ref(false)
-
-// bandera para bloquear el input si la API trae dato
 const califIIBloqueada = ref(false)
 
-// carga el promedio de alumnos desde tu endpoint
+/** Carga promedio alumnos (0–10) y lo convierte a (0–5) */
 async function cargarCalifEstudiante() {
   try {
     const { data } = await axios.get(`/admin/reportes/puntaje-final/${props.id}`)
-    if (data && data.promedio_alumnos !== null && data.promedio_alumnos !== undefined) {
-      // Redondea a 1 decimal para mostrar parejo
-      const valor = Number(parseFloat(data.promedio_alumnos).toFixed(1))
-      califII.value = isNaN(valor) ? 0 : valor
-      califIIBloqueada.value = true     // bloquea el input (solo lectura)
+    if (data && data.promedio_alumnos != null) {
+      const valor5 = Number(data.promedio_alumnos) / 2
+      califII.value = Number((isNaN(valor5) ? 0 : valor5).toFixed(1))
+      califIIBloqueada.value = true
     } else {
-      califIIBloqueada.value = false    // sin dato => editable como antes
+      califIIBloqueada.value = false
     }
   } catch (e) {
     console.error('Error cargando promedio de alumnos:', e)
@@ -201,10 +194,7 @@ const storageKey = computed(() => `evaluado:PTC:${props.id}:${form.periodo}`)
 const obtenerPreguntas = async () => {
   try {
     const res = await axios.get('/evaluaciones/preguntas-ptc')
-    preguntas.value = res.data.map(p => ({
-      ...p,
-      calificacion: 0
-    }))
+    preguntas.value = res.data.map(p => ({ ...p, calificacion: 0 }))
   } catch (error) {
     console.error('Error al obtener preguntas:', error)
   }
@@ -214,8 +204,7 @@ const obtenerEvaluador = async () => {
   try {
     const { data } = await axios.get('/admin/me')
     form.evaluador = data?.nombre || data?.correo || 'Admin'
-  } catch (error) {
-    console.error('Error al obtener evaluador (me):', error)
+  } catch {
     try {
       const admin = JSON.parse(localStorage.getItem('admin') || '{}')
       form.evaluador = admin?.nombre_completo || admin?.correo || 'No identificado'
@@ -235,23 +224,23 @@ const cargarDatosProfesor = async () => {
   }
 }
 
+// I (Resp. PE) en 0–5
 const promedio = computed(() => {
   const total = preguntas.value.reduce((sum, p) => sum + Number(p.calificacion || 0), 0)
   return preguntas.value.length ? total / preguntas.value.length : 0
 })
 
-const calificacionFinal = computed(() => {
-  const i = Number(promedio.value) || 0      // Resp. PE (1–5)
-  const ii = Number(califII.value) || 0      // Estudiante (0–10 desde API o manual)
-  return (i + ii) / 2                        // Si prefieres normalizar I a escala 10: ((i*2) + ii) / 2
+/** TOTAL en 0–10: suma de I (0–5) + II (0–5) */
+const total10 = computed(() => {
+  const i = Number(promedio.value) || 0
+  const ii = Number(califII.value) || 0
+  return Number((i + ii).toFixed(1))
 })
 
-function toggleDropdown() {
-  showDownload.value = !showDownload.value
-}
-function limitarCalificacion(pregunta) {
-  if (pregunta.calificacion > 5) pregunta.calificacion = 5
-  else if (pregunta.calificacion < 1) pregunta.calificacion = 1
+function toggleDropdown() { showDownload.value = !showDownload.value }
+function limitarCalificacion(p) {
+  if (p.calificacion > 5) p.calificacion = 5
+  else if (p.calificacion < 1) p.calificacion = 1
 }
 
 function downloadPDF() {
@@ -281,15 +270,10 @@ async function cargarEstadoEvaluadoBackend() {
       params: { profesor_id: props.id, tipo: 'PTC', periodo: form.periodo }
     })
     evaluado.value = !!data.evaluado
-    if (evaluado.value) {
-      localStorage.setItem(storageKey.value, '1')
-    } else {
-      const local = localStorage.getItem(storageKey.value) === '1'
-      evaluado.value = local
-    }
-  } catch (e) {
-    const local = localStorage.getItem(storageKey.value) === '1'
-    evaluado.value = local
+    if (evaluado.value) localStorage.setItem(storageKey.value, '1')
+    else evaluado.value = localStorage.getItem(storageKey.value) === '1'
+  } catch {
+    evaluado.value = localStorage.getItem(storageKey.value) === '1'
   }
 }
 
@@ -299,9 +283,9 @@ const guardarEvaluacion = async () => {
       profesor_id: props.id,
       tipo: 'PTC',
       periodo: form.periodo,
-      calif_i: Number(promedio.value.toFixed(1)),
-      calif_ii: Number(califII.value || 0),
-      calificacion_final: Number(calificacionFinal.value.toFixed(1)),
+      calif_i: Number(promedio.value.toFixed(1)),           // 0–5
+      calif_ii: Number((califII.value || 0).toFixed(1)),    // 0–5
+      calificacion_final: Number(total10.value.toFixed(1)), // 0–10 (suma)
       comentario: comentario.value,
       respuestas: preguntas.value.map(p => ({
         pregunta_id: p.id,
@@ -313,7 +297,6 @@ const guardarEvaluacion = async () => {
     evaluado.value = true
     localStorage.setItem(storageKey.value, '1')
     alert(' Evaluación enviada correctamente')
-
     window.close()
   } catch (error) {
     console.error(' Error al guardar evaluación:', error)
@@ -326,10 +309,9 @@ onMounted(() => {
   cargarDatosProfesor()
   obtenerEvaluador()
   cargarEstadoEvaluadoBackend()
-  cargarCalifEstudiante() // ⬅Trae promedio de alumnos (API) y bloquea el input si aplica
+  cargarCalifEstudiante() // trae promedio alumnos (0–10) y lo pone en 0–5
 })
 
-// Si llega a cambiar el ID del profe en esta vista, recarga datos clave
 watch(() => props.id, () => {
   cargarDatosProfesor()
   cargarEstadoEvaluadoBackend()
@@ -341,7 +323,6 @@ watch(() => form.periodo, () => {
   cargarCalifEstudiante()
 })
 </script>
-
 
 <style src="@/../css/botones.css"></style>
 <style src="@/../css/EvaluacionProfesores.css"></style>
