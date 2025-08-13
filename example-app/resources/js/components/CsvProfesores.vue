@@ -83,4 +83,4 @@ const cargarCSV = async () => {
 }
 </script>
 
-<style src="@/../css/RegistroCSV.css"></style>
+<style src="@css/global.css" lang="css"></style>

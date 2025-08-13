@@ -120,4 +120,4 @@ onMounted(() => {
 })
 </script>
 
-<style src="@/../css/global.css"></style>
+<style src="@css/global.css" lang="css"></style>

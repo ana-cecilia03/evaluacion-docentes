@@ -63,4 +63,4 @@ const registrarCarrera = async () => {
 }
 </script>
 
-<style src="@/../css/RegistroManual.css"></style>
+<style src="@css/global.css" lang="css"></style>

@@ -102,4 +102,4 @@ const actualizarMateria = async () => {
 }
 </script>
 
-<style src="@/../css/EditarDatos.css"></style>
+<style src="@css/global.css" lang="css"></style>

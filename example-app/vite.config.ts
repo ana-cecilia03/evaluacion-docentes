@@ -7,7 +7,8 @@ import path from 'path'
 export default defineConfig({
   resolve: {
     alias: {
-      '@': path.resolve(__dirname, 'resources/js'), // ⬅️ alias para imports como '@/...'
+      '@': path.resolve(__dirname, 'resources/js'), 
+      '@css': path.resolve(__dirname, 'resources/css')
     },
   },
   plugins: [

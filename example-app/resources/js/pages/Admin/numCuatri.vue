@@ -105,4 +105,4 @@ const actualizarCuatrimestre = async (cuatriActualizado) => {
 onMounted(obtenerCuatrimestres)
 </script>
 
-<style src="@/../css/global.css"></style>
+<style src="@css/global.css" lang="css"></style>

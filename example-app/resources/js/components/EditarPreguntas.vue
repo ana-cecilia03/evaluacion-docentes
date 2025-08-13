@@ -123,4 +123,4 @@ const actualizar = async () => {
 }
 </script>
 
-<style src="@/../css/Editar.css"></style>
+<style src="@css/global.css" lang="css"></style>

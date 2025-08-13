@@ -333,7 +333,7 @@ watch(() => form.periodo, () => {
 })
 </script>
 
-<style src="@/../css/global.css"></style>
+<style src="@css/global.css" lang="css"></style>
 
 <style>
 .boton-gris {

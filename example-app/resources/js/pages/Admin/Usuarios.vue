@@ -49,4 +49,4 @@
 <script setup>
 import Menu from '@/layouts/Menu.vue'
 </script>
-<style src="@/../css/global.css"></style>
+<style src="@css/global.css" lang="css"></style>
