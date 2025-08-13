@@ -82,4 +82,3 @@ function cancelar() {
 }
 </script>
 
-<style src="@css/global.css" lang="css"></style>

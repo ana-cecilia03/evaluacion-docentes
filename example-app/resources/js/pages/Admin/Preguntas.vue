@@ -156,4 +156,3 @@ const eliminarPregunta = async (id) => {
 onMounted(() => cargarPreguntas())
 </script>
 
-<style src="@css/global.css" lang="css"></style>

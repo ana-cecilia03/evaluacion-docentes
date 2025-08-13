@@ -101,4 +101,3 @@ const cerrarEdicion = () => (editarGrupos.value = false)
 // Cargar grupos al montar
 onMounted(obtenerGrupos)
 </script>
-<style src="@css/global.css" lang="css"></style>

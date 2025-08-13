@@ -49,5 +49,3 @@ const guardar = () => {
 </script>
 
 <!-- Estilos -->
-<style src="@css/global.css" lang="css"></style>
-<style src="@css/global.css" lang="css"></style>

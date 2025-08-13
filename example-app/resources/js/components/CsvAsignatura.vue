@@ -74,4 +74,3 @@ const cargarCSV = async () => {
 </script>
 
 <!-- Estilos específicos para carga CSV -->
-<style src="@css/global.css" lang="css"></style>

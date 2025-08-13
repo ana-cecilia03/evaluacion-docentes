@@ -135,7 +135,6 @@ function evaluarProfesor(profesor) {
 }
 </script>
 
-<style src="@css/global.css" lang="css"></style>
 
 <style>
 .fila-evaluado {

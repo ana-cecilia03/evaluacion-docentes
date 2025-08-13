@@ -126,6 +126,5 @@ async function guardar() {
 }
 </script>
 
-<style src="@css/global.css" lang="css"></style>
 
 

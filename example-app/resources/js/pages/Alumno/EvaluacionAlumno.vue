@@ -314,5 +314,4 @@ async function enviarEvaluacion() {
 </style>
 
 <!-- Estilos externos específicos de esta vista -->
-<style src="@css/global.css" lang="css"></style>
 

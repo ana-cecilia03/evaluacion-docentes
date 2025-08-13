@@ -24,4 +24,3 @@
 // vacío, ya que aún no se conecta a backend
 </script>
 
-<style src="@css/global.css" lang="css"></style>

@@ -53,4 +53,3 @@
 import Exterior from '@/components/Exterior.vue'
 </script>
 
-<style src="@css/global.css" lang="css"></style>
