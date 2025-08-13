@@ -116,6 +116,4 @@ function obtenerOpciones(tipo_opciones) {
 </script>
 
 
-<style src="@/../css/Registros.css"></style>
-<style src="@/../css/botones.css"></style>
-<style src="@/../css/Evaluacion.css"></style>
+<style src="@/../css/global.css"></style>

@@ -24,5 +24,4 @@
 // vacío, ya que aún no se conecta a backend
 </script>
 
-<style src="@/../css/Externo.css"></style>
-<style src="@/../css/Contenido.css"></style>
+<style src="@/../css/global.css"></style>

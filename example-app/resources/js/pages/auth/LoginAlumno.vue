@@ -80,4 +80,4 @@ async function login() {
 }
 </script>
 
-<style src="@/../css/bienvenida.css"></style>
+<style src="@/../css/global.css"></style>

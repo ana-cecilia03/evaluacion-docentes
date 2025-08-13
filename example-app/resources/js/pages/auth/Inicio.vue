@@ -16,4 +16,4 @@
 <script setup>
 import Exterior from '@/components/Exterior.vue'
 </script>
-<style src="@/../css/bienvenida.css"></style>
+<style src="@/../css/global.css"></style>

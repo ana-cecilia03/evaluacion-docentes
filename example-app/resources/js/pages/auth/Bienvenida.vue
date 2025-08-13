@@ -15,10 +15,17 @@
           </div>
           <h2>Inicio de sesión</h2>
           <hr />
-          <input type="text" v-model="email" placeholder="correo" />
-          <input type="password" v-model="password" placeholder="contraseña" />
+
+          <input type="email" v-model="email" placeholder="Correo" required />
+          <input type="password" v-model="password" placeholder="Contraseña" required />
+
           <a href="/recuperar">¿Has olvidado tu contraseña?</a>
-          <button @click="login">Ingresar</button>
+
+          <button @click="login" :disabled="loading">
+            <span v-if="loading">Ingresando…</span>
+            <span v-else>Ingresar</span>
+          </button>
+
           <p v-if="error" class="mensaje-error">{{ error }}</p>
         </div>
       </div>
@@ -30,16 +37,17 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
-import axios from 'axios' //  Cliente HTTP para consumir API
 import { router } from '@inertiajs/vue3'
 import Exterior from '@/components/Exterior.vue'
+import api from '@/lib/axios' // ⬅️ instancia con baseURL '/api' y Bearer automático
 
-//  Datos del formulario
+// Datos del formulario
 const email = ref('')
 const password = ref('')
 const error = ref('')
+const loading = ref(false)
 
-//  Frases que se rotan en el lateral izquierdo
+// Frases laterales
 const frases = [
   'Tu opinión es clave para mejorar la calidad educativa.',
   'Evaluar a los docentes es contribuir al crecimiento de la educación.',
@@ -51,7 +59,6 @@ const frases = [
 ]
 const fraseActual = ref(frases[0])
 
-//  Cambia la frase cada 5 segundos
 onMounted(() => {
   let index = 0
   setInterval(() => {
@@ -60,28 +67,36 @@ onMounted(() => {
   }, 5000)
 })
 
-// Función que hace login contra el backend Laravel
-async function login() {
+// Login real contra backend (Alumno)
+async function login () {
+  error.value = ''
+  loading.value = true
+
   try {
-    const response = await axios.post('/api/login/alumno', {
+    // Importante: NO antepongas /api (el wrapper ya lo agrega)
+    const { data } = await api.post('/login/alumno', {
       correo: email.value,
       password: password.value
     })
 
-    // Guarda el alumno y el token en localStorage
-    localStorage.setItem('alumno', JSON.stringify(response.data.alumno))
-    localStorage.setItem('alumnoToken', JSON.stringify(response.data.token))
+    // Guarda alumno y token en claves unificadas
+    localStorage.setItem('alumno', JSON.stringify(data.alumno))
+    localStorage.setItem('token', data.token)
 
-    // Configura el token para todas las peticiones axios
-    axios.defaults.headers.common['Authorization'] = `Bearer ${response.data.token}`
+    // Limpia claves antiguas por compatibilidad
+    localStorage.removeItem('alumnoToken')
+    localStorage.removeItem('adminToken')
 
-    // Redirige a la vista protegida
+    // Redirige a la vista de materias del alumno
     router.visit('/alumno/materias')
-  } catch (err) {
-    error.value = err.response?.data?.message || 'Error al iniciar sesión'
+  } catch (e) {
+    error.value =
+      e?.response?.data?.message ||
+      (e?.response?.status === 422 ? 'Datos inválidos' : 'Error al iniciar sesión')
+  } finally {
+    loading.value = false
   }
 }
-
 </script>
 
-<style src="@/../css/bienvenida.css"></style>
+<style src="@/../css/global.css"></style>

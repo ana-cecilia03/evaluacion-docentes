@@ -29,6 +29,7 @@
             <tr
               v-for="profesor in profesoresFiltrados"
               :key="profesor.id_profesor"
+              :class="{ 'fila-evaluado': profesor.evaluado }"
             >
               <td>{{ profesor.matricula }}</td>
               <td>{{ profesor.nombre_completo }}</td>
@@ -38,6 +39,7 @@
                 <button
                   :class="profesor.evaluado ? 'boton-gris' : 'boton-azul'"
                   @click="evaluarProfesor(profesor)"
+                  :title="profesor.evaluado ? 'Ya evaluado en el periodo actual' : 'Evaluar ahora'"
                 >
                   {{ profesor.evaluado ? 'Evaluado' : 'Evaluar' }}
                 </button>
@@ -52,27 +54,64 @@
     </main>
   </Menu>
 </template>
+
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import { router } from '@inertiajs/vue3'
 import axios from '@/lib/axios'
 import Menu from '@/layouts/Menu.vue'
 
-// Estado
-const profesores = ref([])   // vendrá con campo booleano "evaluado"
+// Estado base de la tabla
+const profesores = ref([])   // se normaliza agregando booleano "evaluado"
 const busqueda = ref('')
 const filtroCargo = ref('')
 
-// Cargar profesores activos (protegido con Sanctum)
+// Periodo actual (mismo criterio que usas en vistas de evaluación)
+const periodo = ref(new Date().getFullYear().toString())
+
+// Carga inicial: profesores + marcado de evaluados
 onMounted(async () => {
   try {
-    const { data } = await axios.get('/profesores/activos') // ← sin /api (baseURL ya es /api)
-    profesores.value = data
+    // /api/profesores/activos (pública según tus rutas)
+    const { data } = await axios.get('/profesores/activos')
+    // Normaliza estructura y asegura "evaluado" para no romper el render
+    profesores.value = (data || []).map(p => ({ ...p, evaluado: !!p.evaluado }))
+    await marcarEvaluados()
   } catch (e) {
     console.error('Error cargando activos:', e?.response?.status, e?.response?.data || e)
     alert('No se pudieron cargar los profesores.')
   }
 })
+
+// Si cambia el periodo, volvemos a marcar evaluados
+watch(periodo, () => marcarEvaluados())
+
+// Marca cada profesor como evaluado consultando backend; usa localStorage como respaldo
+async function marcarEvaluados() {
+  if (!Array.isArray(profesores.value) || profesores.value.length === 0) return
+
+  const tasks = profesores.value.map(async (p) => {
+    // Fallback local: misma convención que en las vistas de evaluación (evaluado:TIPO:ID:PERIODO)
+    const local = localStorage.getItem(`evaluado:${p.cargo}:${p.id_profesor}:${periodo.value}`) === '1'
+    if (local) {
+      p.evaluado = true
+      return
+    }
+
+    // Llamada a backend para saber si ya existe evaluación en el periodo
+    try {
+      // /api/evaluaciones/estado (protegida). Si no hay auth, simplemente no modifica "evaluado".
+      const { data } = await axios.get('/evaluaciones/estado', {
+        params: { profesor_id: p.id_profesor, tipo: p.cargo, periodo: periodo.value }
+      })
+      p.evaluado = !!data?.evaluado
+    } catch (e) {
+      // Ante error (p. ej., 401 si no hay token), mantenemos el valor actual
+    }
+  })
+
+  await Promise.allSettled(tasks)
+}
 
 // Filtrado por texto y cargo
 const profesoresFiltrados = computed(() => {
@@ -86,8 +125,7 @@ const profesoresFiltrados = computed(() => {
   })
 })
 
-// Navegar a la evaluación correspondiente
-//  Ya no bloqueamos si está evaluado: sigue navegando aunque se pinte en gris
+// Navegar a la evaluación correspondiente (no se bloquea la navegación)
 function evaluarProfesor(profesor) {
   const ruta = profesor.cargo === 'PA'
     ? `/evaluacionProfesorPA/${profesor.id_profesor}`
@@ -97,9 +135,7 @@ function evaluarProfesor(profesor) {
 }
 </script>
 
-
-<style src="@/../css/Registros.css"></style>
-<style src="@/../css/botones.css"></style>
+<style src="@/../css/global.css"></style>
 
 <style>
 .fila-evaluado {

@@ -100,4 +100,4 @@ onBeforeUnmount(() => {
 
 </script>
 
-<style src="@/../css/Marco.css"></style>
+<style src="@/../css/global.css"></style>

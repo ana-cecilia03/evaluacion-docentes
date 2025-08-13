@@ -56,5 +56,4 @@ function login() {
   }
 }
 </script>
-
-<style src="@/../css/login.css"></style>
+<style src="@/../css/global.css"></style>

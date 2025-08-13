@@ -64,7 +64,7 @@ const crearPeriodo = async () => {
       nombre_periodo: form.value.nombre,
       fecha_inicio: form.value.inicio,
       fecha_fin: form.value.fin,
-      estado: 'activo' // 🔴 necesario para validación en backend
+      estado: 'activo' // necesario para validación en backend
     })
 
     mensaje.value = response.data.message
@@ -82,5 +82,4 @@ function cancelar() {
 }
 </script>
 
-<style src="@/../css/DashboardAdmin.css"></style>
-<style src="@/../css/botones.css"></style>
+<style src="@/../css/global.css"></style>

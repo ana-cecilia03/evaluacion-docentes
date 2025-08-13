@@ -173,6 +173,4 @@ const editarRelacion = (rel) => {
 }
 </script>
 
-<style src="@/../css/Registros.css"></style>
-<style src="@/../css/relacion.css"></style>
-<style src="@/../css/botones.css"></style>
+<style src="@/../css/global.css"></style>

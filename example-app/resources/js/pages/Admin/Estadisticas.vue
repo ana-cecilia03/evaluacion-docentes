@@ -122,4 +122,4 @@ function w(n) {
 }
 </script>
 
-<style src="@/../css/RendimientoRelacion.css"></style>
+<style src="@/../css/global.css"></style>

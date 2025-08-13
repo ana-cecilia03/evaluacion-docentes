@@ -95,5 +95,4 @@ async function guardar() {
 }
 </script>
 
-<style src="@/../css/Contenido.css"></style>
-<style src="@/../css/botones.css"></style>
+<style src="@/../css/global.css"></style>

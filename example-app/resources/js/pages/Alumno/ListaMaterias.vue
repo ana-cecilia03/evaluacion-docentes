@@ -120,6 +120,4 @@ onMounted(() => {
 })
 </script>
 
-
-<style src="@/../css/materias.css"></style>
-<style src="@/../css/botones.css"></style>
+<style src="@/../css/global.css"></style>
