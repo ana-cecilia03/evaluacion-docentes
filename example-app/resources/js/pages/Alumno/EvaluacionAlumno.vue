@@ -92,7 +92,7 @@
 import { ref, onMounted, nextTick } from 'vue'
 import { usePage, router } from '@inertiajs/vue3'
 import MenuAlumno from '@/layouts/MenuAlumno.vue'
-import axios from 'axios'
+import api from '@/lib/axios' // instancia con baseURL '/api'
 
 const page = usePage()
 const idRelacion = page.props.id_relacion
@@ -154,16 +154,21 @@ const valoresNumericos = {
   'Poca teoria y poca practica': 3
 }
 
-// Cargar datos
+// Cargar datos (usa endpoints públicos temporales)
 onMounted(async () => {
   try {
-    const resRelacion = await axios.get(`/api/alumno/evaluacion-datos/${idRelacion}`)
+    // Datos de la relación (público)
+    const resRelacion = await api.get(`/alumno/evaluacion-datos-public/${idRelacion}`)
     datosRelacion.value = resRelacion.data
 
-    const resPreguntas = await axios.get('/api/alumno/preguntas')
+    // Preguntas (público)
+    const resPreguntas = await api.get('/alumno/preguntas-public')
     agruparPorClasificacion(resPreguntas.data.preguntas)
   } catch (error) {
-    console.error('Error al cargar datos de evaluación:', error)
+    console.error('Error al cargar datos de evaluación:', {
+      status: error.response?.status,
+      data: error.response?.data
+    })
   }
 })
 
@@ -237,7 +242,7 @@ function calcularFaltantes() {
   return faltantes
 }
 
-// Enviar respuestas
+// Enviar respuestas (intenta protegido y cae a público si 401)
 async function enviarEvaluacion() {
   const faltantes = calcularFaltantes()
   if (faltantes.length > 0) {
@@ -246,10 +251,15 @@ async function enviarEvaluacion() {
     return
   }
 
-  const alumno = JSON.parse(localStorage.getItem('alumno'))
+  const alumno = JSON.parse(localStorage.getItem('alumno') || 'null')
+  const idAlumno = alumno?.id_alumno ?? alumno?.id
+  if (!idAlumno) {
+    alert('No se encontró información del alumno.')
+    return
+  }
 
   const payload = {
-    id_alumno: alumno.id_alumno, // 👈 Agregado
+    id_alumno: idAlumno,
     relacion_id: idRelacion,
     respuestas: [],
     comentarios: []
@@ -271,17 +281,30 @@ async function enviarEvaluacion() {
 
   try {
     enviando.value = true
-    await axios.post('/api/alumno/evaluar', payload)
+    // 1) Intento protegido
+    await api.post('/alumno/evaluar', payload, { skipAuthRedirect: true })
     alert('Evaluación enviada correctamente.')
     router.visit('/alumno/materias')
   } catch (error) {
-    console.error('Error al enviar evaluación:', error)
-    alert('Error al enviar evaluación.')
+    // 2) Fallback público si existe y el error fue 401
+    if (error.response?.status === 401) {
+      try {
+        await api.post('/alumno/evaluar-public', payload)
+        alert('Evaluación enviada correctamente.')
+        router.visit('/alumno/materias')
+        return
+      } catch (e2) {
+        console.error('Error al enviar evaluación (público):', e2.response?.status, e2.response?.data)
+        alert('Error al enviar evaluación.')
+      }
+    } else {
+      console.error('Error al enviar evaluación:', error.response?.status, error.response?.data)
+      alert('Error al enviar evaluación.')
+    }
   } finally {
     enviando.value = false
   }
 }
-
 </script>
 
 <!-- Estilos adicionales mínimos para la validación visual -->
@@ -312,6 +335,3 @@ async function enviarEvaluacion() {
   font-weight: 600;
 }
 </style>
-
-<!-- Estilos externos específicos de esta vista -->
-

@@ -112,14 +112,28 @@ Route::prefix('alumnos')->group(function () {
 
 
 // ------- Evaluación de profesores por alumnos (restringido) -------
+// ================== PROTEGIDAS (token Sanctum) ==================
 Route::middleware('auth:sanctum')->prefix('alumno')->group(function () {
-    Route::get('/materias',                [AlumnoMateriaController::class, 'listaMateriasEval']);
-    Route::get('/preguntas',               [EvaluacionAlumnoController::class, 'preguntas']);
-    Route::post('/evaluar',                [EvaluacionAlumnoController::class, 'store']);
+    Route::get('/materias', [AlumnoMateriaController::class, 'listaMateriasEval']);
+    Route::get('/preguntas', [EvaluacionAlumnoController::class, 'preguntas']);
+    Route::post('/evaluar',  [EvaluacionAlumnoController::class, 'store']);
     Route::get('/evaluacion-datos/{id_relacion}', [EvaluacionAlumnoController::class, 'datosRelacion'])
         ->whereNumber('id_relacion');
 });
 
+// ================== PÚBLICAS TEMPORALES (HOTFIX) ==================
+// ⚠️ Quitar cuando estabilices el flujo con token.
+Route::prefix('alumno')->group(function () {
+    // Materias con fallback ?id=
+    Route::get('/materias-public', [AlumnoMateriaController::class, 'listaMateriasEvalPublic']);
+
+    // Si tus métodos NO dependen de Auth::user(), puedes reutilizarlos así:
+    Route::get('/preguntas-public', [EvaluacionAlumnoController::class, 'preguntas']);
+    Route::get('/evaluacion-datos-public/{id_relacion}', [EvaluacionAlumnoController::class, 'datosRelacion'])
+        ->whereNumber('id_relacion');
+
+    // Si alguno usa Auth::user(), crea versiones ...Public en su controlador y apunta aquí.
+});
 
 // ------- Profesores (CRUD) -------
 Route::prefix('profesores')->group(function () {

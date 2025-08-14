@@ -54,27 +54,31 @@
     </main>
   </MenuAlumno>
 </template>
+
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import MenuAlumno from '@/layouts/MenuAlumno.vue'
 import { router } from '@inertiajs/vue3'
-import axios from 'axios'
+import api from '@/lib/axios' // usa tu instancia con baseURL '/api'
 
-const materias = ref([])       // Lista de materias asignadas al alumno
-const busqueda = ref('')       // Texto para búsqueda por nombre o profesor
+// state
+const materias = ref([])
+const busqueda = ref('')
 const error = ref(null)
 const cargando = ref(true)
-const enviandoId = ref(null)   // Para mostrar "Enviando..." en botón
+const enviandoId = ref(null)
 
-// Lista reactiva filtrada según el texto ingresado
+// filtro seguro (null-safe)
 const materiasFiltradas = computed(() =>
-  materias.value.filter(m =>
-    m.materia_nombre.toLowerCase().includes(busqueda.value.toLowerCase()) ||
-    m.profesor_nombre.toLowerCase().includes(busqueda.value.toLowerCase())
-  )
+  materias.value.filter(m => {
+    const materia = (m.materia_nombre || '').toLowerCase()
+    const profe = (m.profesor_nombre || '').toLowerCase()
+    const q = busqueda.value.toLowerCase()
+    return materia.includes(q) || profe.includes(q)
+  })
 )
 
-// Redirige al formulario de evaluación del profesor según la relación
+// navegación a evaluación
 function evaluarMateria(m) {
   if (!m.relacion_id) {
     console.error('relacion_id no definido en la materia:', m)
@@ -84,39 +88,40 @@ function evaluarMateria(m) {
   router.visit(`/alumno/evaluar/${m.relacion_id}`)
 }
 
-// Carga las materias disponibles para evaluación desde el backend
+// carga (usa endpoint público temporal con ?id=)
 const cargar = async () => {
+  cargando.value = true
+  error.value = null
   try {
-    const alumno = JSON.parse(localStorage.getItem('alumno'))
-    if (!alumno || !alumno.id_alumno) {
-      error.value = 'No se encontró información del alumno'
-      cargando.value = false
+    const alumno = JSON.parse(localStorage.getItem('alumno') || 'null')
+    const id = alumno?.id_alumno ?? alumno?.id
+    if (!alumno || !id) {
+      router.visit('/bienvenida')
       return
     }
 
-    const { data } = await axios.get('/api/alumno/materias', {
-      params: { id: alumno.id_alumno }
-    })
+    // ENDPOINT TEMPORAL (público): /api/alumno/materias-public?id=<id_alumno>
+    const { data } = await api.get('/alumno/materias-public', { params: { id } })
 
-    materias.value = data.materias
+    materias.value = data?.materias ?? data?.data ?? []
   } catch (err) {
-    console.error('Error al cargar materias:', err)
+    console.error('Error al cargar materias:', {
+      status: err.response?.status,
+      data: err.response?.data
+    })
     error.value = 'Ocurrió un error al cargar las materias'
   } finally {
     cargando.value = false
   }
 }
 
-// Ejecuta la carga al montar el componente
-// Protección de ruta al montar componente
+// protección + carga
 onMounted(() => {
   const alumno = localStorage.getItem('alumno')
   if (!alumno) {
     router.visit('/bienvenida')
     return
   }
-
   cargar()
 })
 </script>
-
