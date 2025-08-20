@@ -25,7 +25,6 @@
             required
           />
 
-          <a href="/recuperar">¿Has olvidado tu contraseña?</a>
 
           <button @click="login">Ingresar</button>
 

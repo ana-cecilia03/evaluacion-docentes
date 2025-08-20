@@ -326,7 +326,5 @@ table tbody td:last-child { text-align: right !important; }
     padding-bottom: 0.95rem !important;
   }
 }
-
-
 </style>
 

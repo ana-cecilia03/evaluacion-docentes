@@ -17,9 +17,7 @@
           <hr />
 
           <input type="email" v-model="email" placeholder="Correo" required />
-          <input type="password" v-model="password" placeholder="Contraseña" required />
-
-          <a href="/recuperar">¿Has olvidado tu contraseña?</a>
+          <input type="password" v-model="password" placeholder="Contraseña" required />        
 
           <button @click="login" :disabled="loading">
             <span v-if="loading">Ingresando…</span>
