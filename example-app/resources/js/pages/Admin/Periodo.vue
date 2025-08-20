@@ -110,3 +110,92 @@ onMounted(() => {
 })
 </script>
 
+<style scoped>
+/* Contenedor principal */
+.contenido-periodo {
+  max-width: 1000px;
+  margin: 2rem auto;
+  padding: 1.5rem;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+}
+
+/* Título */
+.titulo {
+  font-size: 1.8rem;
+  font-weight: 700;
+  margin-bottom: 1.5rem;
+  text-align: center;
+  color: #333;
+}
+
+/* Contenedor con scroll para tablas grandes */
+.table-wrapper {
+  overflow-x: auto;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+}
+
+/* Tabla */
+.tabla-periodos {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.95rem;
+}
+
+/* Encabezado */
+.tabla-periodos thead {
+  background-color: #f5f7fa;
+}
+.tabla-periodos th {
+  padding: 0.75rem 1rem;
+  text-align: left;
+  font-weight: 600;
+  color: #444;
+  border-bottom: 2px solid #e5e7eb;
+}
+
+/* Filas */
+.tabla-periodos td {
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid #f0f0f0;
+  color: #555;
+}
+
+.tabla-periodos tr:hover {
+  background-color: #fafafa;
+}
+
+/* Botones de acción */
+.boton-rojo,
+.boton-verde {
+  padding: 0.4rem 0.9rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+/* Botón rojo (desactivar) */
+.boton-rojo {
+  background-color: #e44c5b;
+  color: #fff;
+}
+.boton-rojo:hover {
+  background-color: #c62828;
+}
+
+/* Botón verde (activar) */
+.boton-verde {
+  background-color: #156827;
+  color: #fff;
+}
+.boton-verde:hover {
+  background-color: #27ae60;
+}
+</style>
+
+

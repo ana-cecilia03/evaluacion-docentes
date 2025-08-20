@@ -26,21 +26,24 @@
                 <div class="pf-bar-track">
                   <div class="pf-bar-fill alumnos" :style="{ width: w(r.promedio_alumnos) }"></div>
                 </div>
-                <small>{{ f(r.promedio_alumnos) }}</small>
+                <small v-if="r.total === null" class="pf-badge-sd">S/D</small>
+                <small v-else>{{ f(r.total) }}</small>
               </td>
 
               <td>
                 <div class="pf-bar-track">
                   <div class="pf-bar-fill admin" :style="{ width: w(r.calificacion_admin) }"></div>
                 </div>
-                <small>{{ f(r.calificacion_admin) }}</small>
+                <small v-if="r.total === null" class="pf-badge-sd">S/D</small>
+                <small v-else>{{ f(r.total) }}</small>
               </td>
 
               <td>
                 <div class="pf-bar-track">
                   <div class="pf-bar-fill total" :style="{ width: w(r.total) }"></div>
                 </div>
-                <small>{{ r.total === null ? 'S/D' : f(r.total) }}</small>
+                <small v-if="r.total === null" class="pf-badge-sd">S/D</small>
+                <small v-else>{{ f(r.total) }}</small>
               </td>
             </tr>
           </tbody>
@@ -121,4 +124,116 @@ function w(n) {
   return `${pct}%`
 }
 </script>
+<style scoped>
+/* 1) Encabezado sticky + sombra al hacer scroll */
+.pf-card {
+  position: relative;
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  box-shadow: 0 6px 20px rgba(0,0,0,.06);
+  padding: 0;
+  overflow: auto; /* importante para sticky */
+  max-height: 72vh; /* opcional: limita alto si hay muchos registros */
+}
+.pf-table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+  font-size: 0.95rem;
+}
+.pf-table thead th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background: #f8fafc;
+  color: #1f2937;
+  font-weight: 700;
+  border-bottom: 2px solid #e5e7eb;
+  padding: 0.75rem 1rem;
+}
+.pf-card::after { /* sombra bajo header cuando hay scroll */
+  content: "";
+  position: sticky;
+  top: 48px; /* aprox alto del thead */
+  display: block;
+  height: 0;
+  box-shadow: 0 8px 10px -8px rgba(0,0,0,.12);
+}
+
+/* 2) Zebra + celdas */
+.pf-table tbody tr:nth-child(odd) { background: #fcfcfd; }
+.pf-table td {
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid #eef2f7;
+  vertical-align: middle;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* 3) Números: derecha + cifras tabulares */
+.pf-table td,
+.pf-table th {
+  font-variant-numeric: tabular-nums; /* columnas perfectamente alineadas */
+}
+.pf-table td:nth-child(2),
+.pf-table td:nth-child(3),
+.pf-table td:nth-child(4) { text-align: right; }
+
+/* 4) Badge S/D */
+.pf-badge-sd {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: #eef2f7;
+  color: #4b5563;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+/* 5) Barras (mantén tus clases) con mejor contraste */
+.pf-bar-track {
+  position: relative;
+  width: 100%;
+  height: 8px;
+  background: #e5e7eb;
+  border-radius: 999px;
+  overflow: hidden;
+  margin-bottom: .35rem;
+}
+.pf-bar-fill { height: 100%; width: 0%; border-radius: inherit; transition: width .35s ease; }
+.pf-bar-fill.alumnos { background: #2563eb; } /* +contraste */
+.pf-bar-fill.admin   { background: #d97706; }
+.pf-bar-fill.total   { background: #059669; }
+
+/* 6) Responsive mínimo */
+@media (max-width: 720px) {
+  .pf-table { font-size: .92rem; }
+  .pf-table th, .pf-table td { padding: 0.6rem 0.7rem; }
+  .pf-bar-track { height: 7px; }
+}
+
+/* 7) Reseteos anti-globales agresivos (actívalos si notas conflictos) */
+
+.pf-table th, .pf-table td {
+  background: transparent !important;
+  border-bottom: 1px solid #eef2f7 !important;
+  padding: 0.75rem 1rem !important;
+  color: #374151 !important;
+}
+
+/* ——— Vista a lo ANCHO ——— */
+.contenido-principal {
+  max-width: 100%;     /* ocupar todo el ancho */
+  width: 100%;         
+  padding-left: 2rem;  /* margen interno opcional */
+  padding-right: 2rem;
+}
+
+.pf-card {
+  width: 100%;         /* estirarse en horizontal */
+  max-width: 100%;
+}
+</style>
 
