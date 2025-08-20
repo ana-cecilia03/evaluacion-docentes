@@ -109,93 +109,106 @@ onMounted(() => {
   cargarPeriodos()
 })
 </script>
-
 <style scoped>
-/* Contenedor principal */
-.contenido-periodo {
-  max-width: 1000px;
-  margin: 2rem auto;
-  padding: 1.5rem;
-  background: #fff;
-  border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+.contenido-periodo :where(table, thead, tbody, tr, th, td) {
+  background: transparent;
+  color: inherit;
+  border: none;
+  margin: 0;
+  padding: 0;
+  font-weight: inherit;
+  box-shadow: none;
 }
 
-/* Título */
-.titulo {
-  font-size: 1.8rem;
-  font-weight: 700;
-  margin-bottom: 1.5rem;
-  text-align: center;
-  color: #333;
-}
-
-/* Contenedor con scroll para tablas grandes */
+/* Mantén el card y la tabla con esquinas limpias y sin fugas */
 .table-wrapper {
-  overflow-x: auto;
-  border-radius: 8px;
+  overflow: auto;
+  border-radius: 10px;
   border: 1px solid #e5e7eb;
+  background: #fff;
 }
 
-/* Tabla */
+/* ====== Tabla (reseteada y más legible) ====== */
 .tabla-periodos {
   width: 100%;
   border-collapse: collapse;
-  font-size: 0.95rem;
+  table-layout: fixed;
+  font-size: 0.96rem;
 }
 
-/* Encabezado */
-.tabla-periodos thead {
-  background-color: #f5f7fa;
-}
-.tabla-periodos th {
-  padding: 0.75rem 1rem;
+.tabla-periodos thead th,
+.tabla-periodos td {
+  padding: 0.85rem 1rem;
+  border-bottom: 1px solid #eef2f7;
   text-align: left;
-  font-weight: 600;
-  color: #444;
+  vertical-align: middle;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.tabla-periodos thead th {
+  background: #f8fafc;
+  color: #1f2937;
+  font-weight: 700;
   border-bottom: 2px solid #e5e7eb;
 }
 
-/* Filas */
-.tabla-periodos td {
-  padding: 0.75rem 1rem;
-  border-bottom: 1px solid #f0f0f0;
-  color: #555;
-}
+/* Zebra + hover suave */
+.tabla-periodos tbody tr:nth-child(odd)  { background: #fcfcfd; }
+.tabla-periodos tbody tr:hover           { background: #f6f7fb; }
 
-.tabla-periodos tr:hover {
-  background-color: #fafafa;
-}
+/* Anchos mínimos por columna */
+.tabla-periodos th:nth-child(1),
+.tabla-periodos td:nth-child(1) { min-width: 100px; } /* Número */
+.tabla-periodos th:nth-child(2),
+.tabla-periodos td:nth-child(2) { min-width: 260px; } /* Nombre */
+.tabla-periodos th:nth-child(3),
+.tabla-periodos td:nth-child(3),
+.tabla-periodos th:nth-child(4),
+.tabla-periodos td:nth-child(4) { min-width: 150px; } /* Fechas */
+.tabla-periodos th:nth-child(5),
+.tabla-periodos td:nth-child(5) { min-width: 140px; text-align: right; } /* Acciones */
 
-/* Botones de acción */
+/* Botones */
 .boton-rojo,
 .boton-verde {
-  padding: 0.4rem 0.9rem;
-  font-size: 0.9rem;
-  font-weight: 600;
+  display: inline-block;
+  min-width: 110px;
+  padding: 0.5rem 0.9rem;
   border: none;
-  border-radius: 6px;
-  cursor: pointer;
-  transition: 0.2s;
+  border-radius: 8px;
+  font-weight: 700;
+  line-height: 1;
+  box-shadow: 0 1px 2px rgba(0,0,0,.06);
+}
+.boton-rojo  { background: #e63946; color: #fff; }
+.boton-rojo:hover  { background: #c62828; }
+.boton-verde { background: #156827; color: #fff; }
+.boton-verde:hover { background: #0f5a20; }
+
+/* Título */
+.titulo {
+  margin: 0 0 1.25rem 0;
+  line-height: 1.25;
+  letter-spacing: .2px;
 }
 
-/* Botón rojo (desactivar) */
-.boton-rojo {
-  background-color: #e44c5b;
-  color: #fff;
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .contenido-periodo { padding: 1rem; }
+  .tabla-periodos { font-size: 0.94rem; }
+  .tabla-periodos th:nth-child(2),
+  .tabla-periodos td:nth-child(2) { min-width: 220px; }
 }
-.boton-rojo:hover {
-  background-color: #c62828;
+@media (max-width: 640px) {
+  .tabla-periodos { font-size: 0.92rem; }
+  .tabla-periodos thead th, .tabla-periodos td { padding: 0.6rem 0.7rem; }
+  .boton-rojo, .boton-verde { min-width: 96px; }
 }
 
-/* Botón verde (activar) */
-.boton-verde {
-  background-color: #156827;
-  color: #fff;
-}
-.boton-verde:hover {
-  background-color: #27ae60;
-}
 </style>
+
 
 
