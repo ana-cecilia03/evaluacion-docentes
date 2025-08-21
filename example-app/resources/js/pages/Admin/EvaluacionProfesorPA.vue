@@ -77,9 +77,9 @@
         <table class="tabla-evaluacion">
           <!-- Anchos fijos desde HTML para que se vea bien desde el primer render -->
           <colgroup>
-            <col style="width:22%">
-            <col style="width:63%">
-            <col style="width:15%">
+            <col style="width:20%">
+            <col style="width:50%">
+            <col style="width:20%">
           </colgroup>
 
           <thead>
@@ -92,7 +92,8 @@
           <tbody>
             <tr v-for="pregunta in preguntas" :key="pregunta.id">
               <td>{{ pregunta.factor }}</td>
-              <td>{{ pregunta.definicion }}</td>
+              <td class="celda-definicion">{{ pregunta.definicion }}</td>
+
               <td>
                 <input
                   type="number"
@@ -353,11 +354,154 @@ watch(() => form.periodo, () => {
 </script>
 
 
-<style>
-.boton-gris {
-  background-color: gray !important;
-  color: #fff !important;
-  cursor: not-allowed !important;
-  opacity: 0.8;
+<style scoped>
+/* ====== Ajustes locales para NO romper tus globales ====== */
+.evaluacion-page { max-width: 1200px; margin: 0 auto; }
+
+/* Encabezado / acciones */
+.encabezado-evaluacion { overflow: visible; }
+.titulo { text-align: center; margin-bottom: 1rem; }
+.acciones { display: flex; justify-content: flex-end; margin-bottom: 1rem; gap: .5rem; flex-wrap: wrap; }
+.download-wrapper { position: relative; z-index: 2000; }
+
+.boton-verde { background: #0a7a32; color: #fff; border: 0; border-radius: 20px; padding: .5rem 1.2rem; font-weight: 600; cursor: pointer; }
+.boton-gris  { background: #9ca3af; color: #fff; border: 0; border-radius: 20px; padding: .5rem 1.2rem; font-weight: 600; cursor: not-allowed; opacity: .9; }
+
+.dropdown {
+  position: absolute; right: 0; top: calc(100% + 6px);
+  background: #fff; box-shadow: 0 4px 14px rgba(0,0,0,.15);
+  border-radius: 8px; list-style: none; padding: .25rem 0; min-width: 140px;
+}
+.dropdown li { padding: .6rem 1rem; cursor: pointer; }
+.dropdown li:hover { background: #f2f2f2; }
+
+/* Grid superior */
+.datos-grid { display: grid; grid-template-columns: 1fr auto 160px; gap: 1rem; align-items: flex-start; }
+.col-izq .campo { display: grid; grid-template-columns: 120px 1fr; gap: .5rem; margin-bottom: .4rem; align-items: center; }
+.col-izq input { width: 100%; background: #f7f7f7; border: 1px solid #d7d7d7; border-radius: 8px; padding: .35rem .6rem; }
+.col-mid { display: flex; flex-direction: column; gap: .6rem; }
+.box-calif {
+  background: #f7f7f7; border: 1px solid #d7d7d7; border-radius: 8px;
+  padding: .5rem .75rem; display: flex; flex-direction: column; align-items: center;
+}
+.titulo-box { text-align: center; font-weight: 600; margin-bottom: .3rem; }
+.col-der .total-box {
+  min-height: 140px; background: #f7f7f7; border: 1px solid #d7d7d7; border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+}
+.total-box .total { font-size: 3rem; font-weight: 600; }
+
+/* ====== TABLA ====== */
+.table-wrapper {
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  overflow: auto;
+  max-height: 62vh;
+}
+
+.tabla-evaluacion {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;   /* respeta colgroup */
+  font-size: .95rem;
+}
+
+.tabla-evaluacion thead th {
+  position: sticky; top: 0; z-index: 1;
+  background: #343a40; font-weight: 700;
+  box-shadow: inset 0 -1px 0 #e5e7eb;
+}
+
+.tabla-evaluacion th,
+.tabla-evaluacion td {
+  border: 1px solid #ccc;
+  padding: .75rem;
+  vertical-align: top;
+  word-break: break-word;
+  overflow-wrap: anywhere;
+  white-space: normal;
+  line-height: 1.5;
+}
+
+/* Texto de Definición fluye como párrafo */
+.celda-definicion { white-space: normal; }
+
+/* Inputs de calificación compactos */
+.input-calif,
+.tabla-evaluacion td:nth-child(3) input[type="number"] {
+  width: 80px; max-width: 100%;
+  text-align: center; font-weight: 600;
+  border: 1px solid #ccc; border-radius: 6px; padding: .3rem;
+}
+
+/* ====== Footer (mini tabla súper compacta) ====== */
+.comentario-wrapper { padding: 0; }
+.comentario {
+  width: 100%; height: 110px; padding: .8rem;
+  border: none; outline: none; resize: vertical; color: #444;
+}
+
+/* Celda contenedora: bloque normal, alineada a la derecha */
+.resumen-wrapper {
+  padding: 0;
+  vertical-align: middle;
+  display: block;
+  text-align: right;
+  min-width: 100px;
+  max-width: 140px;
+}
+
+/* Mini-tabla: no se estira; solo lo necesario */
+.tabla-resumen{
+  width: auto;
+  min-width: 100px;
+  max-width: 130px;
+  margin: 0;
+  border-collapse: collapse;
+  text-align: center;
+  background: #f7f7f7;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.tabla-resumen td{
+  border: 1px solid #ccc;
+  padding: .22rem .28rem;
+  font-size: .82rem;
+  font-weight: 600;
+  line-height: 1.15;
+  white-space: nowrap;
+}
+
+/* primera celda “Sub. total” bien angosta */
+.sub-total-titulo{
+  width: 50px;
+  white-space: nowrap;
+  font-weight: 700;
+}
+
+.calif-final-titulo{ background: #eee; font-size: .8rem; padding: .2rem .28rem; }
+.calif-final{ background: #e5e5e5; font-size: .9rem; font-weight: 700; padding: .28rem .3rem; }
+
+/* Firma */
+.firma { margin-top: 2rem; text-align: left; }
+.linea-firma {
+  display: inline-block; width: calc(100% - 130px); height: 2px; background: #000;
+  margin-left: .5rem; vertical-align: middle;
+}
+.nombre-firma { text-align: center; }
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .datos-grid { grid-template-columns: 1fr 1fr; }
+  .col-der { grid-column: 1 / -1; }
+  .table-wrapper { max-height: 58vh; }
+}
+@media (max-width: 768px) {
+  .datos-grid { grid-template-columns: 1fr; }
+  .total-box .total { font-size: 2.4rem; }
+  .tabla-evaluacion { font-size: .87rem; }
 }
 </style>
+
