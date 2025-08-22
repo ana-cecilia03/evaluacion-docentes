@@ -10,8 +10,9 @@
           <div class="download-wrapper">
             <button class="boton-verde" @click="toggleDropdown">Descargar</button>
             <ul v-if="showDownload" class="dropdown">
-              <li @click="downloadPDF">PDF</li>
-              <li @click="downloadExcel">Excel</li>
+              <li @click="downloadPDF">PDF (vista)</li>
+              <li @click="downloadExcel">Excel (vista)</li>
+              <li @click="downloadExcelDatos">Excel (datos)</li> <!-- opcional -->
             </ul>
           </div>
 
@@ -153,17 +154,18 @@
   </Menu>
 </template>
 
+
 <script setup>
 /**
  * PA: I y II en 0–5; TOTAL 0–10 = I + II
  */
-import { ref, reactive, computed, onMounted, watch } from 'vue'
+import { ref, reactive, computed, onMounted, watch, nextTick } from 'vue'
 import axios from '@/lib/axios'
 import Menu from '@/layouts/Menu.vue'
-import html2canvas from 'html2canvas'
-import jsPDF from 'jspdf'
-import * as XLSX from 'xlsx'
-import { saveAs } from 'file-saver'
+
+// ⬇ NUEVO: usamos utilidades WYSIWYG
+import { exportViewAsPDF, exportViewAsExcelImage, exportDataToExcel } from '@/lib/exporters'
+
 
 const props = defineProps({ id: { type: Number, required: true } })
 
@@ -266,27 +268,32 @@ async function cargarCalifEstudiante() {
   }
 }
 
-// PDF
-function downloadPDF() {
-  const element = document.querySelector('.contenido-principal')
-  html2canvas(element, { scale: 2 }).then(canvas => {
-    const imgData = canvas.toDataURL('image/png')
-    const pdf = new jsPDF('p', 'mm', 'a4')
-    const imgProps = pdf.getImageProperties(imgData)
-    const pdfWidth = pdf.internal.pageSize.getWidth()
-    const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width
-    pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight)
-    pdf.save(`evaluacion-profesor-${props.id}.pdf`)
-  })
+// ===== Descargas (WYSIWYG) =====
+async function downloadPDF() {
+  showDownload.value = false
+  await nextTick() // asegura que el dropdown ya desapareció
+  await exportViewAsPDF('.contenido-principal', `evaluacion-profesor-${props.id}.pdf`)
 }
 
-// Excel
-function downloadExcel() {
-  const table = document.querySelector('.tabla-evaluacion')
-  const wb = XLSX.utils.book_new()
-  const ws = XLSX.utils.table_to_sheet(table)
-  XLSX.utils.book_append_sheet(wb, ws, 'Evaluacion')
-  XLSX.writeFile(wb, `evaluacion-profesor-${props.id}.xlsx`)
+async function downloadExcel() {
+  showDownload.value = false
+  await nextTick()
+  await exportViewAsExcelImage('.contenido-principal', `evaluacion-profesor-${props.id}.xlsx`)
+}
+
+// (opcional) Excel en celdas reales
+async function downloadExcelDatos() {
+  showDownload.value = false
+  await nextTick()
+  await exportDataToExcel({
+    filename: `evaluacion-profesor-${props.id}-datos.xlsx`,
+    encabezado: { ...form },
+    preguntas: preguntas.value,
+    subtotalI: Number(promedio.value.toFixed(1)),
+    subtotalII: Number((califII.value || 0).toFixed(1)),
+    total10: Number(total10.value.toFixed(1)),
+    comentario: comentario.value
+  })
 }
 
 // Estado evaluado (combina backend + local)
@@ -351,6 +358,7 @@ watch(() => form.periodo, () => {
   cargarEstadoEvaluadoBackend()
   cargarCalifEstudiante()
 })
+
 </script>
 
 
