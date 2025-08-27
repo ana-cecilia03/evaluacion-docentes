@@ -88,7 +88,7 @@ async function guardar() {
   } catch (e) {
     console.error('PUT /admin/me', e?.response?.status, e?.response?.data || e)
     const msg = e?.response?.data?.message || 'No se pudo actualizar'
-    alert('❌ ' + msg)
+    alert('❌' + msg)
   } finally {
     guardando.value = false
   }
